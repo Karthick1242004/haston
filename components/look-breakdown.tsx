@@ -103,7 +103,7 @@ export default function LookBreakdown() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
         >
-          <div className="flex items-center gap-8 mb-6">
+          <div className="flex flex-wrap items-center gap-8 mb-6">
             <h2 className="text-6xl md:text-8xl mt-4 font-medium tracking-tight text-amber-950" style={{ fontFamily: "var(--font-anton)" }}>
               THE{" "}
               <span style={{ fontFamily: "var(--font-allura)" }} className="text-7xl md:text-9xl text-amber-950 font-medium">
@@ -417,7 +417,7 @@ export default function LookBreakdown() {
 
         {/* Bottom Text */}
         <motion.div
-          className="flex flex-row justify-between items-center mt-32"
+          className="flex flex-row justify-between items-center mt-32 flex-wrap"
           initial={{ opacity: 0, y: 50 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.5 }}

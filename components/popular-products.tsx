@@ -35,7 +35,7 @@ export default function PopularProducts() {
           transition={{ duration: 0.8 }}
         >
           <h2 className="text-6xl md:text-8xl font-sans text-orange-950 tracking-tight" style={{ fontFamily: "var(--font-anton)" }}>
-            Popular Prodcuts
+            Popular Products
           </h2>
         </motion.div>
 

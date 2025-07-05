@@ -32,7 +32,7 @@ export default function HeroSection() {
       <div className="relative z-10 h-full flex items-end justify-center pb-20">
         <div className="text-center">
           <motion.h1
-            className="text-[8rem] md:text-[12rem] lg:text-[16rem] xl:text-[20rem]  text-white leading-none tracking-tighter drop-shadow-2xl"
+            className="text-[6rem] md:text-[12rem] lg:text-[16rem] xl:text-[20rem]  text-white leading-none tracking-tighter drop-shadow-2xl"
             style={{
               fontFamily: "var(--font-anton)",
               textShadow: "0 4px 20px rgba(0,0,0,0.3)",
@@ -50,7 +50,7 @@ export default function HeroSection() {
             transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
           >
             <div
-              className="lg:text-8xl xl:text-9xl text-white relative text-8xl"
+              className="lg:text-8xl xl:text-9xl text-white relative text-5xl"
               style={{
                 fontFamily: "var(--font-allura)",
                 textShadow: "0 2px 10px rgba(0,0,0,0.3)",
