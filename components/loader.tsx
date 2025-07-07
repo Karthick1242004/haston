@@ -12,7 +12,7 @@ export default function Loader() {
     >
       <div className="text-center">
         <motion.div
-          className="text-6xl font-bold text-amber-900 mb-4"
+          className="text-6xl font-bold text-amber-950 mb-4"
           style={{
             fontFamily: "var(--font-anton)",
           }}

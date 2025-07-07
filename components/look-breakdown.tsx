@@ -182,7 +182,7 @@ export default function LookBreakdown() {
                         </div>
 
                         <div className="mt-auto pt-11">
-                          <div className="border-t border-gray-200 pt-4">
+                          <div className="border-t border-gray-200 pt-4 ">
                             <div className="flex justify-between items-center mb-2">
                               <p className="text-sm font-bold text-yellow-950">Total Price:</p>
                               <p className="text-gray-400 line-through text-sm">${look1.totalPrice}</p>
@@ -290,7 +290,7 @@ export default function LookBreakdown() {
                   <div className="grid lg:grid-cols-3 gap-0">
                     {/* Left Items */}
                     <motion.div
-                      className="p-6 flex flex-col h-full"
+                      className="p-6 flex flex-col h-full "
                       initial={{ opacity: 0, x: -50 }}
                       animate={isInView ? { opacity: 1, x: 0 } : {}}
                       transition={{ duration: 0.6, delay: index * 0.2 + 0.2 }}

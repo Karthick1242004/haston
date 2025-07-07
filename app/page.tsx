@@ -8,6 +8,7 @@ import HeroSection from "@/components/hero-section"
 import LookBreakdown from "@/components/look-breakdown"
 import PopularProducts from "@/components/popular-products"
 import Footer from "@/components/footer"
+import PageTransition from "@/components/page-transition"
 
 export default function HomePage() {
   const { isLoading, setLoading } = useUIStore()
@@ -26,14 +27,16 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F1EFEE]">
-      <Header />
-      <main>
-        <HeroSection />
-        <LookBreakdown />
-        <PopularProducts />
-      </main>
-      <Footer />
-    </div>
+    <PageTransition>
+      <div className="min-h-screen bg-[#F1EFEE]">
+        <Header />
+        <main>
+          <HeroSection />
+          <LookBreakdown />
+          <PopularProducts />
+        </main>
+        <Footer />
+      </div>
+    </PageTransition>
   )
 }
