@@ -11,7 +11,7 @@ export default function Header() {
   const { setCartOpen } = useProductStore()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  const navItems = ["Shop", "Outfits", "About Us", "Customer Care"]
+  const navItems = ["Shop","About Us", "Customer Care"]
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -32,7 +32,7 @@ export default function Header() {
               {navItems.map((item, index) => (
                 <motion.a
                   key={item}
-                  href="#"
+                  href={item === "Shop" ? "/shop" : "#"}
                   className="text-gray-700 hover:text-gray-900 text-md transition-colors duration-200 relative group font-medium"
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -154,7 +154,7 @@ export default function Header() {
                   {navItems.map((item, index) => (
                     <motion.a
                       key={item}
-                      href="#"
+                      href={item === "Shop" ? "/shop" : "#"}
                       className="block text-gray-700 hover:text-gray-900 text-lg font-medium py-3 px-4 hover:bg-gray-50 rounded-lg transition-colors duration-200"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
