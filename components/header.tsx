@@ -32,11 +32,14 @@ export default function Header() {
               {navItems.map((item, index) => (
                 <motion.a
                   key={item}
-                  href={item === "Shop" ? "/shop" : "#"}
-                  className="text-gray-700 hover:text-gray-900 text-md transition-colors duration-200 relative group font-medium"
+                  href={item === "Shop" ? "/shop" : item === "About Us" ? "/about" : "#"}
+                  className="text-gray-700 hover:text-gray-900 text-md transition-colors duration-200 relative group !font-light"
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
+                  style={{
+                    fontFamily: "var(--font-anton)",
+                  }}
                 >
                   {item}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-900 transition-all duration-200 group-hover:w-full" />
@@ -74,13 +77,13 @@ export default function Header() {
 
             {/* Action Buttons */}
             <div className="flex items-center space-x-4">
-              <motion.button
+              {/* <motion.button
                 className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Search className="w-5 h-5 text-gray-700" />
-              </motion.button>
+              </motion.button> */}
               <motion.button
                 className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
                 whileHover={{ scale: 1.1 }}
@@ -154,7 +157,7 @@ export default function Header() {
                   {navItems.map((item, index) => (
                     <motion.a
                       key={item}
-                      href={item === "Shop" ? "/shop" : "#"}
+                      href={item === "Shop" ? "/shop" : item === "About Us" ? "/about" : "#"}
                       className="block text-gray-700 hover:text-gray-900 text-lg font-medium py-3 px-4 hover:bg-gray-50 rounded-lg transition-colors duration-200"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}

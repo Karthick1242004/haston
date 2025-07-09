@@ -130,12 +130,12 @@ export default function ProductDetailPage() {
 
             {/* Main Image */}
             <div className="flex-1 relative bg-gradient-to-br max-h-screen">
-              <div className="absolute inset-4">
+              <div className="absolute w-full h-full inset-4">
                 <Image
                   src={product.images?.[selectedImageIndex] || product.image}
                   alt={product.name}
                   fill
-                  className="object-cover rounded-lg"
+                  className="object-cover  rounded-lg"
                   unoptimized
                 />
               </div>
@@ -176,22 +176,23 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Right side - Product Details */}
-          <div className="w-[500px] p-12 overflow-y-auto">
+          <div className="w-[500px] px-12 overflow-y-auto scrollbar-hide"
+          style={{
+            scrollbarWidth: "none",
+          }}
+          >
             <motion.div
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
               className="space-y-8"
             >
-
-
-                              {/* Back Button and Wishlist */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mt-2">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => router.back()}
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                  className="flex px-0 items-center gap-2 text-gray-600 hover:text-gray-900"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Back
@@ -213,7 +214,7 @@ export default function ProductDetailPage() {
                   {product.name}
                 </h1>
                 
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-3">
                   <div className="flex items-center">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                     <span className="ml-1 text-sm font-medium">{product.rating}</span>
@@ -221,17 +222,17 @@ export default function ProductDetailPage() {
                   <span className="text-sm text-gray-500">({product.stock})</span>
                 </div>
 
-                <p className="text-4xl font-bold text-gray-900 mb-6">
+                <p className="text-4xl font-bold text-gray-900 mb-3">
                   ${product.price.toFixed(2)}
                 </p>
 
-                <p className="text-gray-600 leading-relaxed mb-8">
+                <p className="text-gray-600 leading-relaxed mb-0">
                   {product.description}
                 </p>
               </div>
 
               {/* Color Selection */}
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-medium">Select Color</h3>
                   <span className="text-gray-500 capitalize">{selectedColor}</span>
@@ -254,8 +255,8 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Size Selection */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+              <div className="space-y-2 !-mt-1">
+                <div className="flex items-center mt-4 justify-between">
                   <h3 className="text-lg font-medium">Select Size</h3>
                   <span className="text-gray-500">{selectedSize}</span>
                 </div>

@@ -216,7 +216,7 @@ export default function LookBreakdown() {
                           src={look2.image || "/placeholder.svg"}
                           alt={look2.title}
                           fill
-                          className="object-cover"
+                          className="object-contain"
                           unoptimized
                         />
                       </motion.div>

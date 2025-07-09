@@ -12,7 +12,7 @@ export default function Loader() {
     >
       <div className="text-center">
         <motion.div
-          className="text-6xl font-bold text-amber-950 mb-4"
+          className="text-6xl font-bold  text-gray-800 mb-4"
           style={{
             fontFamily: "var(--font-anton)",
           }}
@@ -20,10 +20,10 @@ export default function Loader() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          HASTON
+          HEX & HUE
         </motion.div>
         <motion.div
-          className="w-16 h-1 bg-amber-900 mx-auto"
+          className="w-16 h-1 bg-gray-800 mx-auto"
           initial={{ width: 0 }}
           animate={{ width: 64 }}
           transition={{ duration: 1, delay: 0.5 }}

@@ -672,7 +672,7 @@ export default function ShopPage() {
                         <CardContent className="p-4">
                           <div className={`${viewMode === "list" ? "flex justify-between items-start" : ""}`}>
                             <div className={viewMode === "list" ? "flex-1" : ""}>
-                              <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-gray-700 transition-colors line-clamp-2">
+                              <h3 className="font-semibold text-gray-900 truncate mb-1 group-hover:text-gray-700 transition-colors line-clamp-2">
                                 {product.name}
                               </h3>
                               
