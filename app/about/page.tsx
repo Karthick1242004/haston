@@ -58,9 +58,9 @@ export default function AboutPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-amber-200/30 via-transparent to-purple-200/30" />
           </div>
           
-          <div className="relative w-full px-6 md:px-12">
+          <div className="relative w-full  px-6 md:px-12">
             <motion.div
-              className="mb-8"
+              className="mb-8 text-center"
               initial={{ opacity: 0, y: 50 }}
               animate={heroInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8 }}
@@ -92,7 +92,7 @@ export default function AboutPage() {
               </motion.h1>
               
               <motion.p
-                className="text-lg text-gray-600 max-w-2xl leading-relaxed"
+                className="text-lg text-center text-gray-600 mx-auto max-w-2xl leading-relaxed"
                 initial={{ opacity: 0, y: 30 }}
                 animate={heroInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.8, delay: 0.3 }}
@@ -160,7 +160,7 @@ export default function AboutPage() {
                   transition={{ duration: 0.8, delay: 0.6 }}
                 >
                   <Button
-                    className="bg-transparent border-2 border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all duration-300 px-8 py-4 text-lg rounded-none"
+                    className="bg-transparent border-2 border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all duration-300 px-8 py-4 text-sm rounded-none"
                     onClick={() => router.push('/shop')}
                   >
                     Explore Our Collection

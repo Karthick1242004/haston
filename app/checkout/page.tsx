@@ -3,17 +3,20 @@
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import Image from "next/image"
-import { ChevronLeft, Minus, Plus, Trash2, CreditCard, ShoppingBag } from "lucide-react"
+import { ChevronLeft, Minus, Plus, Trash2, CreditCard, ShoppingBag, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
 import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import { useProductStore } from "@/stores/product-store"
+import { ExtendedUser } from "@/lib/mongodb"
 
 interface UserDetails {
   email: string
@@ -29,8 +32,10 @@ interface UserDetails {
 
 export default function CheckoutPage() {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const { cartItems, updateQuantity, removeFromCart, getCartTotal, getCartItemsCount } = useProductStore()
   
+  const [userProfile, setUserProfile] = useState<ExtendedUser | null>(null)
   const [userDetails, setUserDetails] = useState<UserDetails>({
     email: "",
     firstName: "",
@@ -43,9 +48,11 @@ export default function CheckoutPage() {
     country: ""
   })
   
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("")
   const [discountCode, setDiscountCode] = useState("")
   const [appliedDiscount, setAppliedDiscount] = useState(0)
   const [isFormValid, setIsFormValid] = useState(false)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false)
 
   const subtotal = getCartTotal()
   const shipping = subtotal > 200 ? 0 : 12.00
@@ -59,6 +66,67 @@ export default function CheckoutPage() {
       router.push('/')
     }
   }, [cartItems, router])
+
+  // Fetch user profile if authenticated
+  useEffect(() => {
+    if (session?.user && !userProfile) {
+      fetchUserProfile()
+    }
+  }, [session, userProfile])
+
+  // Pre-fill form with session data
+  useEffect(() => {
+    if (session?.user && !userDetails.email) {
+      setUserDetails(prev => ({
+        ...prev,
+        email: session.user?.email || '',
+        firstName: userProfile?.firstName || '',
+        lastName: userProfile?.lastName || '',
+        phone: userProfile?.phone || '',
+      }))
+    }
+  }, [session, userProfile, userDetails.email])
+
+  const fetchUserProfile = async () => {
+    if (!session?.user) return
+    
+    setIsLoadingProfile(true)
+    try {
+      const response = await fetch('/api/user/profile')
+      if (response.ok) {
+        const data = await response.json()
+        setUserProfile(data.user)
+        
+        // Pre-fill form with user data
+        setUserDetails(prev => ({
+          ...prev,
+          email: session.user?.email || '',
+          firstName: data.user.firstName || '',
+          lastName: data.user.lastName || '',
+          phone: data.user.phone || '',
+        }))
+
+        // Set default address if available
+        const defaultAddress = data.user.addresses?.find((addr: any) => addr.isDefault)
+        if (defaultAddress) {
+          setSelectedAddressId(defaultAddress.id)
+          setUserDetails(prev => ({
+            ...prev,
+            address: defaultAddress.address1,
+            city: defaultAddress.city,
+            state: defaultAddress.state,
+            zipCode: defaultAddress.zipCode,
+            country: defaultAddress.country,
+            phone: defaultAddress.phone || prev.phone,
+          }))
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch profile:', error)
+    } finally {
+      setIsLoadingProfile(false)
+    }
+  }
 
   useEffect(() => {
     const requiredFields = [
@@ -82,6 +150,22 @@ export default function CheckoutPage() {
       ...prev,
       [field]: value
     }))
+  }
+
+  const handleAddressSelection = (addressId: string) => {
+    setSelectedAddressId(addressId)
+    const selectedAddress = userProfile?.addresses?.find(addr => addr.id === addressId)
+    if (selectedAddress) {
+      setUserDetails(prev => ({
+        ...prev,
+        address: selectedAddress.address1,
+        city: selectedAddress.city,
+        state: selectedAddress.state,
+        zipCode: selectedAddress.zipCode,
+        country: selectedAddress.country,
+        phone: selectedAddress.phone || prev.phone,
+      }))
+    }
   }
 
   const applyDiscountCode = () => {
@@ -114,12 +198,12 @@ export default function CheckoutPage() {
   if (cartItems.length === 0) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <ShoppingBag className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
+        <div className="min-h-screen bg-[#F1EFEE] flex items-center justify-center">
+          <div className="text-center bg-white rounded-2xl p-12 shadow-lg border border-gray-200">
+            <ShoppingBag className="w-16 h-16 mx-auto text-amber-950 mb-4" />
+            <h2 className="text-2xl font-bold text-amber-950 mb-2">Your cart is empty</h2>
             <p className="text-gray-600 mb-6">Add some items to proceed to checkout</p>
-            <Button onClick={() => router.push('/')} className="bg-black text-white hover:bg-gray-800">
+            <Button onClick={() => router.push('/')} className="bg-amber-950 text-white hover:bg-amber-800 transition-all">
               Continue Shopping
             </Button>
           </div>
@@ -130,7 +214,7 @@ export default function CheckoutPage() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[#F1EFEE]">
         {/* Header */}
         <div className="relative bg-white shadow-sm">
           <Header />
@@ -147,7 +231,7 @@ export default function CheckoutPage() {
               <Button
                 variant="ghost"
                 onClick={() => router.back()}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                className="flex items-center gap-2 text-amber-950 hover:text-amber-800 hover:bg-white transition-all rounded-lg px-4 py-2"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Back to Shopping
@@ -163,11 +247,93 @@ export default function CheckoutPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-2xl font-bold">Contact Information</CardTitle>
+                  <Card className="bg-white shadow-lg border border-gray-200">
+                    <CardHeader className="bg-white border-b border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-2xl font-bold text-amber-950">Contact Information</CardTitle>
+                        {session?.user && (
+                          <div className="flex items-center space-x-3">
+                            {session.user.image ? (
+                              <Image
+                                src={session.user.image}
+                                alt={session.user.name || 'User'}
+                                width={32}
+                                height={32}
+                                className="rounded-full"
+                              />
+                            ) : (
+                              <User className="w-8 h-8 text-amber-950" />
+                            )}
+                            <div className="text-right">
+                              <p className="text-sm font-medium text-amber-950">{session.user.name}</p>
+                              <p className="text-xs text-gray-600">Signed In</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      {!session?.user && (
+                        <p className="text-sm text-gray-600 mt-2">
+                          <Button 
+                            variant="link" 
+                            className="p-0 h-auto text-amber-950 hover:text-amber-800"
+                            onClick={() => router.push('/auth/signin')}
+                          >
+                            Sign in
+                          </Button> 
+                          {" "}for faster checkout with saved addresses
+                        </p>
+                      )}
                     </CardHeader>
                     <CardContent className="space-y-6">
+                      {/* Saved Addresses Section for Authenticated Users */}
+                      {session?.user && userProfile?.addresses && userProfile.addresses.length > 0 && (
+                                                  <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-lg font-semibold text-amber-950">Saved Addresses</h3>
+                              <Badge className="bg-gray-100 text-gray-800">
+                                {userProfile.addresses.length} saved
+                              </Badge>
+                            </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {userProfile.addresses.map((address) => (
+                              <div
+                                key={address.id}
+                                className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                                  selectedAddressId === address.id
+                                    ? 'border-amber-950 bg-gray-50'
+                                    : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                                onClick={() => handleAddressSelection(address.id)}
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Badge variant={address.isDefault ? "default" : "secondary"} className="text-xs">
+                                        {address.type}
+                                      </Badge>
+                                      {address.isDefault && (
+                                        <Badge className="bg-green-100 text-green-800 text-xs">Default</Badge>
+                                      )}
+                                    </div>
+                                    <p className="text-sm font-medium">{address.firstName} {address.lastName}</p>
+                                    <p className="text-xs text-gray-600">{address.address1}</p>
+                                    <p className="text-xs text-gray-600">
+                                      {address.city}, {address.state} {address.zipCode}
+                                    </p>
+                                  </div>
+                                  {selectedAddressId === address.id && (
+                                    <div className="w-5 h-5 bg-amber-950 rounded-full flex items-center justify-center">
+                                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <Separator />
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="email">Email Address *</Label>
@@ -292,10 +458,10 @@ export default function CheckoutPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-2xl font-bold">Your Products</CardTitle>
-                      <p className="text-sm text-gray-600">{getCartItemsCount()} items in your cart</p>
+                  <Card className="bg-white shadow-lg border border-gray-200">
+                    <CardHeader className="bg-white border-b border-gray-200">
+                      <CardTitle className="text-2xl font-bold text-amber-950">Your Products</CardTitle>
+                      <p className="text-sm text-gray-600 font-medium">{getCartItemsCount()} items in your cart</p>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-6">
@@ -305,7 +471,7 @@ export default function CheckoutPage() {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="flex gap-4 p-4 border border-gray-200 rounded-lg"
+                            className="flex gap-4 p-4 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow"
                           >
                             {/* Product Image */}
                             <div className="flex-shrink-0">
@@ -381,11 +547,11 @@ export default function CheckoutPage() {
                         ))}
                       </div>
 
-                      <div className="mt-6 pt-6 border-t">
+                      <div className="mt-6 pt-6 border-t border-gray-200">
                         <Button
                           variant="outline"
                           onClick={() => router.push('/')}
-                          className="text-gray-600 border-gray-300 hover:text-gray-900 hover:border-gray-400"
+                          className="text-amber-950 border-amber-950 hover:text-white hover:bg-amber-950 transition-all"
                         >
                           Continue Shopping
                         </Button>
@@ -403,9 +569,9 @@ export default function CheckoutPage() {
                   transition={{ delay: 0.3 }}
                   className="sticky top-24"
                 >
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-2xl font-bold">Order Review</CardTitle>
+                  <Card className="bg-white shadow-lg border border-gray-200">
+                    <CardHeader className="bg-white border-b border-gray-200">
+                      <CardTitle className="text-2xl font-bold text-amber-950">Order Review</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       {/* Discount Code */}
@@ -422,7 +588,7 @@ export default function CheckoutPage() {
                           <Button
                             variant="outline"
                             onClick={applyDiscountCode}
-                            className="px-6"
+                            className="px-6 bg-amber-950 text-white border-0 hover:bg-amber-800"
                           >
                             Apply
                           </Button>
@@ -477,7 +643,7 @@ export default function CheckoutPage() {
                         <Button
                           onClick={handleCheckout}
                           disabled={!isFormValid}
-                          className="w-full bg-black text-white hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed py-6 text-lg font-medium"
+                          className="w-full bg-amber-950 text-white hover:bg-amber-800 disabled:bg-gray-300 disabled:cursor-not-allowed py-6 text-lg font-medium transition-all"
                         >
                           <CreditCard className="w-5 h-5 mr-2" />
                           {!isFormValid ? "Complete Details to Continue" : "Proceed to Payment"}
@@ -488,14 +654,14 @@ export default function CheckoutPage() {
                           <Button
                             variant="outline"
                             disabled={!isFormValid}
-                            className="py-3 bg-purple-600 text-white border-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300"
+                            className="py-3 bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-500 transition-all"
                           >
                             Shop Pay
                           </Button>
                           <Button
                             variant="outline"
                             disabled={!isFormValid}
-                            className="py-3 bg-yellow-400 text-black border-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300"
+                            className="py-3 bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-500 transition-all"
                           >
                             PayPal
                           </Button>

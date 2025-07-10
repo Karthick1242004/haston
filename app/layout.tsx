@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter, Anton, Allura } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import AuthProvider from "@/components/auth-provider"
 import CartSidebar from "@/components/cart-sidebar"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -37,8 +38,10 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          {children}
-          <CartSidebar />
+          <AuthProvider>
+            {children}
+            <CartSidebar />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

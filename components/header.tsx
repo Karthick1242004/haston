@@ -1,20 +1,40 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, User, ShoppingBag, Menu, X } from "lucide-react"
+import { Search, User, ShoppingBag, Menu, X, LogOut, Settings } from "lucide-react"
 import { useUIStore } from "@/stores/ui-store"
 import { useProductStore } from "@/stores/product-store"
+import { useSession, signOut } from "next-auth/react"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 export default function Header() {
   const { cartCount } = useUIStore()
   const { setCartOpen } = useProductStore()
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
 
   const navItems = ["Shop","About Us", "Customer Care"]
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
+  }
+
+  const handleSignIn = () => {
+    router.push('/auth/signin')
+  }
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: '/' })
+    setIsUserDropdownOpen(false)
+  }
+
+  const handleProfile = () => {
+    router.push('/profile')
+    setIsUserDropdownOpen(false)
   }
 
   return (
@@ -84,13 +104,77 @@ export default function Header() {
               >
                 <Search className="w-5 h-5 text-gray-700" />
               </motion.button> */}
-              <motion.button
-                className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <User className="w-5 h-5 text-gray-700" />
-              </motion.button>
+              
+              {/* User Authentication Button */}
+              <div className="relative">
+                {session ? (
+                  <>
+                    <motion.button
+                      className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200 flex items-center"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                    >
+                      {session.user?.image ? (
+                        <Image
+                          src={session.user.image}
+                          alt={session.user.name || 'User'}
+                          width={22}
+                          height={22}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        <User className="w-5 h-5 text-gray-700" />
+                      )}
+                    </motion.button>
+
+                    {/* User Dropdown */}
+                    <AnimatePresence>
+                      {isUserDropdownOpen && (
+                        <motion.div
+                          className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <div className="px-4 py-2 border-b border-gray-100">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {session.user?.name}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">
+                              {session.user?.email}
+                            </p>
+                          </div>
+                          <button
+                            onClick={handleProfile}
+                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            <Settings className="w-4 h-4 mr-3" />
+                            Profile
+                          </button>
+                          <button
+                            onClick={handleSignOut}
+                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            <LogOut className="w-4 h-4 mr-3" />
+                            Sign Out
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </>
+                ) : (
+                  <motion.button
+                    className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleSignIn}
+                  >
+                    <User className="w-5 h-5 text-gray-700" />
+                  </motion.button>
+                )}
+              </div>
               <motion.button
                 className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200 relative"
                 whileHover={{ scale: 1.1 }}
@@ -181,15 +265,71 @@ export default function Header() {
                       <Search className="w-5 h-5 text-gray-700" />
                       <span className="text-gray-700 font-medium">Search</span>
                     </motion.button>
-                    <motion.button
-                      className="flex items-center space-x-3 w-full p-3 hover:bg-gray-50 rounded-lg transition-colors duration-200"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: 0.5 }}
-                    >
-                      <User className="w-5 h-5 text-gray-700" />
-                      <span className="text-gray-700 font-medium">Account</span>
-                    </motion.button>
+                    {session ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                          {session.user?.image ? (
+                            <Image
+                              src={session.user.image}
+                              alt={session.user.name || 'User'}
+                              width={24}
+                              height={24}
+                              className="rounded-full"
+                            />
+                          ) : (
+                            <User className="w-6 h-6 text-gray-700" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {session.user?.name}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">
+                              {session.user?.email}
+                            </p>
+                          </div>
+                        </div>
+                        <motion.button
+                          className="flex items-center space-x-3 w-full p-3 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.3, delay: 0.5 }}
+                          onClick={() => {
+                            handleProfile()
+                            toggleMobileMenu()
+                          }}
+                        >
+                          <Settings className="w-5 h-5 text-gray-700" />
+                          <span className="text-gray-700 font-medium">Profile</span>
+                        </motion.button>
+                        <motion.button
+                          className="flex items-center space-x-3 w-full p-3 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.3, delay: 0.6 }}
+                          onClick={() => {
+                            handleSignOut()
+                            toggleMobileMenu()
+                          }}
+                        >
+                          <LogOut className="w-5 h-5 text-gray-700" />
+                          <span className="text-gray-700 font-medium">Sign Out</span>
+                        </motion.button>
+                      </div>
+                    ) : (
+                      <motion.button
+                        className="flex items-center space-x-3 w-full p-3 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: 0.5 }}
+                        onClick={() => {
+                          handleSignIn()
+                          toggleMobileMenu()
+                        }}
+                      >
+                        <User className="w-5 h-5 text-gray-700" />
+                        <span className="text-gray-700 font-medium">Sign In</span>
+                      </motion.button>
+                    )}
                     <motion.button
                       className="flex items-center space-x-3 w-full p-3 hover:bg-gray-50 rounded-lg transition-colors duration-200"
                       initial={{ opacity: 0, x: -20 }}

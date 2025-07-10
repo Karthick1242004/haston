@@ -129,13 +129,13 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Main Image */}
-            <div className="flex-1 relative bg-gradient-to-br max-h-screen">
-              <div className="absolute w-full h-full inset-4">
+            <div className="flex-1 relative bg-gradient-to-br h-[80vh] max-h-[800px]">
+              <div className="absolute w-full h-full inset-6">
                 <Image
                   src={product.images?.[selectedImageIndex] || product.image}
                   alt={product.name}
                   fill
-                  className="object-cover  rounded-lg"
+                  className="object-cover rounded-lg"
                   unoptimized
                 />
               </div>
