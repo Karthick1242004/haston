@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Chrome, ArrowLeft } from "lucide-react"
 import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
+import { getRedirectUrl, clearRedirectUrl } from "@/hooks/use-auth-cart"
 
 export default function SignInPage() {
   const router = useRouter()
@@ -19,7 +20,14 @@ export default function SignInPage() {
     const checkSession = async () => {
       const session = await getSession()
       if (session) {
-        router.push('/profile')
+        // Check for redirect URL
+        const redirectUrl = getRedirectUrl()
+        if (redirectUrl) {
+          clearRedirectUrl()
+          router.push(redirectUrl)
+        } else {
+          router.push('/profile')
+        }
       }
     }
     checkSession()
@@ -28,10 +36,20 @@ export default function SignInPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
     try {
-      await signIn('google', { 
-        callbackUrl: '/profile',
+      // Get redirect URL before signin
+      const redirectUrl = getRedirectUrl()
+      const callbackUrl = redirectUrl || '/profile'
+      
+      const result = await signIn('google', { 
+        callbackUrl,
         redirect: false 
       })
+      
+      if (result?.ok) {
+        // Clear redirect URL and navigate
+        clearRedirectUrl()
+        router.push(callbackUrl)
+      }
     } catch (error) {
       console.error('Sign in error:', error)
     } finally {

@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { useProductStore } from "@/stores/product-store"
+import { useAuthCart } from "@/hooks/use-auth-cart"
 import { useRouter } from "next/navigation"
 import type { Product } from "@/types/product"
 
@@ -205,7 +206,7 @@ const colorMap: Record<string, string> = {
 
 export default function ShopPage() {
   const router = useRouter()
-  const { addToCart } = useProductStore()
+  const { addProductToCart } = useAuthCart()
   
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
@@ -662,7 +663,7 @@ export default function ShopPage() {
                               // Add default size and color for quick add
                               const defaultSize = product.sizes?.[0] || "M"
                               const defaultColor = product.colors?.[0] || "Black"
-                              addToCart(product, defaultSize, defaultColor, 1)
+                              addProductToCart(product, defaultSize, defaultColor, 1)
                             }}
                           >
                             <ShoppingBag className="w-4 h-4" />

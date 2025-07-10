@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useProductStore } from "@/stores/product-store"
 import { useUIStore } from "@/stores/ui-store"
+import { useAuthCart } from "@/hooks/use-auth-cart"
 import Header from "@/components/header"
 import type { Product } from "@/types/product"
 
@@ -55,7 +56,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [isWishlisted, setIsWishlisted] = useState(false)
   
-  const { addToCart } = useProductStore()
+  const { addProductToCart } = useAuthCart()
   const { cartCount } = useUIStore()
   
   // Find the product - in a real app, this would be fetched from API
@@ -78,7 +79,7 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (selectedSize && selectedColor) {
-      addToCart(product, selectedSize, selectedColor, quantity)
+      addProductToCart(product, selectedSize, selectedColor, quantity)
     }
   }
 
@@ -318,7 +319,7 @@ export default function ProductDetailPage() {
                   disabled={!selectedSize || !selectedColor}
                   onClick={() => {
                     if (selectedSize && selectedColor) {
-                      addToCart(product, selectedSize, selectedColor, quantity)
+                      addProductToCart(product, selectedSize, selectedColor, quantity)
                       router.push('/checkout')
                     }
                   }}

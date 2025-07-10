@@ -7,6 +7,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLookStore } from "@/stores/look-store"
+import { useAuthCart } from "@/hooks/use-auth-cart"
 import type { Look, CenterLook } from "@/types/look"
 
 const looks: Look[] = [
@@ -87,7 +88,7 @@ const centerLooks: CenterLook[] = [
 export default function LookBreakdown() {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
-  const { addToCart } = useLookStore()
+  const { addLookToCart } = useAuthCart()
 
   const allSections = [
     { type: "side-by-side", data: looks },
@@ -194,7 +195,7 @@ export default function LookBreakdown() {
                             <Button
                               variant="outline"
                               className="w-full rounded-none bg-transparent border border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white py-1 text-sm font-medium transition-all duration-300"
-                              onClick={() => addToCart(look1)}
+                              onClick={() => addLookToCart(look1)}
                             >
                               Add Outfit to Cart
                             </Button>
@@ -266,7 +267,7 @@ export default function LookBreakdown() {
                             <Button
                               variant="outline"
                               className="w-full rounded-none bg-transparent border border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white py-1 text-sm font-medium transition-all duration-300"
-                              onClick={() => addToCart(look1)}
+                              onClick={() => addLookToCart(look1)}
                             >
                               Add Outfit to Cart
                             </Button>

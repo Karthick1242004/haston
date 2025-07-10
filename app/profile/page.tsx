@@ -31,6 +31,7 @@ import { Badge } from "@/components/ui/badge"
 import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import { ExtendedUser, Address } from "@/lib/mongodb"
+import Loader from "@/components/loader"
 
 export default function ProfilePage() {
   const { data: session, status, update } = useSession()
@@ -110,12 +111,7 @@ export default function ProfilePage() {
   if (status === 'loading') {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-[#F1EFEE] flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-gray-200 border-t-amber-950 rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-amber-950">Loading...</p>
-          </div>
-        </div>
+       <Loader/>
       </PageTransition>
     )
   }
