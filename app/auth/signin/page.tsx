@@ -41,9 +41,9 @@ export default function SignInPage() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      <div className="min-h-screen bg-[#F1EFEE]">
         {/* Header */}
-        <div className="relative bg-white/80 backdrop-blur-sm shadow-sm">
+        <div className="relative bg-white shadow-sm">
           <Header />
         </div>
 
@@ -58,7 +58,7 @@ export default function SignInPage() {
               <Button
                 variant="ghost"
                 onClick={() => router.back()}
-                className="flex items-center gap-2 text-blue-600 hover:text-white hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 transition-all rounded-lg px-4 py-2"
+                className="flex items-center gap-2 text-amber-950 hover:text-amber-800 hover:bg-white transition-all rounded-lg px-4 py-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
@@ -71,9 +71,9 @@ export default function SignInPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="border-t-4 border-t-blue-500 bg-white/80 backdrop-blur-sm shadow-xl">
-                <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-lg text-center">
-                  <CardTitle className="text-2xl font-bold text-gray-800">
+              <Card className="bg-white shadow-lg border border-gray-200">
+                <CardHeader className="bg-white border-b border-gray-200 text-center">
+                  <CardTitle className="text-2xl font-bold text-amber-950">
                     Welcome to Hex & Hue
                   </CardTitle>
                   <p className="text-sm text-gray-600 mt-2">
@@ -86,7 +86,7 @@ export default function SignInPage() {
                   <Button
                     onClick={handleGoogleSignIn}
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all py-6 text-lg font-medium rounded-lg"
+                    className="w-full bg-amber-950 text-white hover:bg-amber-800 disabled:bg-gray-300 transition-all py-6 text-lg font-medium rounded-lg"
                   >
                     <Chrome className="w-5 h-5 mr-3" />
                     {isLoading ? "Signing in..." : "Sign in with Google"}
@@ -94,24 +94,24 @@ export default function SignInPage() {
 
                   {/* Features List */}
                   <div className="mt-8 space-y-4">
-                    <p className="text-sm font-medium text-gray-700 text-center">
+                    <p className="text-sm font-medium text-amber-950 text-center">
                       What you'll get:
                     </p>
                     <div className="space-y-2 text-sm text-gray-600">
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                        <div className="w-2 h-2 bg-amber-950 rounded-full"></div>
                         <span>Personalized shopping experience</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full"></div>
+                        <div className="w-2 h-2 bg-amber-950 rounded-full"></div>
                         <span>Save your favorite items to wishlist</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-gradient-to-r from-green-500 to-blue-600 rounded-full"></div>
+                        <div className="w-2 h-2 bg-amber-950 rounded-full"></div>
                         <span>Track your order history</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full"></div>
+                        <div className="w-2 h-2 bg-amber-950 rounded-full"></div>
                         <span>Faster checkout with saved addresses</span>
                       </div>
                     </div>
@@ -135,7 +135,7 @@ export default function SignInPage() {
               <Button
                 variant="outline"
                 onClick={() => router.push('/')}
-                className="text-purple-600 border-purple-300 hover:text-white hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:border-0 transition-all shadow-sm hover:shadow-md"
+                className="text-amber-950 border-amber-950 hover:text-white hover:bg-amber-950 transition-all"
               >
                 Continue as Guest
               </Button>
