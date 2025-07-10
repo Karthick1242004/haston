@@ -161,7 +161,7 @@ export default function ProfilePage() {
                 >
                   <Card className="bg-white shadow-lg border border-gray-200">
                     <CardHeader className="bg-white border-b border-gray-200">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between flex-wrap gap-4">
                         <div className="flex items-center space-x-4">
                           <div className="relative">
                             {session.user?.image ? (
