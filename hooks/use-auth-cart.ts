@@ -8,6 +8,7 @@ import type { Look } from "@/types/look"
 interface UseAuthCartReturn {
   addProductToCart: (product: Product, selectedSize: string, selectedColor: string, quantity?: number) => void
   addLookToCart: (look: Look) => void
+  buyProductNow: (product: Product, selectedSize: string, selectedColor: string, quantity?: number) => void
   isAuthenticated: boolean
 }
 
@@ -49,9 +50,24 @@ export function useAuthCart(): UseAuthCartReturn {
     addLookToCartStore(look)
   }
 
+  const buyProductNow = (product: Product, selectedSize: string, selectedColor: string, quantity = 1) => {
+    if (!isAuthenticated) {
+      // Store current URL and buy now action for redirect after login
+      storeRedirectUrl(window.location.pathname + window.location.search)
+      storeBuyNowAction(product, selectedSize, selectedColor, quantity)
+      router.push('/auth/signin')
+      return
+    }
+    
+    // User is authenticated, add to cart and redirect to checkout
+    addProductToCartStore(product, selectedSize, selectedColor, quantity)
+    router.push('/checkout')
+  }
+
   return {
     addProductToCart,
     addLookToCart,
+    buyProductNow,
     isAuthenticated
   }
 }
@@ -66,5 +82,38 @@ export function getRedirectUrl(): string | null {
 export function clearRedirectUrl(): void {
   if (typeof window !== 'undefined') {
     sessionStorage.removeItem('redirectAfterLogin')
+  }
+}
+
+interface BuyNowAction {
+  product: Product
+  selectedSize: string
+  selectedColor: string
+  quantity: number
+}
+
+function storeBuyNowAction(product: Product, selectedSize: string, selectedColor: string, quantity: number): void {
+  if (typeof window !== 'undefined') {
+    const buyNowAction: BuyNowAction = {
+      product,
+      selectedSize,
+      selectedColor,
+      quantity
+    }
+    sessionStorage.setItem('buyNowAction', JSON.stringify(buyNowAction))
+  }
+}
+
+export function getBuyNowAction(): BuyNowAction | null {
+  if (typeof window !== 'undefined') {
+    const stored = sessionStorage.getItem('buyNowAction')
+    return stored ? JSON.parse(stored) : null
+  }
+  return null
+}
+
+export function clearBuyNowAction(): void {
+  if (typeof window !== 'undefined') {
+    sessionStorage.removeItem('buyNowAction')
   }
 } 

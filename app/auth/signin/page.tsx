@@ -9,17 +9,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Chrome, ArrowLeft } from "lucide-react"
 import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
-import { getRedirectUrl, clearRedirectUrl } from "@/hooks/use-auth-cart"
+import { getRedirectUrl, clearRedirectUrl, getBuyNowAction, clearBuyNowAction } from "@/hooks/use-auth-cart"
+import { useProductStore } from "@/stores/product-store"
 
 export default function SignInPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const { addToCart } = useProductStore()
 
   useEffect(() => {
     // Check if user is already signed in
     const checkSession = async () => {
       const session = await getSession()
       if (session) {
+        // Check for buy now action first
+        const buyNowAction = getBuyNowAction()
+        if (buyNowAction) {
+          // Add to cart and redirect to checkout
+          addToCart(buyNowAction.product, buyNowAction.selectedSize, buyNowAction.selectedColor, buyNowAction.quantity)
+          clearBuyNowAction()
+          clearRedirectUrl()
+          router.push('/checkout')
+          return
+        }
+        
         // Check for redirect URL
         const redirectUrl = getRedirectUrl()
         if (redirectUrl) {
@@ -31,24 +44,32 @@ export default function SignInPage() {
       }
     }
     checkSession()
-  }, [router])
+  }, [router, addToCart])
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
     try {
-      // Get redirect URL before signin
-      const redirectUrl = getRedirectUrl()
-      const callbackUrl = redirectUrl || '/profile'
+      // Check for buy now action first
+      const buyNowAction = getBuyNowAction()
       
       const result = await signIn('google', { 
-        callbackUrl,
+        callbackUrl: buyNowAction ? '/checkout' : (getRedirectUrl() || '/profile'),
         redirect: false 
       })
       
       if (result?.ok) {
-        // Clear redirect URL and navigate
-        clearRedirectUrl()
-        router.push(callbackUrl)
+        // Handle buy now action
+        if (buyNowAction) {
+          addToCart(buyNowAction.product, buyNowAction.selectedSize, buyNowAction.selectedColor, buyNowAction.quantity)
+          clearBuyNowAction()
+          clearRedirectUrl()
+          router.push('/checkout')
+        } else {
+          // Handle normal redirect
+          const redirectUrl = getRedirectUrl()
+          clearRedirectUrl()
+          router.push(redirectUrl || '/profile')
+        }
       }
     } catch (error) {
       console.error('Sign in error:', error)

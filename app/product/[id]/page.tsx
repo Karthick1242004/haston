@@ -56,7 +56,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [isWishlisted, setIsWishlisted] = useState(false)
   
-  const { addProductToCart } = useAuthCart()
+  const { addProductToCart, buyProductNow } = useAuthCart()
   const { cartCount } = useUIStore()
   
   // Find the product - in a real app, this would be fetched from API
@@ -319,8 +319,7 @@ export default function ProductDetailPage() {
                   disabled={!selectedSize || !selectedColor}
                   onClick={() => {
                     if (selectedSize && selectedColor) {
-                      addProductToCart(product, selectedSize, selectedColor, quantity)
-                      router.push('/checkout')
+                      buyProductNow(product, selectedSize, selectedColor, quantity)
                     }
                   }}
                 >
