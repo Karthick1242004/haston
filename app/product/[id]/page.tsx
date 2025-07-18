@@ -21,8 +21,8 @@ const mockProducts: Product[] = [
     id: 1, 
     name: "Nike ACG \"Wolf Tree\" Polartec", 
     price: 250.00, 
-    image: PRODUCT_IMAGE_URL,
-    images: [PRODUCT_IMAGE_URL, PRODUCT_IMAGE_URL, PRODUCT_IMAGE_URL, PRODUCT_IMAGE_URL, PRODUCT_IMAGE_URL],
+    image: "/corousel111.png",
+    images: ["/corousel111.png", "/corousel 2.png", "/corousel 3.png", "/close.png"],
     colors: ["Portage", "Forest Green", "Black", "Pink"],
     sizes: ["S", "M", "L", "XL", "XXL", "3XL"],
     description: "Celebrate the power and simplicity of the Swoosh. This warm, brushed fleece hoodie is made with some extra room through the shoulder.",
@@ -136,7 +136,7 @@ export default function ProductDetailPage() {
                   src={product.images?.[selectedImageIndex] || product.image}
                   alt={product.name}
                   fill
-                  className="object-cover rounded-lg"
+                  className="object-contain rounded-lg"
                   unoptimized
                 />
               </div>
@@ -233,13 +233,13 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Color Selection */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-medium">Select Color</h3>
                   <span className="text-gray-500 capitalize">{selectedColor}</span>
-                </div>
+                </div> */}
                 
-                <div className="flex gap-3">
+                {/* <div className="flex gap-3">
                   {colorOptions.map((option) => (
                     <button
                       key={option.name}
@@ -252,8 +252,8 @@ export default function ProductDetailPage() {
                       aria-label={`Select ${option.name} color`}
                     />
                   ))}
-                </div>
-              </div>
+                </div> */}
+              {/* </div> */}
 
               {/* Size Selection */}
               <div className="space-y-2 !-mt-1">
@@ -280,23 +280,23 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Quantity */}
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <h3 className="text-lg font-medium">Quantity</h3>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   <div className="flex items-center border border-gray-200 rounded-lg">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="p-3 hover:bg-gray-100 transition-colors"
+                      className="p-2 hover:bg-gray-100 transition-colors"
                       disabled={quantity <= 1}
                     >
                       −
                     </button>
-                    <span className="px-6 py-3 font-medium min-w-[4rem] text-center">
+                    <span className="px-3 py-1 font-medium min-w-[1rem] text-center">
                       {quantity.toString().padStart(2, '0')}
                     </span>
                     <button
                       onClick={() => setQuantity(quantity + 1)}
-                      className="p-3 hover:bg-gray-100 transition-colors"
+                      className="p-2 hover:bg-gray-100 transition-colors"
                     >
                       +
                     </button>
@@ -305,7 +305,7 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-4 pt-4">
+              <div className="space-y-2 pt-2">
                 <Button
                   onClick={handleAddToCart}
                   className="w-full bg-white text-black border-2 border-black hover:bg-black hover:text-white transition-all duration-300 py-6 text-lg font-medium rounded-lg"
@@ -442,7 +442,7 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Color Selection */}
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             <div className="flex justify-between">
               <span className="font-medium">Color</span>
               <span className="text-gray-500 capitalize">{selectedColor}</span>
@@ -460,7 +460,7 @@ export default function ProductDetailPage() {
                 />
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Size Selection */}
           <div className="space-y-3">

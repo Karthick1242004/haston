@@ -5,7 +5,8 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
-import { ChevronLeft, Minus, Plus, Trash2, CreditCard, ShoppingBag, User } from "lucide-react"
+import Script from "next/script"
+import { ChevronLeft, Minus, Plus, Trash2, CreditCard, ShoppingBag, User, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -33,7 +34,7 @@ interface UserDetails {
 export default function CheckoutPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const { cartItems, updateQuantity, removeFromCart, getCartTotal, getCartItemsCount } = useProductStore()
+  const { cartItems, updateQuantity, removeFromCart, getCartTotal, getCartItemsCount, clearCart } = useProductStore()
   
   const [userProfile, setUserProfile] = useState<ExtendedUser | null>(null)
   const [userDetails, setUserDetails] = useState<UserDetails>({
@@ -53,6 +54,8 @@ export default function CheckoutPage() {
   const [appliedDiscount, setAppliedDiscount] = useState(0)
   const [isFormValid, setIsFormValid] = useState(false)
   const [isLoadingProfile, setIsLoadingProfile] = useState(false)
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'success' | 'failed'>('idle')
 
   const subtotal = getCartTotal()
   const shipping = subtotal > 200 ? 0 : 12.00
@@ -184,15 +187,112 @@ export default function CheckoutPage() {
     }
   }
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!isFormValid) {
       alert("Please fill in all required fields")
       return
     }
     
-    // TODO: Integrate with Razorpay
-    console.log("Proceeding to payment with:", { userDetails, cartItems, total })
-    alert("Razorpay integration will be added here")
+    setIsProcessingPayment(true)
+    setPaymentStatus('idle')
+
+    try {
+      // Create order with Razorpay
+      const orderResponse = await fetch('/api/razorpay/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: total,
+          currency: 'INR',
+          receipt: `order_${Date.now()}`,
+          notes: {
+            customer_name: `${userDetails.firstName} ${userDetails.lastName}`,
+            customer_email: userDetails.email,
+            items_count: getCartItemsCount(),
+          },
+        }),
+      })
+
+      const orderData = await orderResponse.json()
+
+      if (!orderData.success) {
+        throw new Error(orderData.error || 'Failed to create order')
+      }
+
+      // Initialize Razorpay checkout
+      const options = {
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Haston E-commerce',
+        description: 'Purchase from Haston Store',
+        order_id: orderData.order_id,
+        handler: async function (response: any) {
+          try {
+            // Verify payment
+            const verifyResponse = await fetch('/api/razorpay/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            })
+
+            const verifyData = await verifyResponse.json()
+
+            if (verifyData.success) {
+              setPaymentStatus('success')
+              // Clear cart after successful payment
+              setTimeout(() => {
+                clearCart()
+                router.push('/?payment=success')
+              }, 2000)
+            } else {
+              throw new Error(verifyData.error || 'Payment verification failed')
+            }
+          } catch (error) {
+            console.error('Payment verification error:', error)
+            setPaymentStatus('failed')
+          } finally {
+            setIsProcessingPayment(false)
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessingPayment(false)
+            setPaymentStatus('idle')
+          }
+        },
+        prefill: {
+          name: `${userDetails.firstName} ${userDetails.lastName}`,
+          email: userDetails.email,
+          contact: userDetails.phone,
+        },
+        theme: {
+          color: '#92400e', // amber-950
+        },
+      }
+
+      const rzp = new (window as any).Razorpay(options)
+      rzp.on('payment.failed', function (response: any) {
+        console.error('Payment failed:', response.error)
+        setPaymentStatus('failed')
+        setIsProcessingPayment(false)
+      })
+
+      rzp.open()
+    } catch (error) {
+      console.error('Checkout error:', error)
+      alert('Failed to initiate payment. Please try again.')
+      setIsProcessingPayment(false)
+      setPaymentStatus('failed')
+    }
   }
 
   if (cartItems.length === 0) {
@@ -214,6 +314,10 @@ export default function CheckoutPage() {
 
   return (
     <PageTransition>
+      <Script 
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+      />
       <div className="min-h-screen bg-[#F1EFEE]">
         {/* Header */}
         <div className="relative bg-white shadow-sm">
@@ -642,25 +746,49 @@ export default function CheckoutPage() {
                       <div className="space-y-3">
                         <Button
                           onClick={handleCheckout}
-                          disabled={!isFormValid}
+                          disabled={!isFormValid || isProcessingPayment}
                           className="w-full bg-amber-950 text-white hover:bg-amber-800 disabled:bg-gray-300 disabled:cursor-not-allowed py-6 text-lg font-medium transition-all"
                         >
+                          {isProcessingPayment ? (
+                            <>
+                              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                              Processing Payment...
+                            </>
+                          ) : paymentStatus === 'success' ? (
+                            <>
+                              <CreditCard className="w-5 h-5 mr-2" />
+                              Payment Successful!
+                            </>
+                          ) : paymentStatus === 'failed' ? (
+                            <>
+                              <CreditCard className="w-5 h-5 mr-2" />
+                              Payment Failed - Try Again
+                            </>
+                          ) : !isFormValid ? (
+                            <>
+                              <CreditCard className="w-5 h-5 mr-2" />
+                              Complete Details to Continue
+                            </>
+                          ) : (
+                            <>
                           <CreditCard className="w-5 h-5 mr-2" />
-                          {!isFormValid ? "Complete Details to Continue" : "Proceed to Payment"}
+                              Proceed to Payment
+                            </>
+                          )}
                         </Button>
 
                         {/* Alternative Payment Options */}
                         <div className="grid grid-cols-2 gap-2">
                           <Button
                             variant="outline"
-                            disabled={!isFormValid}
+                            disabled={!isFormValid || isProcessingPayment}
                             className="py-3 bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-500 transition-all"
                           >
                             Shop Pay
                           </Button>
                           <Button
                             variant="outline"
-                            disabled={!isFormValid}
+                            disabled={!isFormValid || isProcessingPayment}
                             className="py-3 bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-500 transition-all"
                           >
                             PayPal
@@ -668,9 +796,32 @@ export default function CheckoutPage() {
                         </div>
                       </div>
 
-                      {!isFormValid && (
+                      {/* Status Messages */}
+                      {paymentStatus === 'success' && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                          <p className="text-sm text-green-800 font-medium">
+                            🎉 Payment successful! Redirecting you shortly...
+                          </p>
+                        </div>
+                      )}
+                      
+                      {paymentStatus === 'failed' && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                          <p className="text-sm text-red-800 font-medium">
+                            ❌ Payment failed. Please try again or contact support.
+                          </p>
+                        </div>
+                      )}
+
+                      {!isFormValid && !isProcessingPayment && (
                         <p className="text-sm text-red-600 text-center">
                           Please fill in all required fields to enable payment options
+                        </p>
+                      )}
+
+                      {isProcessingPayment && (
+                        <p className="text-sm text-blue-600 text-center">
+                          🔐 Redirecting to secure payment gateway...
                         </p>
                       )}
 

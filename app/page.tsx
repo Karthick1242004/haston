@@ -7,6 +7,7 @@ import Header from "@/components/header"
 import HeroSection from "@/components/hero-section"
 import LookBreakdown from "@/components/look-breakdown"
 import PopularProducts from "@/components/popular-products"
+import Testimonials from "@/components/testimonials"
 import Footer from "@/components/footer"
 import PageTransition from "@/components/page-transition"
 
@@ -14,7 +15,6 @@ export default function HomePage() {
   const { isLoading, setLoading } = useUIStore()
 
   useEffect(() => {
-    // Simulate loading time
     const timer = setTimeout(() => {
       setLoading(false)
     }, 2000)
@@ -34,6 +34,7 @@ export default function HomePage() {
           <HeroSection />
           <LookBreakdown />
           <PopularProducts />
+          <Testimonials/>
         </main>
         <Footer />
       </div>
