@@ -40,6 +40,16 @@ export async function getUsersCollection(): Promise<Collection> {
   return db.collection("users")
 }
 
+export async function getProductsCollection(): Promise<Collection> {
+  const db = await getDatabase()
+  return db.collection("products")
+}
+
+export async function getAdminsCollection(): Promise<Collection> {
+  const db = await getDatabase()
+  return db.collection("admins")
+}
+
 // Extended User Schema for scalability
 export interface ExtendedUser {
   _id?: string

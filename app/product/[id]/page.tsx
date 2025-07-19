@@ -13,37 +13,6 @@ import { useAuthCart } from "@/hooks/use-auth-cart"
 import Header from "@/components/header"
 import type { Product } from "@/types/product"
 
-// Mock product data - in a real app, this would come from an API
-const PRODUCT_IMAGE_URL = "https://i.pinimg.com/736x/7e/43/34/7e43342236d1dd193800325d0b99a991.jpg"
-
-const mockProducts: Product[] = [
-  { 
-    id: 1, 
-    name: "Nike ACG \"Wolf Tree\" Polartec", 
-    price: 250.00, 
-    image: "/corousel111.png",
-    images: ["/corousel111.png", "/corousel 2.png", "/corousel 3.png", "/close.png"],
-    colors: ["Portage", "Forest Green", "Black", "Pink"],
-    sizes: ["S", "M", "L", "XL", "XXL", "3XL"],
-    description: "Celebrate the power and simplicity of the Swoosh. This warm, brushed fleece hoodie is made with some extra room through the shoulder.",
-    rating: 5.0,
-    stock: 50,
-    category: "Outerwear"
-  },
-  { 
-    id: 2, 
-    name: "Light Knit Vest", 
-    price: 120, 
-    image: PRODUCT_IMAGE_URL,
-    images: [PRODUCT_IMAGE_URL, PRODUCT_IMAGE_URL, PRODUCT_IMAGE_URL],
-    colors: ["Blue", "Gray", "Black"],
-    sizes: ["S", "M", "L", "XL"],
-    description: "Lightweight vest perfect for layering.",
-    rating: 4.5,
-    stock: 30
-  },
-  // Add more products as needed
-]
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -59,9 +28,21 @@ export default function ProductDetailPage() {
   const { addProductToCart, buyProductNow } = useAuthCart()
   const { cartCount } = useUIStore()
   
-  // Find the product - in a real app, this would be fetched from API
-  const product = mockProducts.find(p => p.id === productId)
-  
+  const [product, setProduct] = useState<Product | null>(null)
+
+  useEffect(() => {
+    async function fetchProduct() {
+      try {
+        const res = await fetch(`/api/products?id=${params.id}`)
+        const json = await res.json()
+        if (!json.error) setProduct(json)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    fetchProduct()
+  }, [params.id])
+
   useEffect(() => {
     if (product) {
       setSelectedColor(product.colors?.[0] || "")

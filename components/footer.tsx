@@ -8,9 +8,11 @@ import { useRef, useState } from "react"
 import { Facebook, Instagram, MapPin, Mail, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useIsAdmin } from '@/hooks/use-admin'
 
 export default function Footer() {
   const ref = useRef<HTMLDivElement>(null)
+  const isAdmin = useIsAdmin()
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [email, setEmail] = useState("")
   const [focused, setFocused] = useState(false)
@@ -102,6 +104,13 @@ export default function Footer() {
                   Terms & Conditions
                 </a>
               </li>
+              {isAdmin && (
+                <li>
+                  <a href="/admin" className="hover:text-amber-950 transition-colors duration-200">
+                    Admin Dashboard
+                  </a>
+                </li>
+              )}
             </ul>
           </motion.div>
 
