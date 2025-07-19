@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
     const limit = parseInt(searchParams.get('limit') || '0')
+    const isLookParam = searchParams.get('isLook')
 
     if (id) {
       const doc = await collection.findOne({ _id: new ObjectId(id) })
@@ -18,7 +19,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ ...rest, id: _id.toString() })
     }
 
-    const cursor = collection.find({}).sort({ createdAt: -1 })
+    const filter:any = {}
+    if (isLookParam==='true') filter.isLook = true
+    if (isLookParam==='false') filter.isLook = { $ne: true }
+
+    const cursor = collection.find(filter).sort({ createdAt: -1 })
     if (limit) cursor.limit(limit)
     const docs = await cursor.toArray()
     const products = docs.map((d: any) => ({ id: d._id.toString(), ...d }))

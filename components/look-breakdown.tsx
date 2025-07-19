@@ -16,58 +16,6 @@ interface CarouselItem {
   price: string
 }
 
-const carouselItems: CarouselItem[] = [
-  {
-    id: 1,
-    title: "Classic Elegance",
-    description: "Timeless sophistication meets modern comfort. Perfect for business meetings and evening events.",
-    image: "/corousel1.png",
-    price: "$299"
-  },
-  {
-    id: 2,
-    title: "Urban Casual",
-    description: "Effortlessly cool streetwear that combines style with comfort for everyday adventures.",
-    image: "/corousel2.png",
-    price: "$199"
-  },
-  {
-    id: 3,
-    title: "Summer Breeze",
-    description: "Light, breathable fabrics designed for warm weather while maintaining a refined look.",
-    image: "/corousel3.png",
-    price: "$249"
-  },
-  {
-    id: 4,
-    title: "Evening Luxe",
-    description: "Sophisticated evening wear that makes a statement at any formal occasion.",
-    image: "/corousel4.png",
-    price: "$399"
-  },
-  {
-    id: 5,
-    title: "Weekend Comfort",
-    description: "Relaxed yet polished pieces perfect for weekend gatherings and casual outings.",
-    image: "/corousel5.png",
-    price: "$179"
-  },
-  {
-    id: 6,
-    title: "Business Ready",
-    description: "Sharp, professional attire that commands respect in any corporate environment.",
-    image: "/corousel6.png",
-    price: "$349"
-  },
-  {
-    id: 7,
-    title: "Seasonal Statement",
-    description: "Bold, contemporary designs that celebrate the current season's trending styles.",
-    image: "/corousel7.png",
-    price: "$279"
-  }
-]
-
 export default function LookBreakdown() {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
@@ -76,6 +24,34 @@ export default function LookBreakdown() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const prevCurrentIndex = useRef(0)
   const { addProductToCart } = useAuthCart()
+
+  // carousel items state
+  const [carouselItems, setCarouselItems] = useState<CarouselItem[]>([])
+
+  // state inside component declared later, placeholder removed
+
+  // fetch look items
+  useEffect(()=>{
+    async function fetchLooks(){
+      try {
+        const res = await fetch('/api/products?isLook=true')
+        const json = await res.json()
+        console.log('Look breakdown API response:', json)
+        const items = (json.products||[]).map((p:any)=>({
+          id: p.id,
+          title: p.name,
+          description: p.description,
+          image: p.image,
+          price: `$${p.price}`
+        }))
+        console.log('Mapped carousel items:', items)
+        setCarouselItems(items)
+      }catch(err){console.error(err)}
+    }
+    fetchLooks()
+  },[])
+
+  console.log('Current carouselItems state:', carouselItems)
 
   // Auto-rotate carousel
   useEffect(() => {
@@ -91,7 +67,7 @@ export default function LookBreakdown() {
   const nextSlide = () => {
     if (isTransitioning) return
     setIsTransitioning(true)
-    setCurrentIndex((prev) => (prev + 1) % carouselItems.length)
+    setCurrentIndex((prev) => (prev + 1) % carouselItems?.length)
     setIsAutoPlaying(false)
     setTimeout(() => setIsTransitioning(false), 1200)
   }
@@ -115,13 +91,7 @@ export default function LookBreakdown() {
   // Generate all items with their positions for smooth transitions
   const getAllItemsWithPositions = () => {
     const allItems = []
-    
-    // Dynamically calculate the visible radius so we never render more items than we actually have.
-    // This guarantees each `actualIndex` appears only once which keeps React keys unique *and*
-    // lets us continue using the stable `actualIndex` key for buttery-smooth animations.
-    // We clamp the radius to 3 to match the original design (max 7 visible items) and ensure
-    // we never render more items than we have (avoids duplicate keys even for even-length arrays).
-    const visibleRadius = Math.min(3, Math.floor((carouselItems.length - 1) / 2))
+    const visibleRadius = Math.min(3, Math.floor((carouselItems?.length - 1) / 2))
 
     // Generate items in the range -visibleRadius … +visibleRadius
     for (let i = -visibleRadius; i <= visibleRadius; i++) {
@@ -145,6 +115,10 @@ export default function LookBreakdown() {
 
   const allItems = getAllItemsWithPositions()
   const edgeDistance = (allItems.length - 1) / 2
+
+  // guard against out-of-range index
+  const len = carouselItems?.length
+  const safeIndex = len ? ((currentIndex % len) + len) % len : 0
 
   // Convert carousel item to product format for cart
   const createProductFromCarouselItem = (item: CarouselItem) => {
@@ -326,14 +300,20 @@ export default function LookBreakdown() {
               transition={{ duration: 0.5 }}
               className="max-w-2xl mx-auto"
             >
-              <h3 className="text-4xl font-bold text-amber-950 mb-4" style={{ fontFamily: "var(--font-anton)" }}>
-                {carouselItems[currentIndex].title}
-              </h3>
-              <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                {carouselItems[currentIndex].description}
-              </p>
+              {carouselItems?.length>0 && (
+                <>
+                  <h3 className="text-4xl font-bold text-amber-950 mb-4" style={{ fontFamily: "var(--font-anton)" }}>
+                    {carouselItems[safeIndex]?.title}
+                  </h3>
+                  <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+                    {carouselItems[safeIndex]?.description}
+                  </p>
+                </>
+              )}
               <div className="flex items-center justify-center gap-6 mb-8">
-                <span className="text-3xl font-bold text-amber-950">{carouselItems[currentIndex].price}</span>
+                {carouselItems?.length>0 && (
+                  <span className="text-3xl font-bold text-amber-950">{carouselItems[safeIndex]?.price}</span>
+                )}
                 <Button 
                   variant="outline"
                   className="border rounded-none font-semibold bg-transparent border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white px-8 py-3 transition-all duration-300"
@@ -353,7 +333,7 @@ export default function LookBreakdown() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.8 }}
         >
-          {carouselItems.map((_, index) => (
+          {carouselItems?.map((_:any, index: any) => (
             <button
               key={index}
               className={`w-4 h-4 rounded-full transition-all duration-300 ${

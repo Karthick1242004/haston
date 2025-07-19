@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
     const price = form.get('price') as string | null
     const description = form.get('description') as string | null
     const sizes = form.get('sizes') as string | null // comma-separated
+    const isLookFlag = form.get('isLook') === 'true'
 
     if (!name || !price || !description || !sizes) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
     const db = await getDatabase()
     const products = db.collection('products')
     const now = new Date()
-    const productDoc = {
+    const productDoc:any = {
       name,
       price: parseFloat(price),
       description,
@@ -74,6 +75,11 @@ export async function POST(request: NextRequest) {
       stock: 100,
       createdAt: now,
       updatedAt: now,
+    }
+
+    if (isLookFlag) {
+      productDoc.isLook = true
+      productDoc.lookImages = imageUrls
     }
 
     const insertRes = await products.insertOne(productDoc)

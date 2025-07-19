@@ -30,8 +30,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     const form = await request.formData()
     const updateDoc: any = {}
+    let isLookFlag = false
     for (const [key,value] of form.entries()) {
       if (key === 'images') continue
+      if (key === 'isLook') { isLookFlag = value==='true'; continue }
       updateDoc[key] = key === 'price' ? parseFloat(value as string) : value
     }
     if (form.has('sizes')) {
@@ -61,6 +63,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       updateDoc.image = finalImages[0]
       updateDoc.images = finalImages
     }
+    if (isLookFlag!==undefined) updateDoc.isLook = isLookFlag
+    if (isLookFlag) updateDoc.lookImages = finalImages
     updateDoc.updatedAt = new Date()
     const collection = await getProductsCollection()
     await collection.updateOne({ _id: new ObjectId(params.id) }, { $set: updateDoc })

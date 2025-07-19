@@ -14,20 +14,11 @@ export const TestimonialsColumn = (props: {
   testimonials: Testimonial[];
   duration?: number;
 }) => {
-  // Log when component mounts for debugging
-  useEffect(() => {
-    console.log("[TestimonialsColumn] mounted", {
-      testimonialsCount: props.testimonials.length,
-      duration: props.duration || 10,
-    })
-  }, [])
 
-  // Throttle onUpdate logs so we don't spam the console
   const lastLog = useRef<number>(0)
   const handleUpdate = (latest: { y: string | number }) => {
     const now = Date.now()
     if (now - lastLog.current > 500) {
-      console.log("[TestimonialsColumn] animate y", latest.y)
       lastLog.current = now
     }
   }

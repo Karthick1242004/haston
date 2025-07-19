@@ -19,6 +19,7 @@ export default function AdminPage() {
   const [sizes, setSizes] = useState('S,M,L')
   const [images, setImages] = useState<File[]>([])
   const [existingImages, setExistingImages] = useState<string[]>([])
+  const [isLook, setIsLook] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement|null>(null)
 
@@ -73,6 +74,7 @@ export default function AdminPage() {
       formData.append('description', description)
       formData.append('sizes', sizes)
       formData.append('existingImages', JSON.stringify(existingImages))
+      formData.append('isLook', isLook ? 'true' : 'false')
       images.forEach((file) => formData.append('images', file))
 
       const res = await fetch('/api/admin/product', {
@@ -111,7 +113,7 @@ export default function AdminPage() {
                     <h3 className="font-semibold">{p.name}</h3>
                     <p>${p.price}</p>
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={()=>{setMode('edit');setEditId(p.id);setName(p.name);setPrice(p.price);setDescription(p.description);setSizes(p.sizes.join(','));setImages([]);setExistingImages(p.images||[])}}>Edit</Button>
+                      <Button size="sm" onClick={()=>{setMode('edit');setEditId(p.id);setName(p.name);setPrice(p.price);setDescription(p.description);setSizes(p.sizes.join(','));setImages([]);setExistingImages(p.images||[]);setIsLook(!!p.isLook)}}>Edit</Button>
                       <Button size="sm" variant="destructive" onClick={async()=>{await fetch(`/api/admin/product/${p.id}`,{method:'DELETE'});await fetchProducts()}}>Delete</Button>
                     </div>
                   </div>
@@ -147,8 +149,13 @@ export default function AdminPage() {
               <label className="block mb-1 text-sm font-medium text-amber-950">Sizes (comma separated)</label>
               <Input value={sizes} onChange={(e)=>setSizes(e.target.value)} className="rounded-none"/>
             </div>
+            <div className="flex items-center gap-3">
+              <input id="isLook" type="checkbox" checked={isLook} onChange={e=>setIsLook(e.target.checked)} />
+              <label htmlFor="isLook" className="text-sm">Use in Look Breakdown slider</label>
+            </div>
+
             <div>
-              <label htmlFor="product-images" className="block mb-3 text-sm font-medium text-amber-950">Images (up to 5)</label>
+              <label htmlFor="product-images" className="block mb-3 text-sm font-medium text-amber-950">{isLook ? 'Slider image (transparent) + 4 additional images' : 'Images (up to 5)'}<br/><span className="text-xs text-gray-500">{isLook && 'First image should be backgroundless'}</span></label>
               <input id="product-images" ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleSelectFiles} className="mb-4" />
               <div className="grid grid-cols-5 gap-2">
                 {images.map((file,index)=> (
