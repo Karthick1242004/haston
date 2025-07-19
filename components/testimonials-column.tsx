@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 
 export interface Testimonial {
   text: string;
@@ -31,6 +31,21 @@ export const TestimonialsColumn = (props: {
       lastLog.current = now
     }
   }
+
+  // Use animation controls for more reliable looping
+  const controls = useAnimation()
+
+  useEffect(() => {
+    controls.start({
+      y: ["0%", "-50%"],
+      transition: {
+        duration: props.duration || 10,
+        ease: "linear",
+        repeat: Infinity,
+        repeatType: "loop",
+      },
+    })
+  }, [controls, props.duration])
 
   // Create testimonial cards
   const testimonialCards = props.testimonials.map(({ text, image, name, role }, i) => (
@@ -65,18 +80,12 @@ export const TestimonialsColumn = (props: {
   return (
     <div className={`${props.className} overflow-hidden relative`}>
       <motion.div
-        animate={{ y: ["0%", "-50%"] }}
-        transition={{
-          duration: props.duration || 10,
-          repeat: Infinity,
-          ease: "linear",
-          type: "tween",
-        }}
+        animate={controls}
+        onUpdate={handleUpdate}
         className="flex flex-col"
         style={{ 
           willChange: "transform",
         }}
-        onUpdate={handleUpdate}
       >
         {/* First set of testimonials */}
         <div className="flex flex-col">
