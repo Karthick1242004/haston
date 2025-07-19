@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { useState, useMemo } from "react"
+import {  useMemo } from "react"
 import { Filter, ChevronDown, Grid, List, Star, Heart, ShoppingBag, X, SlidersHorizontal } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -18,145 +18,8 @@ import { useAuthCart } from "@/hooks/use-auth-cart"
 import { useRouter } from "next/navigation"
 import type { Product } from "@/types/product"
 
-// Mock expanded product data for the shop
-const PRODUCT_IMAGE_URL = "https://i.pinimg.com/736x/7e/43/34/7e43342236d1dd193800325d0b99a991.jpg"
-
-const shopProducts: Product[] = [
-  {
-    id: 1,
-    name: "Nike ACG Wolf Tree Polartec",
-    price: 250.00,
-    image: PRODUCT_IMAGE_URL,
-    images: [PRODUCT_IMAGE_URL, PRODUCT_IMAGE_URL, PRODUCT_IMAGE_URL],
-    colors: ["Portage", "Forest Green", "Black", "Pink"],
-    sizes: ["S", "M", "L", "XL", "XXL", "3XL"],
-    description: "Celebrate the power and simplicity of the Swoosh.",
-    rating: 5.0,
-    stock: 50,
-    category: "Outerwear"
-  },
-  {
-    id: 2,
-    name: "Light Knit Vest",
-    price: 120,
-    image: PRODUCT_IMAGE_URL,
-    colors: ["Blue", "Gray", "Black"],
-    sizes: ["S", "M", "L", "XL"],
-    rating: 4.5,
-    stock: 30,
-    category: "Tops"
-  },
-  {
-    id: 3,
-    name: "Dark Green Polo",
-    price: 110,
-    image: PRODUCT_IMAGE_URL,
-    colors: ["Green", "Navy", "White"],
-    sizes: ["S", "M", "L", "XL"],
-    rating: 4.3,
-    stock: 25,
-    category: "Tops"
-  },
-  {
-    id: 4,
-    name: "White Linen Shorts",
-    price: 135,
-    image: PRODUCT_IMAGE_URL,
-    colors: ["White", "Beige", "Light Blue"],
-    sizes: ["28", "30", "32", "34", "36"],
-    rating: 4.7,
-    stock: 40,
-    category: "Bottoms"
-  },
-  {
-    id: 5,
-    name: "Beige Blazer",
-    price: 320,
-    image: PRODUCT_IMAGE_URL,
-    colors: ["Beige", "Navy", "Charcoal"],
-    sizes: ["S", "M", "L", "XL"],
-    rating: 4.8,
-    stock: 15,
-    category: "Outerwear"
-  },
-  {
-    id: 6,
-    name: "Light Gray Suit",
-    price: 450,
-    image: PRODUCT_IMAGE_URL,
-    colors: ["Light Gray", "Charcoal", "Navy"],
-    sizes: ["S", "M", "L", "XL"],
-    rating: 4.9,
-    stock: 12,
-    category: "Suits"
-  },
-  {
-    id: 7,
-    name: "Casual Trousers",
-    price: 180,
-    image: PRODUCT_IMAGE_URL,
-    colors: ["Khaki", "Navy", "Black"],
-    sizes: ["28", "30", "32", "34", "36"],
-    rating: 4.4,
-    stock: 35,
-    category: "Bottoms"
-  },
-  {
-    id: 8,
-    name: "Cream Suit",
-    price: 420,
-    image: PRODUCT_IMAGE_URL,
-    colors: ["Cream", "Ivory", "Light Beige"],
-    sizes: ["S", "M", "L", "XL"],
-    rating: 4.6,
-    stock: 18,
-    category: "Suits"
-  },
-  {
-    id: 9,
-    name: "Denim Jacket",
-    price: 180,
-    image: PRODUCT_IMAGE_URL,
-    colors: ["Blue", "Black", "Light Blue"],
-    sizes: ["S", "M", "L", "XL"],
-    rating: 4.2,
-    stock: 28,
-    category: "Outerwear"
-  },
-  {
-    id: 10,
-    name: "Cotton T-Shirt",
-    price: 45,
-    image: PRODUCT_IMAGE_URL,
-    colors: ["White", "Black", "Gray", "Navy"],
-    sizes: ["S", "M", "L", "XL"],
-    rating: 4.1,
-    stock: 100,
-    category: "Tops"
-  },
-  {
-    id: 11,
-    name: "Leather Boots",
-    price: 280,
-    image: PRODUCT_IMAGE_URL,
-    colors: ["Brown", "Black"],
-    sizes: ["7", "8", "9", "10", "11", "12"],
-    rating: 4.7,
-    stock: 22,
-    category: "Footwear"
-  },
-  {
-    id: 12,
-    name: "Wool Sweater",
-    price: 160,
-    image: PRODUCT_IMAGE_URL,
-    colors: ["Charcoal", "Cream", "Navy"],
-    sizes: ["S", "M", "L", "XL"],
-    rating: 4.5,
-    stock: 33,
-    category: "Tops"
-  }
-]
+// Products will be fetched from backend
+import { useEffect, useState } from "react"
 
 interface FilterState {
   categories: string[]
@@ -207,6 +70,15 @@ const colorMap: Record<string, string> = {
 export default function ShopPage() {
   const router = useRouter()
   const { addProductToCart } = useAuthCart()
+
+  const [products, setProducts] = useState<Product[]>([])
+
+  useEffect(()=>{
+    fetch('/api/products')
+      .then(r=>r.json())
+      .then(d=>setProducts(d.products||[]))
+      .catch(console.error)
+  },[])
   
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
@@ -226,7 +98,7 @@ export default function ShopPage() {
 
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = shopProducts.filter((product) => {
+    let filtered = products.filter((product) => {
       // Category filter
       if (filters.categories.length > 0 && !filters.categories.includes(product.category || "")) {
         return false
@@ -275,7 +147,7 @@ export default function ShopPage() {
     })
 
     return filtered
-  }, [filters, sortBy])
+  }, [products, filters, sortBy])
 
   const paginatedProducts = filteredAndSortedProducts.slice(0, currentPage * itemsPerPage)
   const hasMore = filteredAndSortedProducts.length > currentPage * itemsPerPage
