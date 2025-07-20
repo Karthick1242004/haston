@@ -22,7 +22,9 @@ export default function CartSidebar() {
     updateQuantity, 
     removeFromCart, 
     getCartTotal,
-    getCartItemsCount 
+    getCartItemsCount,
+    isLoading,
+    error 
   } = useProductStore()
 
   const total = getCartTotal()
@@ -48,6 +50,20 @@ export default function CartSidebar() {
               </Button>
             </div>
           </SheetHeader>
+
+          {/* Error Message */}
+          {error && (
+            <div className="px-6 py-3 bg-red-50 border-b border-red-100">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+
+          {/* Loading Indicator */}
+          {isLoading && (
+            <div className="px-6 py-3 bg-blue-50 border-b border-blue-100">
+              <p className="text-sm text-blue-600">Syncing cart...</p>
+            </div>
+          )}
 
           {/* Cart Items */}
           <div className="flex-1 overflow-y-auto p-6">
@@ -94,7 +110,7 @@ export default function CartSidebar() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => removeFromCart(item.id, item.selectedSize, item.selectedColor)}
+                            onClick={async () => await removeFromCart(item.id, item.selectedSize, item.selectedColor)}
                             className="h-8 w-8 rounded-full hover:bg-red-50 hover:text-red-600 transition-colors"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -117,7 +133,7 @@ export default function CartSidebar() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => updateQuantity(item.id, item.selectedSize, item.selectedColor, item.quantity - 1)}
+                              onClick={async () => await updateQuantity(item.id, item.selectedSize, item.selectedColor, item.quantity - 1)}
                               className="h-8 w-8 rounded-full hover:bg-gray-100"
                               disabled={item.quantity <= 1}
                             >
@@ -129,7 +145,7 @@ export default function CartSidebar() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => updateQuantity(item.id, item.selectedSize, item.selectedColor, item.quantity + 1)}
+                              onClick={async () => await updateQuantity(item.id, item.selectedSize, item.selectedColor, item.quantity + 1)}
                               className="h-8 w-8 rounded-full hover:bg-gray-100"
                             >
                               <Plus className="h-3 w-3" />

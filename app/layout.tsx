@@ -5,6 +5,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import AuthProvider from "@/components/auth-provider"
 import CartSidebar from "@/components/cart-sidebar"
+import CartSyncProvider from "@/components/cart-sync-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 const anton = Anton({
@@ -39,8 +40,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            {children}
-            <CartSidebar />
+            <CartSyncProvider>
+              {children}
+              <CartSidebar />
+            </CartSyncProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

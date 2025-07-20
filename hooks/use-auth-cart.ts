@@ -6,9 +6,9 @@ import type { Product } from "@/types/product"
 import type { Look } from "@/types/look"
 
 interface UseAuthCartReturn {
-  addProductToCart: (product: Product, selectedSize: string, selectedColor: string, quantity?: number) => void
+  addProductToCart: (product: Product, selectedSize: string, selectedColor: string, quantity?: number) => Promise<void>
   addLookToCart: (look: Look) => void
-  buyProductNow: (product: Product, selectedSize: string, selectedColor: string, quantity?: number) => void
+  buyProductNow: (product: Product, selectedSize: string, selectedColor: string, quantity?: number) => Promise<void>
   isAuthenticated: boolean
 }
 
@@ -26,7 +26,7 @@ export function useAuthCart(): UseAuthCartReturn {
     }
   }
 
-  const addProductToCart = (product: Product, selectedSize: string, selectedColor: string, quantity = 1) => {
+  const addProductToCart = async (product: Product, selectedSize: string, selectedColor: string, quantity = 1) => {
     if (!isAuthenticated) {
       // Store current URL for redirect after login
       storeRedirectUrl(window.location.pathname + window.location.search)
@@ -35,7 +35,7 @@ export function useAuthCart(): UseAuthCartReturn {
     }
     
     // User is authenticated, proceed with adding to cart
-    addProductToCartStore(product, selectedSize, selectedColor, quantity)
+    await addProductToCartStore(product, selectedSize, selectedColor, quantity)
   }
 
   const addLookToCart = (look: Look) => {
@@ -50,7 +50,7 @@ export function useAuthCart(): UseAuthCartReturn {
     addLookToCartStore(look)
   }
 
-  const buyProductNow = (product: Product, selectedSize: string, selectedColor: string, quantity = 1) => {
+  const buyProductNow = async (product: Product, selectedSize: string, selectedColor: string, quantity = 1) => {
     if (!isAuthenticated) {
       // Store current URL and buy now action for redirect after login
       storeRedirectUrl(window.location.pathname + window.location.search)
@@ -60,7 +60,7 @@ export function useAuthCart(): UseAuthCartReturn {
     }
     
     // User is authenticated, add to cart and redirect to checkout
-    addProductToCartStore(product, selectedSize, selectedColor, quantity)
+    await addProductToCartStore(product, selectedSize, selectedColor, quantity)
     router.push('/checkout')
   }
 

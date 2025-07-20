@@ -360,15 +360,15 @@ export default function CheckoutPage() {
 
               if (orderResult.success) {
                 // Clear cart and redirect to success page
-                setTimeout(() => {
-                  clearCart()
+                setTimeout(async () => {
+                  await clearCart()
                   router.push(`/order-success?orderId=${orderResult.orderId}`)
                 }, 2000)
               } else {
                 console.error('Failed to save order:', orderResult.error)
                 // Still clear cart and redirect but show warning
-                setTimeout(() => {
-                  clearCart()
+                setTimeout(async () => {
+                  await clearCart()
                   router.push('/?payment=success&warning=order-save-failed')
                 }, 2000)
               }
@@ -765,7 +765,7 @@ export default function CheckoutPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  onClick={() => removeFromCart(item.id, item.selectedSize, item.selectedColor)}
+                                  onClick={async () => await removeFromCart(item.id, item.selectedSize, item.selectedColor)}
                                   className="text-gray-400 hover:text-red-600"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -778,7 +778,7 @@ export default function CheckoutPage() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => updateQuantity(item.id, item.selectedSize, item.selectedColor, item.quantity - 1)}
+                                    onClick={async () => await updateQuantity(item.id, item.selectedSize, item.selectedColor, item.quantity - 1)}
                                     className="h-8 w-8 rounded-l-lg"
                                     disabled={item.quantity <= 1}
                                   >
@@ -790,7 +790,7 @@ export default function CheckoutPage() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => updateQuantity(item.id, item.selectedSize, item.selectedColor, item.quantity + 1)}
+                                    onClick={async () => await updateQuantity(item.id, item.selectedSize, item.selectedColor, item.quantity + 1)}
                                     className="h-8 w-8 rounded-r-lg"
                                   >
                                     <Plus className="h-3 w-3" />

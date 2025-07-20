@@ -5,20 +5,28 @@ import { useUIStore } from "./ui-store"
 interface ProductState {
   cartItems: CartItem[]
   isCartOpen: boolean
-  addToCart: (product: Product, selectedSize: string, selectedColor: string, quantity?: number) => void
-  removeFromCart: (productId: number, selectedSize: string, selectedColor: string) => void
-  updateQuantity: (productId: number, selectedSize: string, selectedColor: string, quantity: number) => void
-  clearCart: () => void
+  isLoading: boolean
+  error: string | null
+  addToCart: (product: Product, selectedSize: string, selectedColor: string, quantity?: number, syncToDb?: boolean) => Promise<void>
+  removeFromCart: (productId: number, selectedSize: string, selectedColor: string, syncToDb?: boolean) => Promise<void>
+  updateQuantity: (productId: number, selectedSize: string, selectedColor: string, quantity: number, syncToDb?: boolean) => Promise<void>
+  clearCart: (syncToDb?: boolean) => Promise<void>
   setCartOpen: (open: boolean) => void
   getCartTotal: () => number
   getCartItemsCount: () => number
+  syncCartFromDB: (dbCartItems: any[]) => void
+  setLoading: (loading: boolean) => void
+  setError: (error: string | null) => void
 }
 
 export const useProductStore = create<ProductState>((set, get) => ({
   cartItems: [],
   isCartOpen: false,
+  isLoading: false,
+  error: null,
 
-  addToCart: (product, selectedSize, selectedColor, quantity = 1) => {
+  addToCart: async (product, selectedSize, selectedColor, quantity = 1, syncToDb = true) => {
+    // Update local state first for immediate UI response
     set((state) => {
       const existingItemIndex = state.cartItems.findIndex(
         (item) => 
@@ -53,9 +61,41 @@ export const useProductStore = create<ProductState>((set, get) => ({
     // Update UI store cart count
     const { getCartItemsCount } = get()
     useUIStore.setState({ cartCount: getCartItemsCount() })
+
+    // Sync to database if requested
+    if (syncToDb) {
+      set({ isLoading: true, error: null })
+      try {
+        const response = await fetch('/api/user/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.images[0],
+            selectedSize,
+            selectedColor,
+            quantity,
+            action: 'add'
+          }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          set({ error: errorData.error || 'Failed to sync cart' })
+        }
+      } catch (error) {
+        console.error('Error syncing cart:', error)
+        set({ error: 'Failed to sync cart' })
+      } finally {
+        set({ isLoading: false })
+      }
+    }
   },
 
-  removeFromCart: (productId, selectedSize, selectedColor) => {
+  removeFromCart: async (productId, selectedSize, selectedColor, syncToDb = true) => {
+    // Update local state first
     set((state) => {
       const newCartItems = state.cartItems.filter(
         (item) => 
@@ -69,14 +109,42 @@ export const useProductStore = create<ProductState>((set, get) => ({
     // Update UI store cart count
     const { getCartItemsCount } = get()
     useUIStore.setState({ cartCount: getCartItemsCount() })
+
+    // Sync to database if requested
+    if (syncToDb) {
+      set({ isLoading: true, error: null })
+      try {
+        const response = await fetch('/api/user/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId,
+            selectedSize,
+            selectedColor,
+            action: 'remove'
+          }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          set({ error: errorData.error || 'Failed to sync cart' })
+        }
+      } catch (error) {
+        console.error('Error syncing cart:', error)
+        set({ error: 'Failed to sync cart' })
+      } finally {
+        set({ isLoading: false })
+      }
+    }
   },
 
-  updateQuantity: (productId, selectedSize, selectedColor, quantity) => {
+  updateQuantity: async (productId, selectedSize, selectedColor, quantity, syncToDb = true) => {
     if (quantity <= 0) {
-      get().removeFromCart(productId, selectedSize, selectedColor)
+      await get().removeFromCart(productId, selectedSize, selectedColor, syncToDb)
       return
     }
 
+    // Update local state first
     set((state) => {
       const newCartItems = state.cartItems.map((item) =>
         item.id === productId && 
@@ -91,15 +159,93 @@ export const useProductStore = create<ProductState>((set, get) => ({
     // Update UI store cart count
     const { getCartItemsCount } = get()
     useUIStore.setState({ cartCount: getCartItemsCount() })
+
+    // Sync to database if requested
+    if (syncToDb) {
+      set({ isLoading: true, error: null })
+      try {
+        const response = await fetch('/api/user/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId,
+            selectedSize,
+            selectedColor,
+            quantity,
+            action: 'update'
+          }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          set({ error: errorData.error || 'Failed to sync cart' })
+        }
+      } catch (error) {
+        console.error('Error syncing cart:', error)
+        set({ error: 'Failed to sync cart' })
+      } finally {
+        set({ isLoading: false })
+      }
+    }
   },
 
-  clearCart: () => {
+  clearCart: async (syncToDb = true) => {
     set({ cartItems: [] })
     useUIStore.setState({ cartCount: 0 })
+
+    // Sync to database if requested
+    if (syncToDb) {
+      set({ isLoading: true, error: null })
+      try {
+        const response = await fetch('/api/user/cart', {
+          method: 'DELETE'
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          set({ error: errorData.error || 'Failed to clear cart' })
+        }
+      } catch (error) {
+        console.error('Error clearing cart:', error)
+        set({ error: 'Failed to clear cart' })
+      } finally {
+        set({ isLoading: false })
+      }
+    }
+  },
+
+  syncCartFromDB: (dbCartItems) => {
+    // Convert database cart items to local cart items format
+    const localCartItems: CartItem[] = dbCartItems.map((dbItem) => ({
+      id: parseInt(dbItem.productId),
+      name: dbItem.name,
+      price: dbItem.price,
+      image: dbItem.image, // Set the singular image property for cart display
+      images: [dbItem.image],
+      description: '',
+      category: '',
+      colors: [dbItem.selectedColor],
+      sizes: [dbItem.selectedSize],
+      isLook: false,
+      quantity: dbItem.quantity,
+      selectedSize: dbItem.selectedSize,
+      selectedColor: dbItem.selectedColor,
+    }))
+
+    set({ cartItems: localCartItems })
+    useUIStore.setState({ cartCount: localCartItems.reduce((count, item) => count + item.quantity, 0) })
   },
 
   setCartOpen: (open) => {
     set({ isCartOpen: open })
+  },
+
+  setLoading: (loading) => {
+    set({ isLoading: loading })
+  },
+
+  setError: (error) => {
+    set({ error })
   },
 
   getCartTotal: () => {
