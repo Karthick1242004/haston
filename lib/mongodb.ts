@@ -50,6 +50,11 @@ export async function getAdminsCollection(): Promise<Collection> {
   return db.collection("admins")
 }
 
+export async function getOrdersCollection(): Promise<Collection> {
+  const db = await getDatabase()
+  return db.collection("orders")
+}
+
 // Extended User Schema for scalability
 export interface ExtendedUser {
   _id?: string

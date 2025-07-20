@@ -41,6 +41,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [userProfile, setUserProfile] = useState<ExtendedUser | null>(null)
+  const [orderCount, setOrderCount] = useState(0)
   const [editForm, setEditForm] = useState({
     firstName: '',
     lastName: '',
@@ -78,17 +79,26 @@ export default function ProfilePage() {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch('/api/user/profile')
-      if (response.ok) {
-        const data = await response.json()
-        setUserProfile(data.user)
+      const [profileResponse, ordersResponse] = await Promise.all([
+        fetch('/api/user/profile'),
+        fetch('/api/orders?limit=1') // Just get count info
+      ])
+      
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json()
+        setUserProfile(profileData.user)
         setEditForm({
-          firstName: data.user.firstName || '',
-          lastName: data.user.lastName || '',
-          phone: data.user.phone || '',
-          dateOfBirth: data.user.dateOfBirth ? new Date(data.user.dateOfBirth).toISOString().split('T')[0] : '',
-          gender: data.user.gender || '',
+          firstName: profileData.user.firstName || '',
+          lastName: profileData.user.lastName || '',
+          phone: profileData.user.phone || '',
+          dateOfBirth: profileData.user.dateOfBirth ? new Date(profileData.user.dateOfBirth).toISOString().split('T')[0] : '',
+          gender: profileData.user.gender || '',
         })
+      }
+
+      if (ordersResponse.ok) {
+        const ordersData = await ordersResponse.json()
+        setOrderCount(ordersData.pagination?.total || 0)
       }
     } catch (error) {
       console.error('Failed to fetch profile:', error)
@@ -742,7 +752,7 @@ export default function ProfilePage() {
                           <span className="font-medium">Orders</span>
                         </div>
                         <Badge className="bg-gray-100 text-gray-800">
-                          {userProfile?.orderHistory?.length || 0}
+                          {orderCount}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -797,9 +807,15 @@ export default function ProfilePage() {
                       <Button
                         variant="outline"
                         className="w-full justify-start bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300 transition-all"
+                        onClick={() => router.push('/orders')}
                       >
                         <ShoppingBag className="w-4 h-4 mr-3" />
                         Order History
+                        {orderCount > 0 && (
+                          <Badge className="ml-auto bg-amber-950 text-white">
+                            {orderCount}
+                          </Badge>
+                        )}
                       </Button>
                     </CardContent>
                   </Card>

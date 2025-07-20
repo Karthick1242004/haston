@@ -39,13 +39,21 @@ export default function Footer() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <h3 className="text-4xl font-bold text-amber-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>
-              HASTON
-            </h3>
+            {/* Use next/image for optimized images in Next.js */}
+            {/* If not using Next.js, replace with <img ... /> */}
+            {/* If using Next.js, make sure to import: import Image from "next/image" */}
+            <img
+              src="/logomain.png"
+              alt="HEX & HUE"
+              width={100}
+              height={100}
+              className="object-contain"
+              loading="eager"
+            />
             <div className="space-y-3 text-xs text-gray-600">
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4" />
-                <span>info@haston.com</span>
+                <span>Hexhueclothing.com</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4" />

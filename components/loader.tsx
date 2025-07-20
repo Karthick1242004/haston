@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Image from "next/image"
 
 export default function Loader() {
   return (
@@ -12,15 +13,19 @@ export default function Loader() {
     >
       <div className="text-center">
         <motion.div
-          className="text-6xl font-bold  text-gray-800 mb-4"
-          style={{
-            fontFamily: "var(--font-anton)",
-          }}
+          className="mb-4"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          HEX & HUE
+          <Image
+            src="/logomain.png"
+            alt="HEX & HUE"
+            width={200}
+            height={80}
+            className="object-contain"
+            priority
+          />
         </motion.div>
         <motion.div
           className="w-16 h-1 bg-gray-800 mx-auto"

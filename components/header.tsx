@@ -45,7 +45,7 @@ export default function Header() {
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <div className="w-full px-6 py-3">
+        <div className="w-full px-6 py-0">
           <div className="flex items-center justify-between">
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
@@ -84,15 +84,19 @@ export default function Header() {
             {/* Logo */}
             <motion.a
               href="/"
-              className="text-4xl font-light text-gray-800 tracking-normal md:mr-20 hover:text-gray-600 transition-colors cursor-pointer"
-              style={{
-                fontFamily: "var(--font-anton)",
-              }}
+              className="md:mr-20 hover:opacity-80 transition-opacity cursor-pointer"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              HEX & HUE
+              <Image
+                src="/logomain.png"
+                alt="HEX & HUE"
+                width={100}
+                height={100}
+                className="object-contain"
+                priority
+              />
             </motion.a>
 
             {/* Action Buttons */}

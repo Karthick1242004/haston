@@ -305,11 +305,73 @@ export default function CheckoutPage() {
 
             if (verifyData.success) {
               setPaymentStatus('success')
-              // Clear cart after successful payment
-              setTimeout(() => {
-                clearCart()
-                router.push('/?payment=success')
-              }, 2000)
+              
+              // Create order in database
+              const orderData = {
+                items: cartItems.map(item => ({
+                  id: item.id,
+                  name: item.name,
+                  image: item.image,
+                  price: item.price,
+                  quantity: item.quantity,
+                  selectedSize: item.selectedSize,
+                  selectedColor: item.selectedColor,
+                  subtotal: item.price * item.quantity
+                })),
+                shippingAddress: {
+                  firstName: userDetails.firstName,
+                  lastName: userDetails.lastName,
+                  email: userDetails.email,
+                  phone: userDetails.phone,
+                  address: userDetails.address,
+                  city: userDetails.city,
+                  state: userDetails.state,
+                  zipCode: userDetails.zipCode,
+                  country: userDetails.country
+                },
+                paymentDetails: {
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature,
+                  amount: total,
+                  currency: 'INR',
+                  status: 'success' as const
+                },
+                orderSummary: {
+                  subtotal,
+                  shipping,
+                  taxes,
+                  discount,
+                  discountCode: appliedDiscount > 0 ? discountCode : undefined,
+                  total
+                }
+              }
+
+              // Save order to database
+              const orderResponse = await fetch('/api/orders', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderData),
+              })
+
+              const orderResult = await orderResponse.json()
+
+              if (orderResult.success) {
+                // Clear cart and redirect to success page
+                setTimeout(() => {
+                  clearCart()
+                  router.push(`/order-success?orderId=${orderResult.orderId}`)
+                }, 2000)
+              } else {
+                console.error('Failed to save order:', orderResult.error)
+                // Still clear cart and redirect but show warning
+                setTimeout(() => {
+                  clearCart()
+                  router.push('/?payment=success&warning=order-save-failed')
+                }, 2000)
+              }
             } else {
               throw new Error(verifyData.error || 'Payment verification failed')
             }
