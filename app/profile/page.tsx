@@ -789,6 +789,7 @@ export default function ProfilePage() {
                       <Button
                         variant="outline"
                         className="w-full justify-start bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300 transition-all"
+                        onClick={() => router.push('/wishlist')}
                       >
                         <Heart className="w-4 h-4 mr-3" />
                         View Wishlist

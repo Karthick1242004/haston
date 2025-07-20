@@ -5,8 +5,9 @@ import { useInView } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
 import { useAuthCart } from "@/hooks/use-auth-cart"
+import { useWishlist } from "@/hooks/use-wishlist"
 
 interface CarouselItem {
   id: number
@@ -14,6 +15,7 @@ interface CarouselItem {
   description: string
   image: string
   price: string
+  sizes: string[]
 }
 
 export default function LookBreakdown() {
@@ -24,9 +26,11 @@ export default function LookBreakdown() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const prevCurrentIndex = useRef(0)
   const { addProductToCart } = useAuthCart()
+  const { toggleWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist()
 
   // carousel items state
   const [carouselItems, setCarouselItems] = useState<CarouselItem[]>([])
+  const [selectedSize, setSelectedSize] = useState<string>("")
 
   // state inside component declared later, placeholder removed
 
@@ -42,7 +46,8 @@ export default function LookBreakdown() {
           title: p.name,
           description: p.description,
           image: p.image,
-          price: `₹${p.price}`
+          price: `₹${p.price}`,
+          sizes: p.sizes || ["S", "M", "L", "XL"]
         }))
         console.log('Mapped carousel items:', items)
         setCarouselItems(items)
@@ -120,6 +125,16 @@ export default function LookBreakdown() {
   const len = carouselItems?.length
   const safeIndex = len ? ((currentIndex % len) + len) % len : 0
 
+  // Set default size when carousel items change or current index changes
+  useEffect(() => {
+    if (carouselItems.length > 0) {
+      const currentItem = carouselItems[safeIndex]
+      if (currentItem?.sizes && currentItem.sizes.length > 0) {
+        setSelectedSize(currentItem.sizes[0])
+      }
+    }
+  }, [carouselItems, safeIndex])
+
   // Convert carousel item to product format for cart
   const createProductFromCarouselItem = (item: CarouselItem) => {
     return {
@@ -129,7 +144,7 @@ export default function LookBreakdown() {
       image: item.image,
       images: [item.image],
       colors: ["Default"],
-      sizes: ["One Size"],
+      sizes: item.sizes || ["S", "M", "L", "XL"],
       description: item.description,
       rating: 5.0,
       stock: 50,
@@ -140,8 +155,15 @@ export default function LookBreakdown() {
   const handleAddToCart = () => {
     const currentItem = carouselItems[currentIndex]
     const productItem = createProductFromCarouselItem(currentItem)
-    // Add as product with default size and color
-    addProductToCart(productItem, "One Size", "Default", 1)
+    // Add as product with selected size and default color
+    addProductToCart(productItem, selectedSize || "M", "Default", 1)
+  }
+
+  const handleToggleWishlist = async () => {
+    const currentItem = carouselItems[currentIndex]
+    if (currentItem) {
+      await toggleWishlist(currentItem.id)
+    }
   }
 
   return (
@@ -310,17 +332,64 @@ export default function LookBreakdown() {
                   </p>
                 </>
               )}
+              {/* Size Selection */}
+              {carouselItems?.length > 0 && carouselItems[safeIndex]?.sizes && (
+                <div className="space-y-4 mb-6">
+                  <div className="text-center">
+                    <h4 className="text-lg font-semibold text-amber-950 mb-3">Select Size</h4>
+                    <div className="flex justify-center">
+                      <div className="grid grid-cols-4 gap-2 mx-auto max-w-sm">
+                        {carouselItems[safeIndex].sizes.map((size) => (
+                          <button
+                            key={size}
+                            onClick={() => setSelectedSize(size)}
+                            className={`py-2 px-3 text-sm border rounded transition-all duration-200 font-medium ${
+                              selectedSize === size
+                                ? "border-amber-950 bg-amber-950 text-white"
+                                : "border-gray-300 hover:border-amber-700 hover:bg-amber-50"
+                            }`}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2">Selected: {selectedSize}</p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-center gap-6 mb-8">
                 {carouselItems?.length>0 && (
                   <span className="text-3xl font-bold text-amber-950">{carouselItems[safeIndex]?.price}</span>
                 )}
-                <Button 
-                  variant="outline"
-                  className="border rounded-none font-semibold bg-transparent border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white px-8 py-3 transition-all duration-300"
-                  onClick={handleAddToCart}
-                >
-                  Add to Cart
-                </Button>
+                <div className="flex items-center gap-3">
+                  <Button 
+                    variant="outline"
+                    className="border rounded-none font-semibold bg-transparent border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white px-8 py-3 transition-all duration-300"
+                    onClick={handleAddToCart}
+                    disabled={!selectedSize}
+                  >
+                    Add to Cart {selectedSize && `(${selectedSize})`}
+                  </Button>
+                  
+                  {/* Wishlist Button */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="border rounded-none bg-transparent border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all duration-300"
+                    onClick={handleToggleWishlist}
+                    disabled={wishlistLoading}
+                  >
+                    <Heart
+                      className={`w-5 h-5 transition-colors ${
+                        carouselItems?.length > 0 && isInWishlist(carouselItems[safeIndex]?.id)
+                          ? "fill-current"
+                          : ""
+                      }`}
+                    />
+                  </Button>
+                </div>
               </div>
             </motion.div>
           </AnimatePresence>

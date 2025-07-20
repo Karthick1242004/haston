@@ -15,6 +15,7 @@ import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { useProductStore } from "@/stores/product-store"
 import { useAuthCart } from "@/hooks/use-auth-cart"
+import { useWishlist } from "@/hooks/use-wishlist"
 import { useRouter } from "next/navigation"
 import type { Product } from "@/types/product"
 
@@ -70,6 +71,7 @@ const colorMap: Record<string, string> = {
 export default function ShopPage() {
   const router = useRouter()
   const { addProductToCart } = useAuthCart()
+  const { toggleWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist()
 
   const [products, setProducts] = useState<Product[]>([])
 
@@ -92,7 +94,6 @@ export default function ShopPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [currentPage, setCurrentPage] = useState(1)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
-  const [likedProducts, setLikedProducts] = useState<Set<number>>(new Set())
   
   const itemsPerPage = 12
 
@@ -181,16 +182,9 @@ export default function ShopPage() {
     setCurrentPage(1)
   }
 
-  const toggleLike = (productId: number) => {
-    setLikedProducts(prev => {
-      const newLiked = new Set(prev)
-      if (newLiked.has(productId)) {
-        newLiked.delete(productId)
-      } else {
-        newLiked.add(productId)
-      }
-      return newLiked
-    })
+  const handleToggleWishlist = async (productId: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    await toggleWishlist(productId)
   }
 
   const handleProductClick = (productId: number) => {
@@ -512,16 +506,14 @@ export default function ShopPage() {
                             variant="ghost"
                             size="icon"
                             className="absolute top-3 right-3 bg-white/80 hover:bg-white transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              toggleLike(product.id)
-                            }}
+                            onClick={(e) => handleToggleWishlist(product.id, e)}
+                            disabled={wishlistLoading}
                           >
                             <Heart
-                              className={`w-4 h-4 ${
-                                likedProducts.has(product.id)
+                              className={`w-4 h-4 transition-colors ${
+                                isInWishlist(product.id)
                                   ? "fill-red-500 text-red-500"
-                                  : "text-gray-600"
+                                  : "text-gray-600 hover:text-red-400"
                               }`}
                             />
                           </Button>

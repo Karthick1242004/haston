@@ -5,6 +5,9 @@ import { useInView } from "framer-motion"
 import { useRef, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { Heart } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useWishlist } from "@/hooks/use-wishlist"
 import type { Product } from "@/types/product"
 
 export default function PopularProducts() {
@@ -12,8 +15,8 @@ export default function PopularProducts() {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const router = useRouter()
+  const { toggleWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist()
 
-  // fetch products
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -29,6 +32,11 @@ export default function PopularProducts() {
 
   const handleProductClick = (productId: number) => {
     router.push(`/product/${productId}`)
+  }
+
+  const handleToggleWishlist = async (productId: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    await toggleWishlist(productId)
   }
 
   return (
@@ -69,10 +77,27 @@ export default function PopularProducts() {
                   unoptimized
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                
+                {/* Wishlist Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 bg-white/80 hover:bg-white transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm"
+                  onClick={(e) => handleToggleWishlist(product.id, e)}
+                  disabled={wishlistLoading}
+                >
+                  <Heart
+                    className={`w-4 h-4 transition-colors ${
+                      isInWishlist(product.id)
+                        ? "fill-red-500 text-red-500"
+                        : "text-gray-600 hover:text-red-400"
+                    }`}
+                  />
+                </Button>
               </motion.div>
 
               <div className="flex flex-row justify-between items-center">
-                <h3 className="font-bold text-gray-800 text-xs mb-1">{product.name}</h3>
+                <h3 className="font-bold text-gray-800 text-md mb-1">{product.name}</h3>
                 <p className="text-lg font-semibold text-amber-900">₹{product.price}</p>
               </div>
             </motion.div>

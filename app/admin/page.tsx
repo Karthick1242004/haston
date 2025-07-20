@@ -62,10 +62,16 @@ export default function AdminPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name || !price || !description || images.length === 0) {
-      alert('Please fill all fields and select at least one image')
+    
+    // For create mode, require at least one image
+    // For edit mode, allow updating without new images if existing images are present
+    const hasImages = images.length > 0 || (mode === 'edit' && existingImages.length > 0)
+    
+    if (!name || !price || !description || !hasImages) {
+      alert('Please fill all fields and ensure at least one image is present')
       return
     }
+    
     setIsSubmitting(true)
     try {
       const formData = new FormData()
@@ -77,17 +83,26 @@ export default function AdminPage() {
       formData.append('isLook', isLook ? 'true' : 'false')
       images.forEach((file) => formData.append('images', file))
 
-      const res = await fetch('/api/admin/product', {
-        method: 'POST',
+      const url = mode === 'edit' ? `/api/admin/product/${editId}` : '/api/admin/product'
+      const method = mode === 'edit' ? 'PUT' : 'POST'
+      
+      const res = await fetch(url, {
+        method,
         body: formData,
       })
 
       const json = await res.json()
       if (json.success) {
-        alert('Product added successfully!')
-        router.push(`/product/${json.id}`)
+        alert(mode === 'edit' ? 'Product updated successfully!' : 'Product added successfully!')
+        if (mode === 'create' && json.id) {
+          router.push(`/product/${json.id}`)
+        } else {
+          // Refresh products list and go back to list view
+          await fetchProducts()
+          setMode('list')
+        }
       } else {
-        alert(json.error || 'Failed to create product')
+        alert(json.error || `Failed to ${mode === 'edit' ? 'update' : 'create'} product`)
       }
     } catch(err) {
       console.error(err)
@@ -105,7 +120,7 @@ export default function AdminPage() {
           <h1 className="text-3xl font-bold text-amber-950 mb-8" style={{fontFamily:'var(--font-anton)'}}>Admin Dashboard</h1>
           {mode==='list' && (
             <>
-              <Button className="mb-6 bg-amber-950 text-white" onClick={()=>{setMode('create');setName('');setPrice('');setDescription('');setSizes('S,M,L');setImages([])}}>Add New Product</Button>
+              <Button className="mb-6 bg-amber-950 text-white" onClick={()=>{setMode('create');setName('');setPrice('');setDescription('');setSizes('S,M,L');setImages([]);setExistingImages([]);setIsLook(false);setEditId('')}}>Add New Product</Button>
               <div className="grid md:grid-cols-3 gap-6">
                 {products.map(p=> (
                   <div key={p.id} className="border p-4 space-y-2">
@@ -165,15 +180,30 @@ export default function AdminPage() {
             </div>
             {mode==='edit' && (
               <div className="mb-6">
-                <label className="block mb-2 text-sm font-medium text-amber-950">Existing Images</label>
+                <label className="block mb-2 text-sm font-medium text-amber-950">
+                  Existing Images
+                  <span className="text-xs text-gray-500 ml-2">
+                    (Click × to remove - images will be deleted from storage)
+                  </span>
+                </label>
                 <div className="grid grid-cols-5 gap-2">
                   {existingImages.map((url,idx)=>(
-                    <div key={idx} className="relative p-2.5 w-auto rounded-sm">
+                    <div key={idx} className="relative p-2.5 w-auto rounded-sm group">
                       <img src={url} alt="existing" className="h-24 rounded-sm w-24 object-cover border"/>
-                      <button type="button" className="absolute top-1 left-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs" onClick={()=>setExistingImages(existingImages.filter((_,i)=>i!==idx))}>×</button>
+                      <button 
+                        type="button" 
+                        className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-6 h-6 text-xs font-bold transition-colors shadow-lg opacity-75 group-hover:opacity-100" 
+                        onClick={()=>setExistingImages(existingImages.filter((_,i)=>i!==idx))}
+                        title="Remove image (will be deleted from storage)"
+                      >
+                        ×
+                      </button>
                     </div>
                   ))}
                 </div>
+                {existingImages.length === 0 && (
+                  <p className="text-sm text-gray-500 italic">No existing images</p>
+                )}
               </div>
             )}
 
