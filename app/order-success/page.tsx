@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
@@ -26,20 +26,36 @@ import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import { Order } from "@/types/order"
 import Confetti from 'react-confetti'
-import { useWindowSize } from 'react-use'
 
-export default function OrderSuccessPage() {
+function OrderSuccessContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: session } = useSession()
-  const { width, height } = useWindowSize()
   
   const [order, setOrder] = useState<Order | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showConfetti, setShowConfetti] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 })
+  const [isMounted, setIsMounted] = useState(false)
 
   const orderId = searchParams.get('orderId')
+
+  useEffect(() => {
+    // Set mounted state and get window size
+    setIsMounted(true)
+    const updateWindowSize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    }
+
+    updateWindowSize()
+    window.addEventListener('resize', updateWindowSize)
+
+    return () => window.removeEventListener('resize', updateWindowSize)
+  }, [])
 
   useEffect(() => {
     if (!orderId) {
@@ -149,10 +165,10 @@ export default function OrderSuccessPage() {
 
   return (
     <PageTransition>
-      {showConfetti && (
+      {isMounted && showConfetti && windowSize.width > 0 && (
         <Confetti
-          width={width}
-          height={height}
+          width={windowSize.width}
+          height={windowSize.height}
           recycle={false}
           numberOfPieces={200}
           gravity={0.1}
@@ -437,5 +453,20 @@ export default function OrderSuccessPage() {
         </div>
       </div>
     </PageTransition>
+  )
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#F1EFEE] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-amber-950 mx-auto mb-4"></div>
+          <p className="text-amber-950 font-medium">Loading...</p>
+        </div>
+      </div>
+    }>
+      <OrderSuccessContent />
+    </Suspense>
   )
 } 
