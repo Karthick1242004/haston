@@ -13,7 +13,7 @@ export default function Loader() {
     >
       <div className="text-center">
         <motion.div
-          className="mb-4"
+          className=""
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
@@ -27,6 +27,7 @@ export default function Loader() {
             priority
           />
         </motion.div>
+
         <motion.div
           className="w-16 h-1 bg-gray-800 mx-auto"
           initial={{ width: 0 }}
