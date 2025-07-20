@@ -102,7 +102,7 @@ export default function CartSidebar() {
                         </div>
 
                         <p className="text-lg font-bold text-gray-900">
-                          ${item.price.toFixed(2)}
+                          ₹{item.price.toFixed(2)}
                         </p>
 
                         <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -164,7 +164,7 @@ export default function CartSidebar() {
               {/* Total */}
               <div className="flex justify-between items-center text-lg font-bold">
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                <span>₹{total.toFixed(2)}</span>
               </div>
               
               <p className="text-sm text-gray-500">

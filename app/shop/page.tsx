@@ -281,8 +281,8 @@ export default function ShopPage() {
               className="w-full"
             />
             <div className="flex justify-between text-sm text-gray-500 mt-2">
-              <span>${filters.priceRange[0]}</span>
-              <span>${filters.priceRange[1]}</span>
+              <span>₹{filters.priceRange[0]}</span>
+              <span>₹{filters.priceRange[1]}</span>
             </div>
           </div>
         </div>
@@ -558,7 +558,7 @@ export default function ShopPage() {
                               </div>
 
                               <p className="text-lg font-bold text-gray-900">
-                                ${product.price.toFixed(2)}
+                                ₹{product.price.toFixed(2)}
                               </p>
 
                               {product.category && (

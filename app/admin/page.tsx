@@ -111,7 +111,7 @@ export default function AdminPage() {
                   <div key={p.id} className="border p-4 space-y-2">
                     <Image src={p.image} alt={p.name} width={200} height={250} className="object-cover w-full h-40" unoptimized/>
                     <h3 className="font-semibold">{p.name}</h3>
-                    <p>${p.price}</p>
+                    <p>₹{p.price}</p>
                     <div className="flex gap-2">
                       <Button size="sm" onClick={()=>{setMode('edit');setEditId(p.id);setName(p.name);setPrice(p.price);setDescription(p.description);setSizes(p.sizes.join(','));setImages([]);setExistingImages(p.images||[]);setIsLook(!!p.isLook)}}>Edit</Button>
                       <Button size="sm" variant="destructive" onClick={async()=>{await fetch(`/api/admin/product/${p.id}`,{method:'DELETE'});await fetchProducts()}}>Delete</Button>

@@ -28,6 +28,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
 import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import { ExtendedUser, Address } from "@/lib/mongodb"
@@ -45,6 +47,22 @@ export default function ProfilePage() {
     phone: '',
     dateOfBirth: '',
     gender: '',
+  })
+  const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false)
+  const [isAddingAddress, setIsAddingAddress] = useState(false)
+  const [addressForm, setAddressForm] = useState({
+    type: 'home' as 'home' | 'work' | 'other',
+    firstName: '',
+    lastName: '',
+    company: '',
+    address1: '',
+    address2: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: 'India',
+    phone: '',
+    isDefault: false,
   })
 
   useEffect(() => {
@@ -106,6 +124,98 @@ export default function ProfilePage() {
       ...prev,
       [field]: value
     }))
+  }
+
+  const handleAddressForm = (field: string, value: string | boolean) => {
+    setAddressForm(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const resetAddressForm = () => {
+    setAddressForm({
+      type: 'home',
+      firstName: '',
+      lastName: '',
+      company: '',
+      address1: '',
+      address2: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: 'India',
+      phone: '',
+      isDefault: false,
+    })
+  }
+
+  const handleSaveAddress = async () => {
+    setIsAddingAddress(true)
+    try {
+      // Generate a unique ID for the address
+      const newAddress: Address = {
+        ...addressForm,
+        id: `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      }
+
+      // Get current addresses or empty array
+      const currentAddresses = userProfile?.addresses || []
+      
+      // If this is the first address or isDefault is true, make it default
+      if (currentAddresses.length === 0 || newAddress.isDefault) {
+        // Remove default from other addresses
+        currentAddresses.forEach(addr => {
+          addr.isDefault = false
+        })
+        newAddress.isDefault = true
+      }
+
+      // Add new address to the array
+      const updatedAddresses = [...currentAddresses, newAddress]
+
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ addresses: updatedAddresses }),
+      })
+
+      if (response.ok) {
+        await fetchUserProfile()
+        setIsAddressDialogOpen(false)
+        resetAddressForm()
+      } else {
+        console.error('Failed to save address')
+      }
+    } catch (error) {
+      console.error('Error saving address:', error)
+    } finally {
+      setIsAddingAddress(false)
+    }
+  }
+
+  const handleDeleteAddress = async (addressId: string) => {
+    try {
+      const updatedAddresses = userProfile?.addresses?.filter(addr => addr.id !== addressId) || []
+      
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ addresses: updatedAddresses }),
+      })
+
+      if (response.ok) {
+        await fetchUserProfile()
+      } else {
+        console.error('Failed to delete address')
+      }
+    } catch (error) {
+      console.error('Error deleting address:', error)
+    }
   }
 
   if (status === 'loading') {
@@ -357,14 +467,204 @@ export default function ProfilePage() {
                           <MapPin className="w-5 h-5 mr-2" />
                           Saved Addresses
                         </CardTitle>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Address
-                        </Button>
+                        <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all"
+                              onClick={() => {
+                                resetAddressForm()
+                                setIsAddressDialogOpen(true)
+                              }}
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add Address
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle className="text-xl font-bold text-amber-950">Add New Address</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4 mt-4">
+                              {/* Address Type */}
+                              <div>
+                                <Label htmlFor="addressType">Address Type</Label>
+                                <Select 
+                                  value={addressForm.type} 
+                                  onValueChange={(value: 'home' | 'work' | 'other') => handleAddressForm('type', value)}
+                                >
+                                  <SelectTrigger className="mt-1">
+                                    <SelectValue placeholder="Select address type" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="home">Home</SelectItem>
+                                    <SelectItem value="work">Work</SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {/* Name Fields */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <Label htmlFor="addrFirstName">First Name*</Label>
+                                  <Input
+                                    id="addrFirstName"
+                                    value={addressForm.firstName}
+                                    onChange={(e) => handleAddressForm('firstName', e.target.value)}
+                                    className="mt-1"
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="addrLastName">Last Name*</Label>
+                                  <Input
+                                    id="addrLastName"
+                                    value={addressForm.lastName}
+                                    onChange={(e) => handleAddressForm('lastName', e.target.value)}
+                                    className="mt-1"
+                                    required
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Company */}
+                              <div>
+                                <Label htmlFor="company">Company (Optional)</Label>
+                                <Input
+                                  id="company"
+                                  value={addressForm.company}
+                                  onChange={(e) => handleAddressForm('company', e.target.value)}
+                                  className="mt-1"
+                                />
+                              </div>
+
+                              {/* Address Lines */}
+                              <div>
+                                <Label htmlFor="address1">Address Line 1*</Label>
+                                <Input
+                                  id="address1"
+                                  value={addressForm.address1}
+                                  onChange={(e) => handleAddressForm('address1', e.target.value)}
+                                  className="mt-1"
+                                  placeholder="Street address, apartment, suite, etc."
+                                  required
+                                />
+                              </div>
+
+                              <div>
+                                <Label htmlFor="address2">Address Line 2 (Optional)</Label>
+                                <Input
+                                  id="address2"
+                                  value={addressForm.address2}
+                                  onChange={(e) => handleAddressForm('address2', e.target.value)}
+                                  className="mt-1"
+                                  placeholder="Apartment, suite, unit, building, floor, etc."
+                                />
+                              </div>
+
+                              {/* City, State, ZIP */}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                  <Label htmlFor="city">City*</Label>
+                                  <Input
+                                    id="city"
+                                    value={addressForm.city}
+                                    onChange={(e) => handleAddressForm('city', e.target.value)}
+                                    className="mt-1"
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="state">State*</Label>
+                                  <Input
+                                    id="state"
+                                    value={addressForm.state}
+                                    onChange={(e) => handleAddressForm('state', e.target.value)}
+                                    className="mt-1"
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="zipCode">PIN Code*</Label>
+                                  <Input
+                                    id="zipCode"
+                                    value={addressForm.zipCode}
+                                    onChange={(e) => handleAddressForm('zipCode', e.target.value)}
+                                    className="mt-1"
+                                    required
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Country and Phone */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <Label htmlFor="country">Country</Label>
+                                  <Select 
+                                    value={addressForm.country} 
+                                    onValueChange={(value) => handleAddressForm('country', value)}
+                                  >
+                                    <SelectTrigger className="mt-1">
+                                      <SelectValue placeholder="Select country" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="India">India</SelectItem>
+                                      <SelectItem value="United States">United States</SelectItem>
+                                      <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                                      <SelectItem value="Canada">Canada</SelectItem>
+                                      <SelectItem value="Australia">Australia</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div>
+                                  <Label htmlFor="addrPhone">Phone Number</Label>
+                                  <Input
+                                    id="addrPhone"
+                                    value={addressForm.phone}
+                                    onChange={(e) => handleAddressForm('phone', e.target.value)}
+                                    className="mt-1"
+                                    placeholder="+91 XXXXX XXXXX"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Default Address Checkbox */}
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  id="isDefault"
+                                  checked={addressForm.isDefault}
+                                  onCheckedChange={(checked) => handleAddressForm('isDefault', checked)}
+                                />
+                                <Label htmlFor="isDefault" className="text-sm">
+                                  Set as default address
+                                </Label>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex gap-3 pt-4">
+                                <Button
+                                  onClick={handleSaveAddress}
+                                  disabled={isAddingAddress || !addressForm.firstName || !addressForm.lastName || !addressForm.address1 || !addressForm.city || !addressForm.state || !addressForm.zipCode}
+                                  className="bg-amber-950 text-white hover:bg-amber-800 transition-all"
+                                >
+                                  <Save className="w-4 h-4 mr-2" />
+                                  {isAddingAddress ? 'Saving...' : 'Save Address'}
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => {
+                                    setIsAddressDialogOpen(false)
+                                    resetAddressForm()
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </CardHeader>
                     <CardContent className="p-6">
@@ -398,7 +698,12 @@ export default function ProfilePage() {
                                   <Button variant="ghost" size="sm">
                                     <Edit2 className="w-4 h-4" />
                                   </Button>
-                                  <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="text-red-600 hover:text-red-700"
+                                    onClick={() => handleDeleteAddress(address.id)}
+                                  >
                                     <Trash2 className="w-4 h-4" />
                                   </Button>
                                 </div>

@@ -42,7 +42,7 @@ export default function LookBreakdown() {
           title: p.name,
           description: p.description,
           image: p.image,
-          price: `$${p.price}`
+          price: `₹${p.price}`
         }))
         console.log('Mapped carousel items:', items)
         setCarouselItems(items)
@@ -125,7 +125,7 @@ export default function LookBreakdown() {
     return {
       id: item.id,
       name: item.title,
-      price: parseInt(item.price.replace('$', '')),
+      price: parseInt(item.price.replace('₹', '')),
       image: item.image,
       images: [item.image],
       colors: ["Default"],

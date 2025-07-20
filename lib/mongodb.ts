@@ -171,7 +171,7 @@ export async function createUserProfile(user: Partial<ExtendedUser>): Promise<Ex
     preferences: {
       newsletter: false,
       smsUpdates: false,
-      currency: 'USD',
+      currency: 'INR',
       language: 'en',
       theme: 'system' as 'light' | 'dark' | 'system'
     }

@@ -205,7 +205,7 @@ export default function ProductDetailPage() {
                 </div>
 
                 <p className="text-4xl font-bold text-gray-900 mb-3">
-                  ${product.price.toFixed(2)}
+                  ₹{product.price.toFixed(2)}
                 </p>
 
                 <p className="text-gray-600 leading-relaxed mb-0">

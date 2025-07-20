@@ -73,7 +73,7 @@ export default function PopularProducts() {
 
               <div className="flex flex-row justify-between items-center">
                 <h3 className="font-bold text-gray-800 text-xs mb-1">{product.name}</h3>
-                <p className="text-lg font-semibold text-amber-900">${product.price}</p>
+                <p className="text-lg font-semibold text-amber-900">₹{product.price}</p>
               </div>
             </motion.div>
           ))}

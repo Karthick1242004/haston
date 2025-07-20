@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city"
+import "react-country-state-city/dist/react-country-state-city.css"
 import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import { useProductStore } from "@/stores/product-store"
@@ -29,6 +31,12 @@ interface UserDetails {
   state: string
   zipCode: string
   country: string
+}
+
+interface LocationState {
+  countryId: number
+  stateId: number
+  cityId: number
 }
 
 export default function CheckoutPage() {
@@ -47,6 +55,12 @@ export default function CheckoutPage() {
     state: "",
     zipCode: "",
     country: ""
+  })
+  
+  const [locationState, setLocationState] = useState<LocationState>({
+    countryId: 0,
+    stateId: 0,
+    cityId: 0
   })
   
   const [selectedAddressId, setSelectedAddressId] = useState<string>("")
@@ -155,6 +169,45 @@ export default function CheckoutPage() {
     }))
   }
 
+  const handleCountryChange = (e: any) => {
+    setLocationState(prev => ({
+      ...prev,
+      countryId: e.id,
+      stateId: 0,
+      cityId: 0
+    }))
+    setUserDetails(prev => ({
+      ...prev,
+      country: e.name,
+      state: "",
+      city: ""
+    }))
+  }
+
+  const handleStateChange = (e: any) => {
+    setLocationState(prev => ({
+      ...prev,
+      stateId: e.id,
+      cityId: 0
+    }))
+    setUserDetails(prev => ({
+      ...prev,
+      state: e.name,
+      city: ""
+    }))
+  }
+
+  const handleCityChange = (e: any) => {
+    setLocationState(prev => ({
+      ...prev,
+      cityId: e.id
+    }))
+    setUserDetails(prev => ({
+      ...prev,
+      city: e.name
+    }))
+  }
+
   const handleAddressSelection = (addressId: string) => {
     setSelectedAddressId(addressId)
     const selectedAddress = userProfile?.addresses?.find(addr => addr.id === addressId)
@@ -168,6 +221,10 @@ export default function CheckoutPage() {
         country: selectedAddress.country,
         phone: selectedAddress.phone || prev.phone,
       }))
+      
+      // Note: For saved addresses, we don't set locationState IDs as they require lookup
+      // The form will show the text values but won't populate the select components
+      // This is a limitation when working with saved addresses vs dynamic selection
     }
   }
 
@@ -314,6 +371,54 @@ export default function CheckoutPage() {
 
   return (
     <PageTransition>
+      <style jsx global>{`
+        .css-1hwfws3 {
+          border: 1px solid #d1d5db !important;
+          border-radius: 6px !important;
+          padding: 8px 12px !important;
+          min-height: 40px !important;
+          font-size: 14px !important;
+          background-color: white !important;
+        }
+        .css-1hwfws3:focus {
+          outline: none !important;
+          border-color: #92400e !important;
+          box-shadow: 0 0 0 1px #92400e !important;
+        }
+        .css-1hwfws3 .react-select__control {
+          border: none !important;
+          box-shadow: none !important;
+          min-height: 38px !important;
+        }
+        .css-1hwfws3 .react-select__value-container {
+          padding: 0 !important;
+        }
+        .css-1hwfws3 .react-select__input-container {
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        .css-1hwfws3 .react-select__placeholder {
+          color: #9ca3af !important;
+          font-size: 14px !important;
+        }
+        .css-1hwfws3 .react-select__single-value {
+          color: #111827 !important;
+          font-size: 14px !important;
+        }
+        .css-1hwfws3 .react-select__menu {
+          border: 1px solid #d1d5db !important;
+          border-radius: 6px !important;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+        }
+        .css-1hwfws3 .react-select__option:hover {
+          background-color: #f3f4f6 !important;
+          color: #111827 !important;
+        }
+        .css-1hwfws3 .react-select__option--is-selected {
+          background-color: #92400e !important;
+          color: white !important;
+        }
+      `}</style>
       <Script 
         src="https://checkout.razorpay.com/v1/checkout.js"
         strategy="lazyOnload"
@@ -352,7 +457,7 @@ export default function CheckoutPage() {
                   transition={{ delay: 0.1 }}
                 >
                   <Card className="bg-white shadow-lg border border-gray-200">
-                    <CardHeader className="bg-white border-b border-gray-200">
+                    <CardHeader className="bg-white">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-2xl font-bold text-amber-950">Contact Information</CardTitle>
                         {session?.user && (
@@ -457,7 +562,7 @@ export default function CheckoutPage() {
                             type="tel"
                             value={userDetails.phone}
                             onChange={(e) => handleInputChange("phone", e.target.value)}
-                            placeholder="+1 (555) 123-4567"
+                            placeholder="+91 XXXXX XXXXX"
                             className="mt-1"
                           />
                         </div>
@@ -497,60 +602,56 @@ export default function CheckoutPage() {
                         />
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <Label htmlFor="city">City *</Label>
-                          <Input
-                            id="city"
-                            value={userDetails.city}
-                            onChange={(e) => handleInputChange("city", e.target.value)}
-                            placeholder="New York"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="state">State *</Label>
-                          <Select value={userDetails.state} onValueChange={(value) => handleInputChange("state", value)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select state" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="ny">New York</SelectItem>
-                              <SelectItem value="ca">California</SelectItem>
-                              <SelectItem value="tx">Texas</SelectItem>
-                              <SelectItem value="fl">Florida</SelectItem>
-                              <SelectItem value="wa">Washington</SelectItem>
-                              <SelectItem value="or">Oregon</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label htmlFor="zipCode">ZIP Code *</Label>
-                          <Input
-                            id="zipCode"
-                            value={userDetails.zipCode}
-                            onChange={(e) => handleInputChange("zipCode", e.target.value)}
-                            placeholder="10001"
-                            className="mt-1"
+                      {/* Country, State, City Selection - Dynamic */}
+                      <div>
+                        <Label htmlFor="country">Country *</Label>
+                        <div className="mt-1">
+                          <CountrySelect
+                            onChange={handleCountryChange}
+                            placeHolder="Select Country"
+                            containerClassName="!border !border-gray-200 !rounded-md"
+                            inputClassName="!border-0 !outline-none !ring-0 !bg-transparent"
                           />
                         </div>
                       </div>
 
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="state">State/Province *</Label>
+                          <div className="mt-1">
+                            <StateSelect
+                              countryid={locationState.countryId}
+                              onChange={handleStateChange}
+                              placeHolder="Select State/Province"
+                              containerClassName="!border !border-gray-200 !rounded-md"
+                              inputClassName="!border-0 !outline-none !ring-0 !bg-transparent"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="city">City/District *</Label>
+                          <div className="mt-1">
+                            <CitySelect
+                              countryid={locationState.countryId}
+                              stateid={locationState.stateId}
+                              onChange={handleCityChange}
+                              placeHolder="Select City/District"
+                              containerClassName="!border !border-gray-200 !rounded-md"
+                              inputClassName="!border-0 !outline-none !ring-0 !bg-transparent"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
                       <div>
-                        <Label htmlFor="country">Country *</Label>
-                        <Select value={userDetails.country} onValueChange={(value) => handleInputChange("country", value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select country" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="us">United States</SelectItem>
-                            <SelectItem value="ca">Canada</SelectItem>
-                            <SelectItem value="uk">United Kingdom</SelectItem>
-                            <SelectItem value="au">Australia</SelectItem>
-                            <SelectItem value="de">Germany</SelectItem>
-                            <SelectItem value="fr">France</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="zipCode">ZIP/PIN Code *</Label>
+                        <Input
+                          id="zipCode"
+                          value={userDetails.zipCode}
+                          onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                          placeholder="Enter ZIP/PIN code"
+                          className="mt-1"
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -563,7 +664,7 @@ export default function CheckoutPage() {
                   transition={{ delay: 0.2 }}
                 >
                   <Card className="bg-white shadow-lg border border-gray-200">
-                    <CardHeader className="bg-white border-b border-gray-200">
+                    <CardHeader className="bg-white">
                       <CardTitle className="text-2xl font-bold text-amber-950">Your Products</CardTitle>
                       <p className="text-sm text-gray-600 font-medium">{getCartItemsCount()} items in your cart</p>
                     </CardHeader>
@@ -637,11 +738,11 @@ export default function CheckoutPage() {
                                 {/* Price */}
                                 <div className="text-right">
                                   <p className="text-lg font-bold text-gray-900">
-                                    ${(item.price * item.quantity).toFixed(2)}
+                                    ₹{(item.price * item.quantity).toFixed(2)}
                                   </p>
                                   {item.quantity > 1 && (
                                     <p className="text-sm text-gray-500">
-                                      ${item.price.toFixed(2)} each
+                                      ₹{item.price.toFixed(2)} each
                                     </p>
                                   )}
                                 </div>
@@ -674,7 +775,7 @@ export default function CheckoutPage() {
                   className="sticky top-24"
                 >
                   <Card className="bg-white shadow-lg border border-gray-200">
-                    <CardHeader className="bg-white border-b border-gray-200">
+                    <CardHeader className="bg-white">
                       <CardTitle className="text-2xl font-bold text-amber-950">Order Review</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -710,25 +811,25 @@ export default function CheckoutPage() {
                       <div className="space-y-3">
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Subtotal</span>
-                          <span className="font-medium">${subtotal.toFixed(2)}</span>
+                          <span className="font-medium">₹{subtotal.toFixed(2)}</span>
                         </div>
                         
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Shipping</span>
                           <span className="font-medium">
-                            {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+                            {shipping === 0 ? "Free" : `₹${shipping.toFixed(2)}`}
                           </span>
                         </div>
                         
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Estimated Taxes</span>
-                          <span className="font-medium">${taxes.toFixed(2)}</span>
+                          <span className="font-medium">₹{taxes.toFixed(2)}</span>
                         </div>
 
                         {appliedDiscount > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-green-600">Discount ({appliedDiscount}%)</span>
-                            <span className="text-green-600 font-medium">-${discount.toFixed(2)}</span>
+                            <span className="text-green-600 font-medium">-₹{discount.toFixed(2)}</span>
                           </div>
                         )}
 
@@ -736,7 +837,7 @@ export default function CheckoutPage() {
 
                         <div className="flex justify-between text-lg font-bold">
                           <span>Total</span>
-                          <span>${total.toFixed(2)}</span>
+                          <span>₹{total.toFixed(2)}</span>
                         </div>
                       </div>
 
