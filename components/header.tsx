@@ -1,18 +1,20 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, User, ShoppingBag, Menu, X, LogOut, Settings } from "lucide-react"
+import { Search, User, ShoppingBag, Menu, X, LogOut, Settings, Shield } from "lucide-react"
 import { useUIStore } from "@/stores/ui-store"
 import { useProductStore } from "@/stores/product-store"
 import { useSession, signOut } from "next-auth/react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { useIsAdmin } from '@/hooks/use-admin'
 
 export default function Header() {
   const { cartCount } = useUIStore()
   const { setCartOpen } = useProductStore()
   const { data: session, status } = useSession()
+  const isAdmin = useIsAdmin()
   const router = useRouter()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
@@ -157,6 +159,15 @@ export default function Header() {
                             <Settings className="w-4 h-4 mr-3" />
                             Profile
                           </button>
+                          {isAdmin && (
+                            <button
+                              onClick={() => router.push('/admin')}
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              <Shield className="w-4 h-4 mr-3" />
+                              Admin Dashboard
+                            </button>
+                          )}
                           <button
                             onClick={handleSignOut}
                             className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
