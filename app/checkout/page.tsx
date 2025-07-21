@@ -363,7 +363,7 @@ export default function CheckoutPage() {
                 setTimeout(async () => {
                   await clearCart()
                   router.push(`/order-success?orderId=${orderResult.orderId}`)
-                }, 2000)
+              }, 2000)
               } else {
                 console.error('Failed to save order:', orderResult.error)
                 // Still clear cart and redirect but show warning
@@ -665,7 +665,7 @@ export default function CheckoutPage() {
                       </div>
 
                       {/* Country, State, City Selection - Dynamic */}
-                      <div>
+                        <div>
                         <Label htmlFor="country">Country *</Label>
                         <div className="mt-1">
                           <CountrySelect
@@ -707,13 +707,13 @@ export default function CheckoutPage() {
 
                       <div>
                         <Label htmlFor="zipCode">ZIP/PIN Code *</Label>
-                        <Input
-                          id="zipCode"
-                          value={userDetails.zipCode}
-                          onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                          <Input
+                            id="zipCode"
+                            value={userDetails.zipCode}
+                            onChange={(e) => handleInputChange("zipCode", e.target.value)}
                           placeholder="Enter ZIP/PIN code"
-                          className="mt-1"
-                        />
+                            className="mt-1"
+                          />
                       </div>
                     </CardContent>
                   </Card>

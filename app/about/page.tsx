@@ -20,7 +20,7 @@ export default function AboutPage() {
   const heroInView = useInView(heroRef, { once: true })
   const contentInView = useInView(contentRef, { once: true, margin: "-100px" })
   const statsInView = useInView(statsRef, { once: true, margin: "-100px" })
-  const valuesInView = useInView(valuesRef, { once: true, margin: "-100px" })
+  // const valuesInView = useInView(valuesRef, { once: true, margin: "-100px" })
 
   const stats = [
     { number: "500+", label: "Unique Colors", icon: Palette },
@@ -29,23 +29,23 @@ export default function AboutPage() {
     { number: "100%", label: "Quality Promise", icon: Sparkles },
   ]
 
-  const values = [
-    {
-      title: "Color Innovation",
-      description: "We stay ahead of color trends, ensuring our customers always have access to the latest and most vibrant hues that express their unique personality.",
-      color: "from-blue-400 to-purple-500"
-    },
-    {
-      title: "Quality Craftsmanship", 
-      description: "Each t-shirt is carefully crafted with premium materials and attention to detail, ensuring comfort, durability, and style in every piece.",
-      color: "from-green-400 to-teal-500"
-    },
-    {
-      title: "Fresh Vibes",
-      description: "Whether retro-inspired graphics or minimalist modern designs, every piece from Hex and Hue is designed to make a statement and exude unique vibes.",
-      color: "from-orange-400 to-red-500"
-    }
-  ]
+  // const values = [
+  //   {
+  //     title: "Color Innovation",
+  //     description: "We stay ahead of color trends, ensuring our customers always have access to the latest and most vibrant hues that express their unique personality.",
+  //     color: "from-blue-400 to-purple-500"
+  //   },
+  //   {
+  //     title: "Quality Craftsmanship", 
+  //     description: "Each t-shirt is carefully crafted with premium materials and attention to detail, ensuring comfort, durability, and style in every piece.",
+  //     color: "from-green-400 to-teal-500"
+  //   },
+  //   {
+  //     title: "Fresh Vibes",
+  //     description: "Whether retro-inspired graphics or minimalist modern designs, every piece from Hex and Hue is designed to make a statement and exude unique vibes.",
+  //     color: "from-orange-400 to-red-500"
+  //   }
+  // ]
 
   return (
     <PageTransition>

@@ -364,12 +364,12 @@ export default function LookBreakdown() {
                   <span className="text-3xl font-bold text-amber-950">{carouselItems[safeIndex]?.price}</span>
                 )}
                 <div className="flex items-center gap-3">
-                  <Button 
-                    variant="outline"
-                    className="border rounded-none font-semibold bg-transparent border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white px-8 py-3 transition-all duration-300"
-                    onClick={handleAddToCart}
+                <Button 
+                  variant="outline"
+                  className="border rounded-none font-semibold bg-transparent border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white px-8 py-3 transition-all duration-300"
+                  onClick={handleAddToCart}
                     disabled={!selectedSize}
-                  >
+                >
                     Add to Cart {selectedSize && `(${selectedSize})`}
                   </Button>
                   
@@ -388,7 +388,7 @@ export default function LookBreakdown() {
                           : ""
                       }`}
                     />
-                  </Button>
+                </Button>
                 </div>
               </div>
             </motion.div>

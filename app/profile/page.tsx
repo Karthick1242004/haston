@@ -479,18 +479,18 @@ export default function ProfilePage() {
                         </CardTitle>
                         <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
                           <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all"
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all"
                               onClick={() => {
                                 resetAddressForm()
                                 setIsAddressDialogOpen(true)
                               }}
-                            >
-                              <Plus className="w-4 h-4 mr-2" />
-                              Add Address
-                            </Button>
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Address
+                        </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>

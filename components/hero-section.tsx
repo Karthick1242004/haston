@@ -4,50 +4,13 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-
-interface SlideData {
-  id: number
-  mainText: string
-  subText: string
-  image: string
-  bgColor: string
-}
-
-const slidesData: SlideData[] = [
-  {
-    id: 1,
-    mainText: "SUMMER",
-    subText: "Collection",
-    image: "/heromainbg.png",
-    bgColor: "from-amber-900/20 via-transparent to-amber-900/40"
-  },
-  {
-    id: 2,
-    mainText: "WINTER",
-    subText: "Collection",
-    image: "/heromainbg.png",
-    bgColor: "from-blue-900/20 via-transparent to-blue-900/40"
-  },
-  {
-    id: 3,
-    mainText: "SPRING",
-    subText: "Fits",
-    image: "/heromainbg.png",
-    bgColor: "from-green-900/20 via-transparent to-green-900/40"
-  },
-  {
-    id: 4,
-    mainText: "AUTUMN",
-    subText: "Collection",
-    image: "/heromainbg.png",
-    bgColor: "from-orange-900/20 via-transparent to-orange-900/40"
-  }
-]
+import { useHeroSlides } from "@/hooks/use-hero-slides"
 
 export default function HeroSection() {
   const ref = useRef<HTMLDivElement>(null)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlay, setIsAutoPlay] = useState(true)
+  const { slides, isLoading, error } = useHeroSlides()
   
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -62,11 +25,11 @@ export default function HeroSection() {
     if (!isAutoPlay) return
     
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slidesData.length)
+      setCurrentSlide((prev) => (prev + 1) % slides.length)
     }, 5000) // Change slide every 5 seconds
 
     return () => clearInterval(interval)
-  }, [isAutoPlay])
+  }, [isAutoPlay, slides.length])
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index)
@@ -76,15 +39,43 @@ export default function HeroSection() {
   }
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slidesData.length)
+    setCurrentSlide((prev) => (prev + 1) % slides.length)
     setIsAutoPlay(false)
     setTimeout(() => setIsAutoPlay(true), 10000)
   }
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slidesData.length) % slidesData.length)
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
     setIsAutoPlay(false)
     setTimeout(() => setIsAutoPlay(true), 10000)
+  }
+
+  // Show loading or error states
+  if (isLoading) {
+    return (
+      <section className="h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-amber-950 mx-auto mb-4"></div>
+          <p className="text-amber-950 text-lg">Loading...</p>
+        </div>
+      </section>
+    )
+  }
+
+  if (error || slides.length === 0) {
+    return (
+      <section className="h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 text-lg mb-4">{error || 'No slides available'}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-amber-950 text-white rounded hover:bg-amber-900 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </section>
+    )
   }
 
   return (
@@ -100,8 +91,8 @@ export default function HeroSection() {
             transition={{ duration: 1, ease: "easeInOut" }}
           >
             <Image
-              src={slidesData[currentSlide].image}
-              alt={`${slidesData[currentSlide].mainText} ${slidesData[currentSlide].subText}`}
+              src={slides[currentSlide].image}
+              alt={`${slides[currentSlide].mainText} ${slides[currentSlide].subText}`}
               fill
               className="object-cover"
               priority
@@ -110,17 +101,8 @@ export default function HeroSection() {
         </AnimatePresence>
       </motion.div>
 
-      {/* Dynamic overlay gradient */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentSlide}
-          className={`absolute inset-0 bg-gradient-to-b ${slidesData[currentSlide].bgColor}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1, ease: "easeInOut" }}
-        />
-      </AnimatePresence>
+      {/* Overlay for better text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
 
       {/* Content */}
       <div className="relative z-10 h-full flex items-end justify-center pb-20">
@@ -138,7 +120,7 @@ export default function HeroSection() {
               exit={{ scale: 1.1, opacity: 0, y: -50 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              {slidesData[currentSlide].mainText}
+              {slides[currentSlide].mainText}
             </motion.h1>
           </AnimatePresence>
           
@@ -159,7 +141,7 @@ export default function HeroSection() {
                   WebkitTextStroke: "2px #92400e",
                 }}
               >
-                {slidesData[currentSlide].subText}
+                {slides[currentSlide].subText}
               </div>
             </motion.div>
           </AnimatePresence>
@@ -195,7 +177,7 @@ export default function HeroSection() {
 
       {/* Slide Indicators */}
       <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 flex space-x-3 z-20">
-        {slidesData.map((_, index) => (
+        {slides.map((_, index) => (
           <motion.button
             key={index}
             onClick={() => goToSlide(index)}

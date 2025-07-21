@@ -41,8 +41,8 @@ export default function RootLayout({
         >
           <AuthProvider>
             <CartSyncProvider>
-              {children}
-              <CartSidebar />
+            {children}
+            <CartSidebar />
             </CartSyncProvider>
           </AuthProvider>
         </ThemeProvider>
