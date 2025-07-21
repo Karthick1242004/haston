@@ -27,11 +27,9 @@ export async function deleteImageFromCloudinary(imageUrl: string): Promise<boole
       return false
     }
 
-    console.log(`Deleting image from Cloudinary: ${publicId}`)
     const result = await cloudinary.uploader.destroy(publicId)
     
     if (result.result === 'ok') {
-      console.log(`Successfully deleted image: ${publicId}`)
       return true
     } else {
       console.warn(`Failed to delete image: ${publicId}, result:`, result)
@@ -49,7 +47,6 @@ export async function deleteImageFromCloudinary(imageUrl: string): Promise<boole
 export async function deleteImagesFromCloudinary(imageUrls: string[]): Promise<void> {
   if (imageUrls.length === 0) return
 
-  console.log(`Deleting ${imageUrls.length} images from Cloudinary`)
   
   // Delete images in parallel for better performance
   const deletePromises = imageUrls.map(url => deleteImageFromCloudinary(url))

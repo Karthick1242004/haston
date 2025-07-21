@@ -40,7 +40,6 @@ export default function LookBreakdown() {
       try {
         const res = await fetch('/api/products?isLook=true')
         const json = await res.json()
-        console.log('Look breakdown API response:', json)
         const items = (json.products||[]).map((p:any)=>({
           id: p.id,
           title: p.name,
@@ -49,14 +48,12 @@ export default function LookBreakdown() {
           price: `₹${p.price}`,
           sizes: p.sizes || ["S", "M", "L", "XL"]
         }))
-        console.log('Mapped carousel items:', items)
         setCarouselItems(items)
       }catch(err){console.error(err)}
     }
     fetchLooks()
   },[])
 
-  console.log('Current carouselItems state:', carouselItems)
 
   // Auto-rotate carousel
   useEffect(() => {

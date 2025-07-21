@@ -19,9 +19,12 @@ import Header from '@/components/header'
 import AdminsManager from '@/components/admins-manager'
 import HeroSlidesManager from '@/components/hero-slides-manager'
 import { Order } from '@/types/order'
+import { useToast } from '@/hooks/use-toast'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Package, ShoppingBag, Users, DollarSign, TrendingUp, Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, Filter, ExternalLink, Edit3, Search, Eye, Trash2, Image as ImageIcon } from 'lucide-react'
 
 export default function AdminPage() {
+  const { toast } = useToast()
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
   const [description, setDescription] = useState('')
@@ -53,6 +56,10 @@ export default function AdminPage() {
     estimatedDelivery: '',
     notes: ''
   })
+  
+  // Delete confirmation state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [productToDelete, setProductToDelete] = useState<any>(null)
 
   const fetchProducts = async () => {
     try {
@@ -148,7 +155,11 @@ export default function AdminPage() {
     const hasImages = images.length > 0 || (mode === 'edit' && existingImages.length > 0)
     
     if (!name || !price || !description || !hasImages) {
-      alert('Please fill all fields and ensure at least one image is present')
+      toast({
+        title: "Validation Error",
+        description: "Please fill all fields and ensure at least one image is present",
+        variant: "destructive"
+      })
       return
     }
     
@@ -173,7 +184,10 @@ export default function AdminPage() {
 
       const json = await res.json()
       if (json.success) {
-        alert(mode === 'edit' ? 'Product updated successfully!' : 'Product added successfully!')
+        toast({
+          title: "Success",
+          description: mode === 'edit' ? 'Product updated successfully!' : 'Product added successfully!'
+        })
         if (mode === 'create' && json.id) {
           router.push(`/product/${json.id}`)
         } else {
@@ -181,11 +195,19 @@ export default function AdminPage() {
           setMode('list')
         }
       } else {
-        alert(json.error || `Failed to ${mode === 'edit' ? 'update' : 'create'} product`)
+        toast({
+          title: "Error",
+          description: json.error || `Failed to ${mode === 'edit' ? 'update' : 'create'} product`,
+          variant: "destructive"
+        })
       }
     } catch(err) {
       console.error(err)
-      alert('Error submitting')
+      toast({
+        title: "Error",
+        description: "An error occurred while submitting. Please try again.",
+        variant: "destructive"
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -244,6 +266,32 @@ export default function AdminPage() {
       setIsOrderModalOpen(false)
       setIsEditingOrder(false)
       setSelectedOrder(null)
+    }
+  }
+
+  const handleDeleteProduct = async () => {
+    if (!productToDelete) return
+    
+    try {
+      const response = await fetch(`/api/admin/product/${productToDelete.id}`, { method: 'DELETE' })
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Product deleted successfully"
+        })
+        await fetchProducts()
+      } else {
+        throw new Error('Failed to delete product')
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete product. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setDeleteDialogOpen(false)
+      setProductToDelete(null)
     }
   }
 
@@ -371,19 +419,43 @@ export default function AdminPage() {
                                   <Edit3 className="w-4 h-4 mr-2" />
                                   Edit
                                 </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 transition-all"
-                                  onClick={async() => {
-                                    if(window.confirm('Are you sure you want to delete this product?')){
-                                      await fetch(`/api/admin/product/${p.id}`,{method:'DELETE'});
-                                      await fetchProducts();
-                                    }
-                                  }}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
+                                <AlertDialog open={deleteDialogOpen && productToDelete?.id === p.id} onOpenChange={(open) => {
+                                  if (!open) {
+                                    setDeleteDialogOpen(false)
+                                    setProductToDelete(null)
+                                  }
+                                }}>
+                                  <AlertDialogTrigger asChild>
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 transition-all"
+                                      onClick={() => {
+                                        setProductToDelete(p)
+                                        setDeleteDialogOpen(true)
+                                      }}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete Product</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete "{p.name}"? This action cannot be undone and will also remove all associated images from storage.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction 
+                                        onClick={handleDeleteProduct}
+                                        className="bg-red-600 hover:bg-red-700"
+                                      >
+                                        Delete Product
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                               </div>
 
                               <div className="flex gap-2 pt-2">
@@ -402,7 +474,10 @@ export default function AdminPage() {
                                   className="flex-1 text-xs text-gray-600 hover:text-amber-950"
                                   onClick={() => {
                                     navigator.clipboard.writeText(`${window.location.origin}/product/${p.id}`)
-                                    alert('Product URL copied to clipboard!')
+                                    toast({
+                                      title: "Success",
+                                      description: "Product URL copied to clipboard!"
+                                    })
                                   }}
                                 >
                                   <ExternalLink className="w-3 h-3 mr-1" />

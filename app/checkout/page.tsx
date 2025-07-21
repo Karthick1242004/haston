@@ -20,6 +20,7 @@ import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import { useProductStore } from "@/stores/product-store"
 import { ExtendedUser } from "@/lib/mongodb"
+import { useToast } from "@/hooks/use-toast"
 
 interface UserDetails {
   email: string
@@ -43,6 +44,7 @@ export default function CheckoutPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const { cartItems, updateQuantity, removeFromCart, getCartTotal, getCartItemsCount, clearCart } = useProductStore()
+  const { toast } = useToast()
   
   const [userProfile, setUserProfile] = useState<ExtendedUser | null>(null)
   const [userDetails, setUserDetails] = useState<UserDetails>({
@@ -240,13 +242,21 @@ export default function CheckoutPage() {
       setAppliedDiscount(discountCodes[discountCode.toUpperCase()])
     } else {
       setAppliedDiscount(0)
-      alert("Invalid discount code")
+      toast({
+        title: "Invalid Code",
+        description: "The discount code you entered is not valid",
+        variant: "destructive"
+      })
     }
   }
 
   const handleCheckout = async () => {
     if (!isFormValid) {
-      alert("Please fill in all required fields")
+      toast({
+        title: "Form Incomplete",
+        description: "Please fill in all required fields before proceeding",
+        variant: "destructive"
+      })
       return
     }
     
@@ -408,7 +418,11 @@ export default function CheckoutPage() {
       rzp.open()
     } catch (error) {
       console.error('Checkout error:', error)
-      alert('Failed to initiate payment. Please try again.')
+      toast({
+        title: "Payment Error",
+        description: "Failed to initiate payment. Please try again.",
+        variant: "destructive"
+      })
       setIsProcessingPayment(false)
       setPaymentStatus('failed')
     }

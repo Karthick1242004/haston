@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
+import { toast } from '@/hooks/use-toast'
 
 export const useWishlist = () => {
   const { data: session } = useSession()
@@ -32,7 +33,11 @@ export const useWishlist = () => {
   // Add product to wishlist
   const addToWishlist = async (productId: number) => {
     if (!session?.user) {
-      alert('Please sign in to add items to your wishlist')
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to add items to your wishlist",
+        variant: "destructive"
+      })
       return false
     }
 

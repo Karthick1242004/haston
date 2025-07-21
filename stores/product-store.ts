@@ -73,7 +73,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
             productId: product.id,
             name: product.name,
             price: product.price,
-            image: product.images[0],
+            image: product.images?.[0] || product.image,
             selectedSize,
             selectedColor,
             quantity,
@@ -95,6 +95,15 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
   removeFromCart: async (productId, selectedSize, selectedColor, syncToDb = true) => {
+    // Find the item first for API sync
+    const { cartItems } = get()
+    const itemToRemove = cartItems.find(
+      (item) => 
+        item.id === productId && 
+        item.selectedSize === selectedSize && 
+        item.selectedColor === selectedColor
+    )
+
     // Update local state first
     set((state) => {
       const newCartItems = state.cartItems.filter(
@@ -111,7 +120,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
     useUIStore.setState({ cartCount: getCartItemsCount() })
 
     // Sync to database if requested
-    if (syncToDb) {
+    if (syncToDb && itemToRemove) {
       set({ isLoading: true, error: null })
       try {
         const response = await fetch('/api/user/cart', {
@@ -119,6 +128,9 @@ export const useProductStore = create<ProductState>((set, get) => ({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             productId,
+            name: itemToRemove.name,
+            price: itemToRemove.price,
+            image: itemToRemove.image,
             selectedSize,
             selectedColor,
             action: 'remove'
@@ -144,6 +156,15 @@ export const useProductStore = create<ProductState>((set, get) => ({
       return
     }
 
+    // Find the item first for API sync
+    const { cartItems } = get()
+    const itemToUpdate = cartItems.find(
+      (item) => 
+        item.id === productId && 
+        item.selectedSize === selectedSize && 
+        item.selectedColor === selectedColor
+    )
+
     // Update local state first
     set((state) => {
       const newCartItems = state.cartItems.map((item) =>
@@ -161,7 +182,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
     useUIStore.setState({ cartCount: getCartItemsCount() })
 
     // Sync to database if requested
-    if (syncToDb) {
+    if (syncToDb && itemToUpdate) {
       set({ isLoading: true, error: null })
       try {
         const response = await fetch('/api/user/cart', {
@@ -169,6 +190,9 @@ export const useProductStore = create<ProductState>((set, get) => ({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             productId,
+            name: itemToUpdate.name,
+            price: itemToUpdate.price,
+            image: itemToUpdate.image,
             selectedSize,
             selectedColor,
             quantity,

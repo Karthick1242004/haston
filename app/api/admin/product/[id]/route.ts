@@ -37,7 +37,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const uniqueImages = [...new Set(imagesToDelete)]
     
     if (uniqueImages.length > 0) {
-      console.log(`Cleaning up ${uniqueImages.length} images for deleted product ${params.id}`)
       // Delete images from Cloudinary (async, don't wait for completion)
       deleteImagesFromCloudinary(uniqueImages).catch(error => {
         console.error('Error cleaning up images for deleted product:', error)
@@ -112,7 +111,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     
     // Clean up removed images from Cloudinary (async, don't block response)
     if (removedImages.length > 0) {
-      console.log(`Cleaning up ${removedImages.length} removed images for product ${params.id}`)
       deleteImagesFromCloudinary(removedImages).catch(error => {
         console.error('Error cleaning up removed images:', error)
       })
