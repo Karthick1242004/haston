@@ -168,34 +168,97 @@ export default function AboutPage() {
                 </motion.div>
               </motion.div>
 
-              {/* Visual Elements */}
+              {/* Testimonials */}
               <motion.div
                 initial={{ opacity: 0, x: 50 }}
                 animate={contentInView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.8, delay: 0.3 }}
                 className="relative"
               >
-                <div className="grid grid-cols-2 gap-4">
-                  <motion.div
-                    className="aspect-square bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                  <motion.div
-                    className="aspect-square bg-gradient-to-br from-green-400 to-teal-500 rounded-lg mt-8"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                  <motion.div
-                    className="aspect-square bg-gradient-to-br from-orange-400 to-red-500 rounded-lg -mt-8"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                  <motion.div
-                    className="aspect-square bg-gradient-to-br from-pink-400 to-purple-600 rounded-lg"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
-                  />
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-amber-950 mb-8 text-center" style={{ fontFamily: "var(--font-anton)" }}>
+                    What Our Customers Say
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    {/* Testimonial 1 */}
+                    <motion.div
+                      className="bg-white p-6 rounded-xl shadow-lg border border-gray-100"
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="flex items-center mb-4">
+                        <div className="flex text-yellow-400">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-gray-600 italic mb-4">
+                        "The colors are absolutely vibrant and the quality is outstanding! 
+                        I've gotten so many compliments on my Hex and Hue tees."
+                      </p>
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full mr-3"></div>
+                        <div>
+                          <p className="font-semibold text-gray-900">Sarah M.</p>
+                          <p className="text-sm text-gray-500">Fashion Enthusiast</p>
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    {/* Testimonial 2 */}
+                    <motion.div
+                      className="bg-white p-6 rounded-xl shadow-lg border border-gray-100"
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="flex items-center mb-4">
+                        <div className="flex text-yellow-400">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-gray-600 italic mb-4">
+                        "Finally found a brand that gets color right! Every shade is perfect 
+                        and the fit is incredibly comfortable."
+                      </p>
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-teal-500 rounded-full mr-3"></div>
+                        <div>
+                          <p className="font-semibold text-gray-900">Alex R.</p>
+                          <p className="text-sm text-gray-500">Design Student</p>
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    {/* Testimonial 3 */}
+                    <motion.div
+                      className="bg-white p-6 rounded-xl shadow-lg border border-gray-100"
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="flex items-center mb-4">
+                        <div className="flex text-yellow-400">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-gray-600 italic mb-4">
+                        "Love the fresh vibes and unique designs. Hex and Hue has become 
+                        my go-to brand for expressing my personality through fashion."
+                      </p>
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-full mr-3"></div>
+                        <div>
+                          <p className="font-semibold text-gray-900">Maya K.</p>
+                          <p className="text-sm text-gray-500">Creative Director</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
                 </div>
               </motion.div>
             </div>
@@ -240,7 +303,7 @@ export default function AboutPage() {
         </section>
 
         {/* Values Section */}
-        <section ref={valuesRef} className="py-20">
+        {/* <section ref={valuesRef} className="py-20">
           <div className="w-full px-6 md:px-12">
             <motion.div
               className="mb-16 text-center"
@@ -289,7 +352,7 @@ export default function AboutPage() {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
         <Footer />
       </div>
