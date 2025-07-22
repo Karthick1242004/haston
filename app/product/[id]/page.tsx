@@ -80,7 +80,7 @@ export default function ProductDetailPage() {
     >
       {/* Header */}
       <div className="relative">
-        <div className="absolute mt-2 inset-0 bg-white/95 backdrop-blur-sm"></div>
+        <div className="absolute mt-2 inset-0 bg-[#F1EFEE] backdrop-blur-sm"></div>
         <Header />
       </div>
       {/* Desktop Layout */}
@@ -114,7 +114,7 @@ export default function ProductDetailPage() {
             <div className="flex-1 relative bg-gradient-to-br h-[80vh] max-h-[800px]">
               <div className="absolute w-full h-full inset-6">
                 <Image
-                  src={product.images?.[selectedImageIndex] || product.image}
+                  src={product.images?.[selectedImageIndex] || product.image || '/placeholder.jpg'}
                   alt={product.name}
                   fill
                   className="object-contain rounded-lg"
@@ -359,7 +359,7 @@ export default function ProductDetailPage() {
         {/* Product Image */}
         <div className="relative aspect-square bg-gradient-to-br from-blue-200 to-purple-200">
           <Image
-            src={product.images?.[selectedImageIndex] || product.image}
+            src={product.images?.[selectedImageIndex] || product.image || '/placeholder.jpg'}
             alt={product.name}
             fill
             className="object-cover"

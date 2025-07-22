@@ -78,15 +78,20 @@ export default function ShopPage() {
   useEffect(()=>{
     fetch('/api/products')
       .then(r=>r.json())
-      .then(d=>setProducts(d.products||[]))
-      .catch(console.error)
+      .then(d=>{
+        const productsToSet = d.products || []
+        setProducts(productsToSet)
+      })
+      .catch(err => {
+        console.error('API Error:', err)
+      })
   },[])
   
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     colors: [],
     sizes: [],
-    priceRange: [0, 500],
+    priceRange: [0, 10000], // Increased max price to 10,000
     inStock: false
   })
   
@@ -99,7 +104,11 @@ export default function ShopPage() {
 
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products.filter((product) => {
+    if (!products || !Array.isArray(products)) {
+      return []
+    }
+    
+    let filtered = products.filter((product, index) => {
       // Category filter
       if (filters.categories.length > 0 && !filters.categories.includes(product.category || "")) {
         return false
@@ -108,13 +117,17 @@ export default function ShopPage() {
       // Color filter
       if (filters.colors.length > 0) {
         const hasMatchingColor = product.colors?.some(color => filters.colors.includes(color))
-        if (!hasMatchingColor) return false
+        if (!hasMatchingColor) {
+          return false
+        }
       }
       
       // Size filter
       if (filters.sizes.length > 0) {
         const hasMatchingSize = product.sizes?.some(size => filters.sizes.includes(size))
-        if (!hasMatchingSize) return false
+        if (!hasMatchingSize) {
+          return false
+        }
       }
       
       // Price filter
@@ -140,7 +153,7 @@ export default function ShopPage() {
         case "rating":
           return (b.rating || 0) - (a.rating || 0)
         case "newest":
-          return b.id - a.id
+          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
         case "popularity":
         default:
           return (b.rating || 0) * (b.stock || 0) - (a.rating || 0) * (a.stock || 0)
@@ -176,7 +189,7 @@ export default function ShopPage() {
       categories: [],
       colors: [],
       sizes: [],
-      priceRange: [0, 500],
+      priceRange: [0, 10000], 
       inStock: false
     })
     setCurrentPage(1)
@@ -187,7 +200,7 @@ export default function ShopPage() {
     await toggleWishlist(productId)
   }
 
-  const handleProductClick = (productId: number) => {
+  const handleProductClick = (productId: string | number) => {
     router.push(`/product/${productId}`)
   }
 
@@ -269,9 +282,9 @@ export default function ShopPage() {
             <Slider
               value={filters.priceRange}
               onValueChange={(value) => handleFilterChange("priceRange", value as [number, number])}
-              max={500}
+              max={10000}
               min={0}
-              step={10}
+              step={100}
               className="w-full"
             />
             <div className="flex justify-between text-sm text-gray-500 mt-2">
@@ -369,9 +382,9 @@ export default function ShopPage() {
 
       {/* Main Content */}
       <div id="products-section" className="container mx-auto px-4 pb-20">
-        <div className="flex gap-6">
+        <div className="flex gap-4">
           {/* Desktop Filters Sidebar */}
-          <FilterSidebar className="hidden lg:block w-64 shrink-0" />
+          <FilterSidebar className="hidden lg:block w-48 shrink-0" />
 
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
@@ -454,9 +467,9 @@ export default function ShopPage() {
               </div>
             ) : (
               <>
-                <div className={`grid gap-4 ${
+                <div className={`grid gap-3 ${
                   viewMode === "grid" 
-                    ? "grid-cols-2 md:grid-cols-3 xl:grid-cols-4" 
+                    ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" 
                     : "grid-cols-1"
                 }`}>
                   {paginatedProducts.map((product, index) => (
@@ -468,13 +481,13 @@ export default function ShopPage() {
                       className="group cursor-pointer"
                       onClick={() => handleProductClick(product.id)}
                     >
-                      <Card className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-white rounded-2xl">
-                                                  <div className="relative overflow-hidden rounded-t-2xl">
+                      <Card className="overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white rounded-lg">
+                                                  <div className="relative overflow-hidden rounded-t-lg">
                             <div className={`${
                               viewMode === "grid" ? "aspect-[3/4]" : "aspect-square w-48"
                             } overflow-hidden`}>
                               <Image
-                                src={product.image}
+                                src={product.image || product.images?.[0] || '/placeholder.jpg'}
                                 alt={product.name}
                                 fill
                                 className="object-cover transition-all duration-500 group-hover:scale-105"
@@ -484,134 +497,120 @@ export default function ShopPage() {
                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             </div>
                           
-                          {/* Improved Badge for Stock Status */}
+                          {/* Stock Status */}
                           {(product.stock || 0) <= 5 && (product.stock || 0) > 0 && (
-                            <div className="absolute top-3 left-3">
-                              <Badge className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium shadow-lg">
-                                Only {product.stock} left
+                            <div className="absolute top-2 left-2">
+                              <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded text-[10px]">
+                                {product.stock} left
                               </Badge>
                             </div>
                           )}
                           
                           {/* Out of stock badge */}
                           {(product.stock || 0) === 0 && (
-                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-t-2xl">
-                              <Badge className="bg-gray-800 text-white px-4 py-2 text-sm font-semibold">
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-t-lg">
+                              <Badge className="bg-gray-800 text-white px-3 py-1 text-sm">
                                 Out of Stock
                               </Badge>
                             </div>
                           )}
                           
-                          {/* Enhanced Color Options Indicator */}
+                          {/* Color Options */}
                           {product.colors && product.colors.length > 1 && (
-                            <div className="absolute top-3 left-3 flex gap-1.5 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
-                              {product.colors.slice(0, 3).map((color, colorIndex) => (
+                            <div className="absolute top-2 left-2 flex gap-1 bg-white/90 backdrop-blur-sm rounded px-1 py-0.5">
+                              {product.colors.slice(0, 2).map((color, colorIndex) => (
                                 <div
                                   key={colorIndex}
-                                  className={`w-4 h-4 rounded-full border-2 border-white shadow-sm ${
+                                  className={`w-3 h-3 rounded-full border border-white ${
                                     colorMap[color] || "bg-gray-400"
                                   }`}
                                 />
                               ))}
-                              {product.colors.length > 3 && (
-                                <div className="w-4 h-4 rounded-full bg-gray-300 border-2 border-white shadow-sm flex items-center justify-center">
-                                  <span className="text-[8px] text-gray-600 font-bold">+{product.colors.length - 3}</span>
-                                </div>
+                              {product.colors.length > 2 && (
+                                <span className="text-[8px] text-gray-600 font-medium">+{product.colors.length - 2}</span>
                               )}
                             </div>
                           )}
 
-                          {/* Enhanced Wishlist Button */}
+                          {/* Wishlist Button */}
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="absolute top-3 right-3 bg-white/90 hover:bg-white backdrop-blur-sm transition-all duration-300 hover:scale-110 shadow-lg rounded-full w-10 h-10"
-                            onClick={(e) => handleToggleWishlist(product.id, e)}
+                            className="absolute top-2 right-2 bg-white/90 hover:bg-white backdrop-blur-sm transition-all duration-200 rounded-full w-8 h-8"
+                            onClick={(e) => handleToggleWishlist(typeof product.id === 'string' ? parseInt(product.id, 16) : product.id, e)}
                             disabled={wishlistLoading}
                           >
                             <Heart
-                              className={`w-5 h-5 transition-all duration-300 ${
-                                isInWishlist(product.id)
-                                  ? "fill-red-500 text-red-500 scale-110"
+                              className={`w-4 h-4 transition-all duration-200 ${
+                                isInWishlist(typeof product.id === 'string' ? parseInt(product.id, 16) : product.id)
+                                  ? "fill-red-500 text-red-500"
                                   : "text-gray-600 hover:text-red-400"
                               }`}
                             />
                           </Button>
 
-                          {/* Enhanced Quick Add to Cart */}
-                          <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                          {/* Quick Add to Cart */}
+                          <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
                             <Button
                               size="sm"
-                              className="bg-black text-white hover:bg-gray-800 transition-all duration-300 rounded-full px-4 py-2 shadow-lg hover:shadow-xl font-medium"
+                              className="bg-black text-white hover:bg-gray-800 transition-all duration-200 rounded px-2 py-1 text-xs"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                // Add default size and color for quick add
                                 const defaultSize = product.sizes?.[0] || "M"
                                 const defaultColor = product.colors?.[0] || "Black"
                                 addProductToCart(product, defaultSize, defaultColor, 1)
                               }}
                               disabled={(product.stock || 0) === 0}
                             >
-                              <ShoppingBag className="w-4 h-4 mr-2" />
-                              Quick Add
+                              <ShoppingBag className="w-3 h-3 mr-1" />
+                              Add
                             </Button>
                           </div>
                         </div>
 
-                        <CardContent className="p-5">
+                        <CardContent className="p-3">
                           <div className={`${viewMode === "list" ? "flex justify-between items-start" : ""}`}>
                             <div className={viewMode === "list" ? "flex-1" : ""}>
-                              {/* Enhanced Product Name */}
-                              <h3 className="font-bold text-gray-900 text-lg mb-2 group-hover:text-gray-700 transition-colors line-clamp-2 leading-tight">
+                              {/* Product Name */}
+                              <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2 leading-tight">
                                 {product.name}
                               </h3>
                               
-                              {/* Enhanced Rating and Reviews */}
-                              <div className="flex items-center gap-3 mb-3">
-                                <div className="flex items-center bg-yellow-50 rounded-full px-2 py-1">
-                                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                  <span className="text-sm font-semibold text-yellow-700 ml-1">{product.rating}</span>
+                              {/* Rating and Reviews */}
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center">
+                                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                  <span className="text-xs font-medium text-yellow-700 ml-1">{product.rating}</span>
                                 </div>
-                                <span className="text-sm text-gray-500 bg-gray-100 rounded-full px-2 py-1">
-                                  ({product.stock} reviews)
+                                <span className="text-xs text-gray-500">
+                                  ({product.stock})
                                 </span>
                               </div>
 
-                              {/* Enhanced Price Display */}
-                              <div className="flex items-center gap-2 mb-3">
-                                <p className="text-2xl font-bold text-gray-900">
+                              {/* Price Display */}
+                              <div className="flex items-center gap-2 mb-2">
+                                <p className="text-lg font-bold text-gray-900">
                                   ₹{product.price.toFixed(2)}
                                 </p>
-                                {/* Add discount price if needed */}
                                 {product.price > 1000 && (
-                                  <p className="text-lg text-gray-500 line-through">
+                                  <p className="text-sm text-gray-500 line-through">
                                     ₹{(product.price * 1.2).toFixed(2)}
                                   </p>
                                 )}
                               </div>
 
-                              {/* Enhanced Category Badge */}
-                              {product.category && (
-                                <Badge 
-                                  variant="secondary" 
-                                  className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 font-medium px-3 py-1 rounded-full border-0"
-                                >
-                                  {product.category}
-                                </Badge>
-                              )}
-
-                              {/* Size Preview */}
+                              {/* Sizes */}
                               {product.sizes && product.sizes.length > 0 && (
-                                <div className="flex items-center gap-2 mt-3">
-                                  <span className="text-xs text-gray-500 font-medium">Sizes:</span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-xs text-gray-500">Sizes:</span>
                                   <div className="flex gap-1">
-                                    {product.sizes.slice(0, 4).map((size, idx) => (
-                                      <span key={idx} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                    {product.sizes.slice(0, 3).map((size, idx) => (
+                                      <span key={idx} className="text-xs bg-gray-100 text-gray-600 px-1 py-0.5 rounded">
                                         {size}
                                       </span>
                                     ))}
-                                    {product.sizes.length > 4 && (
-                                      <span className="text-xs text-gray-400">+{product.sizes.length - 4}</span>
+                                    {product.sizes.length > 3 && (
+                                      <span className="text-xs text-gray-400">+{product.sizes.length - 3}</span>
                                     )}
                                   </div>
                                 </div>

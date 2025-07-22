@@ -232,7 +232,106 @@ function OrderSuccessContent() {
               </motion.div>
             </motion.div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Order Timeline */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="mb-8"
+            >
+              <Card className="bg-white shadow-lg border border-gray-200">
+                <CardHeader className="bg-white border-b border-gray-200">
+                  <CardTitle className="text-2xl font-bold text-amber-950">Order Timeline</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    {/* Order Placed */}
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">Order Placed</h3>
+                            <p className="text-sm text-gray-600">Your order has been received and confirmed</p>
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">
+                            {new Date(order.createdAt).toLocaleDateString('en-IN', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Processing */}
+                    <div className="flex items-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
+                        ['processing', 'shipped', 'delivered'].includes(order.status) 
+                          ? 'bg-blue-500' 
+                          : 'bg-gray-300'
+                      }`}>
+                        <Package className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">Processing</h3>
+                            <p className="text-sm text-gray-600">We're preparing your order for shipment</p>
+                          </div>
+                          <span className="text-sm text-gray-500">1-2 business days</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Shipped */}
+                    <div className="flex items-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
+                        ['shipped', 'delivered'].includes(order.status) 
+                          ? 'bg-purple-500' 
+                          : 'bg-gray-300'
+                      }`}>
+                        <Truck className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">Shipped</h3>
+                            <p className="text-sm text-gray-600">Your order is on its way</p>
+                          </div>
+                          <span className="text-sm text-gray-500">3-5 business days</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Delivered */}
+                    <div className="flex items-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
+                        order.status === 'delivered' 
+                          ? 'bg-green-500' 
+                          : 'bg-gray-300'
+                      }`}>
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">Delivered</h3>
+                            <p className="text-sm text-gray-600">Your order has been delivered</p>
+                          </div>
+                          <span className="text-sm text-gray-500">5-7 business days</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
               {/* Order Summary */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}

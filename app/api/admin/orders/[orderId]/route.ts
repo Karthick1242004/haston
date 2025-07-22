@@ -60,7 +60,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 })
     }
 
-    const { status, estimatedDelivery, notes } = body
+    const { status, estimatedDelivery, notes, timeline } = body
     
     // Build update object
     const updateData: any = {
@@ -86,6 +86,17 @@ export async function PUT(
 
     if (notes !== undefined) {
       updateData.adminNotes = notes
+    }
+
+    if (timeline) {
+      // Validate timeline object
+      if (timeline.processingDays || timeline.shippedDays || timeline.deliveredDays) {
+        updateData.timeline = {
+          processingDays: timeline.processingDays || '1-2 business days',
+          shippedDays: timeline.shippedDays || '3-5 business days',
+          deliveredDays: timeline.deliveredDays || '5-7 business days'
+        }
+      }
     }
 
     const collection = await getOrdersCollection()

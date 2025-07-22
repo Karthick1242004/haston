@@ -1,8 +1,8 @@
 export interface Product {
-  id: number
+  id: string | number
   name: string
   price: number
-  image: string
+  image?: string
   images?: string[]
   size?: string
   color?: string
@@ -12,6 +12,7 @@ export interface Product {
   rating?: number
   stock?: number
   category?: string
+  createdAt?: string | Date
 }
 
 export interface CartItem extends Product {

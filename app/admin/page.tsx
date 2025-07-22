@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import PageTransition from '@/components/page-transition'
@@ -21,7 +22,7 @@ import HeroSlidesManager from '@/components/hero-slides-manager'
 import { Order } from '@/types/order'
 import { useToast } from '@/hooks/use-toast'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Package, ShoppingBag, Users, DollarSign, TrendingUp, Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, Filter, ExternalLink, Edit3, Search, Eye, Trash2, Image as ImageIcon } from 'lucide-react'
+import { Package, ShoppingBag, Users, User, DollarSign, TrendingUp, Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, Filter, ExternalLink, Edit3, Search, Eye, Trash2, Image as ImageIcon, Plus } from 'lucide-react'
 
 export default function AdminPage() {
   const { toast } = useToast()
@@ -54,7 +55,13 @@ export default function AdminPage() {
   const [orderEditForm, setOrderEditForm] = useState({
     status: '',
     estimatedDelivery: '',
-    notes: ''
+    notes: '',
+    timeline: {
+      placedDate: '',
+      processingDays: '1-2 business days',
+      shippedDays: '3-5 business days', 
+      deliveredDays: '5-7 business days'
+    }
   })
   
   // Delete confirmation state
@@ -241,7 +248,13 @@ export default function AdminPage() {
     setOrderEditForm({
       status: order.status,
       estimatedDelivery: order.estimatedDelivery ? new Date(order.estimatedDelivery).toISOString().split('T')[0] : '',
-      notes: (order as any).adminNotes || ''
+      notes: (order as any).adminNotes || '',
+      timeline: {
+        placedDate: new Date(order.createdAt).toISOString().split('T')[0],
+        processingDays: (order as any).timeline?.processingDays || '1-2 business days',
+        shippedDays: (order as any).timeline?.shippedDays || '3-5 business days',
+        deliveredDays: (order as any).timeline?.deliveredDays || '5-7 business days'
+      }
     })
     setIsEditingOrder(true)
     setIsOrderModalOpen(true)
@@ -259,6 +272,14 @@ export default function AdminPage() {
     }
     if (orderEditForm.notes !== ((selectedOrder as any).adminNotes || '')) {
       updateData.notes = orderEditForm.notes
+    }
+    
+    // Check if timeline data has changed
+    const currentTimeline = (selectedOrder as any).timeline || {}
+    if (orderEditForm.timeline.processingDays !== (currentTimeline.processingDays || '1-2 business days') ||
+        orderEditForm.timeline.shippedDays !== (currentTimeline.shippedDays || '3-5 business days') ||
+        orderEditForm.timeline.deliveredDays !== (currentTimeline.deliveredDays || '5-7 business days')) {
+      updateData.timeline = orderEditForm.timeline
     }
 
     const success = await updateOrder(selectedOrder.orderId, updateData)
@@ -299,7 +320,7 @@ export default function AdminPage() {
     <PageTransition>
       <div className="min-h-screen bg-[#F1EFEE] py-20">
         <Header/>
-        <div className="max-w-7xl mx-auto bg-white p-10 shadow-xl border border-gray-200">
+        <div className="max-w-7xl mx-auto bg-white lg:p-10 p-4 shadow-xl border border-gray-200">
           <h1 className="text-3xl font-bold text-amber-950 mb-8" style={{fontFamily:'var(--font-anton)'}}>Admin Dashboard</h1>
           
           <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as 'products' | 'orders' | 'hero' | 'admins')} className="space-y-6">
@@ -325,17 +346,17 @@ export default function AdminPage() {
             <TabsContent value="products" className="space-y-6">
               {mode === 'list' && (
                 <>
-                  <div className="flex justify-between items-center mb-8">
+                  <div className="flex justify-between flex-wrap items-center mb-8">
                     <div>
                       <h2 className="text-2xl font-bold text-amber-950 mb-2">Product Management</h2>
                       <p className="text-gray-600">Manage your product catalog</p>
                     </div>
                     <Button 
-                      className="bg-amber-950 text-white hover:bg-amber-800 transition-all shadow-lg px-6 py-3"
+                      className="bg-amber-950 text-white mt-2 hover:bg-amber-800 transition-all shadow-lg px-4 py-2"
                       onClick={() => {setMode('create');setName('');setPrice('');setDescription('');setSizes('S,M,L');setImages([]);setExistingImages([]);setIsLook(false);setEditId('')}}
                     >
-                      <Package className="w-4 h-4 mr-2" />
-                      Add New Product
+                      <Plus className="w-4 h-4 mr-2" />
+                       New Product
                     </Button>
                   </div>
 
@@ -525,11 +546,21 @@ export default function AdminPage() {
                         <br/><span className="text-xs text-gray-500">{isLook && 'First image should be backgroundless'}</span>
                       </label>
                       <input id="product-images" ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleSelectFiles} className="mb-4" />
-                      <div className="grid grid-cols-5 gap-2">
+                                    <div className="grid grid-cols-5 gap-2">
                         {images.map((file, index) => (
-                          <img key={index} src={URL.createObjectURL(file)} alt="preview" className="h-24 w-24 object-cover border" />
+                          <div key={index} className="relative group">
+                            <img src={URL.createObjectURL(file)} alt="preview" className="h-24 w-24 object-cover border rounded-lg" />
+                            <button 
+                              type="button" 
+                              className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-6 h-6 text-xs font-bold transition-colors shadow-lg opacity-75 group-hover:opacity-100" 
+                              onClick={() => setImages(images.filter((_, i) => i !== index))}
+                              title="Remove image"
+                            >
+                              ×
+                            </button>
+                          </div>
                         ))}
-                      </div>
+              </div>
                     </div>
                     
                     {mode === 'edit' && (
@@ -778,16 +809,59 @@ export default function AdminPage() {
                               />
                             </div>
                           </div>
-                          <div>
-                            <Label htmlFor="notes">Admin Notes</Label>
-                            <Textarea
-                              id="notes"
-                              placeholder="Add internal notes about this order..."
-                              value={orderEditForm.notes}
-                              onChange={(e) => setOrderEditForm(prev => ({ ...prev, notes: e.target.value }))}
-                              rows={3}
-                            />
-                          </div>
+                                                      <div>
+                              <Label htmlFor="notes">Admin Notes</Label>
+                              <Textarea
+                                id="notes"
+                                placeholder="Add internal notes about this order..."
+                                value={orderEditForm.notes}
+                                onChange={(e) => setOrderEditForm(prev => ({ ...prev, notes: e.target.value }))}
+                                rows={3}
+                              />
+                            </div>
+                            
+                            {/* Timeline Editing */}
+                            <div className="space-y-4">
+                              <Label className="text-lg font-semibold">Timeline Settings</Label>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                  <Label htmlFor="processingDays">Processing Duration</Label>
+                                  <Input
+                                    id="processingDays"
+                                    value={orderEditForm.timeline.processingDays}
+                                    onChange={(e) => setOrderEditForm(prev => ({ 
+                                      ...prev, 
+                                      timeline: { ...prev.timeline, processingDays: e.target.value }
+                                    }))}
+                                    placeholder="e.g., 1-2 business days"
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="shippedDays">Shipping Duration</Label>
+                                  <Input
+                                    id="shippedDays"
+                                    value={orderEditForm.timeline.shippedDays}
+                                    onChange={(e) => setOrderEditForm(prev => ({ 
+                                      ...prev, 
+                                      timeline: { ...prev.timeline, shippedDays: e.target.value }
+                                    }))}
+                                    placeholder="e.g., 3-5 business days"
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="deliveredDays">Delivery Duration</Label>
+                                  <Input
+                                    id="deliveredDays"
+                                    value={orderEditForm.timeline.deliveredDays}
+                                    onChange={(e) => setOrderEditForm(prev => ({ 
+                                      ...prev, 
+                                      timeline: { ...prev.timeline, deliveredDays: e.target.value }
+                                    }))}
+                                    placeholder="e.g., 5-7 business days"
+                                  />
+                                </div>
+                              </div>
+                            </div>
                           <div className="flex gap-3">
                             <Button onClick={handleSaveOrder} className="bg-amber-950 text-white">
                               Save Changes
@@ -798,12 +872,335 @@ export default function AdminPage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="text-center py-8">
-                          <p className="text-gray-600">Order details view will be implemented</p>
-                          <Button onClick={() => setIsEditingOrder(true)} className="mt-4 bg-amber-950 text-white">
-                            <Edit3 className="w-4 h-4 mr-2" />
-                            Edit Order
-                          </Button>
+                        <div className="space-y-6">
+                          {/* Order Overview */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-amber-100 rounded-lg">
+                                    <Package className="w-5 h-5 text-amber-950" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-gray-600">Order ID</p>
+                                    <p className="font-semibold text-gray-900">#{selectedOrder.orderId}</p>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-green-100 rounded-lg">
+                                    <Calendar className="w-5 h-5 text-green-700" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-gray-600">Order Date</p>
+                                    <p className="font-semibold text-gray-900">
+                                      {new Date(selectedOrder.createdAt).toLocaleDateString('en-IN', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                      })}
+                                    </p>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-blue-100 rounded-lg">
+                                    <DollarSign className="w-5 h-5 text-blue-700" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-gray-600">Total Amount</p>
+                                    <p className="font-semibold text-gray-900">₹{selectedOrder.orderSummary.total.toFixed(2)}</p>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Order Status & Customer Info */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <Card>
+                              <CardHeader>
+                                                                 <CardTitle className="flex items-center gap-2">
+                                   <Users className="w-5 h-5" />
+                                   Customer Information
+                                 </CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-3">
+                                <div>
+                                  <p className="text-sm font-medium text-gray-700">Name</p>
+                                  <p className="text-gray-900">{selectedOrder.shippingAddress.firstName} {selectedOrder.shippingAddress.lastName}</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-gray-700">Email</p>
+                                  <p className="text-gray-900">{selectedOrder.userEmail}</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-gray-700">Phone</p>
+                                  <p className="text-gray-900">{selectedOrder.shippingAddress.phone}</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-gray-700">Status</p>
+                                  <Badge className={getStatusColor(selectedOrder.status)}>
+                                    {getStatusIcon(selectedOrder.status)}
+                                    <span className="ml-1 capitalize">{selectedOrder.status}</span>
+                                  </Badge>
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <MapPin className="w-5 h-5" />
+                                  Shipping Address
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-2">
+                                <p className="text-gray-900 font-medium">{selectedOrder.shippingAddress.firstName} {selectedOrder.shippingAddress.lastName}</p>
+                                <p className="text-gray-700">{selectedOrder.shippingAddress.address}</p>
+                                <p className="text-gray-700">
+                                  {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}
+                                </p>
+                                <p className="text-gray-700">{selectedOrder.shippingAddress.country}</p>
+                                {selectedOrder.estimatedDelivery && (
+                                  <div className="mt-3 p-3 bg-yellow-50 rounded-lg">
+                                    <p className="text-sm font-medium text-yellow-800">Estimated Delivery</p>
+                                    <p className="text-yellow-700">
+                                      {new Date(selectedOrder.estimatedDelivery).toLocaleDateString('en-IN', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                      })}
+                                    </p>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Order Items */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <ShoppingBag className="w-5 h-5" />
+                                Order Items ({selectedOrder.items.length})
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-4">
+                                {selectedOrder.items.map((item, index) => (
+                                  <div key={index} className="flex gap-4 p-4 border border-gray-200 rounded-lg">
+                                    <div className="relative w-16 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                      <Image
+                                        src={item.image}
+                                        alt={item.name}
+                                        fill
+                                        className="object-cover"
+                                        unoptimized
+                                      />
+                                    </div>
+                                    <div className="flex-1">
+                                      <h4 className="font-medium text-gray-900">{item.name}</h4>
+                                      <p className="text-sm text-gray-600">
+                                        Size: {item.selectedSize} • Color: {item.selectedColor}
+                                      </p>
+                                      <div className="flex items-center justify-between mt-2">
+                                        <div className="flex items-center gap-4">
+                                          <span className="text-sm text-gray-600">Qty: {item.quantity}</span>
+                                          <span className="text-sm font-medium">₹{item.price.toFixed(2)} each</span>
+                                        </div>
+                                        <div className="text-right">
+                                          <p className="font-semibold text-gray-900">₹{item.subtotal.toFixed(2)}</p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Payment & Order Summary */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <CreditCard className="w-5 h-5" />
+                                  Payment Details
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-3">
+                                <div>
+                                  <p className="text-sm font-medium text-gray-700">Payment ID</p>
+                                  <p className="text-gray-900 font-mono text-sm">{selectedOrder.paymentDetails.razorpay_payment_id}</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-gray-700">Order ID</p>
+                                  <p className="text-gray-900 font-mono text-sm">{selectedOrder.paymentDetails.razorpay_order_id}</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-gray-700">Amount Paid</p>
+                                  <p className="text-gray-900">₹{selectedOrder.paymentDetails.amount.toFixed(2)} {selectedOrder.paymentDetails.currency}</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-gray-700">Status</p>
+                                  <Badge className="bg-green-100 text-green-800">
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    {selectedOrder.paymentDetails.status}
+                                  </Badge>
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>Order Summary</CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-3">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Subtotal</span>
+                                  <span className="font-medium">₹{selectedOrder.orderSummary.subtotal.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Shipping</span>
+                                  <span className="font-medium">
+                                    {selectedOrder.orderSummary.shipping === 0 ? "Free" : `₹${selectedOrder.orderSummary.shipping.toFixed(2)}`}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Taxes</span>
+                                  <span className="font-medium">₹{selectedOrder.orderSummary.taxes.toFixed(2)}</span>
+                                </div>
+                                {selectedOrder.orderSummary.discount > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-green-600">
+                                      Discount {selectedOrder.orderSummary.discountCode && `(${selectedOrder.orderSummary.discountCode})`}
+                                    </span>
+                                    <span className="text-green-600 font-medium">-₹{selectedOrder.orderSummary.discount.toFixed(2)}</span>
+                                  </div>
+                                                                 )}
+                                 <div className="border-t border-gray-200 my-3"></div>
+                                 <div className="flex justify-between text-lg font-bold">
+                                  <span>Total</span>
+                                  <span>₹{selectedOrder.orderSummary.total.toFixed(2)}</span>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Order Timeline */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Clock className="w-5 h-5" />
+                                Order Timeline
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-4">
+                                {/* Order Placed */}
+                                <div className="flex items-center">
+                                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                                    <CheckCircle className="w-5 h-5 text-white" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex justify-between items-center">
+                                      <div>
+                                        <h4 className="font-medium text-gray-900">Order Placed</h4>
+                                        <p className="text-xs text-gray-600">Order received and confirmed</p>
+                                      </div>
+                                      <span className="text-xs font-medium text-gray-900">
+                                        {new Date(selectedOrder.createdAt).toLocaleDateString('en-IN', {
+                                          day: '2-digit',
+                                          month: '2-digit',
+                                          year: 'numeric'
+                                        })}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Processing */}
+                                <div className="flex items-center">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
+                                    ['processing', 'shipped', 'delivered'].includes(selectedOrder.status) 
+                                      ? 'bg-blue-500' 
+                                      : 'bg-gray-300'
+                                  }`}>
+                                    <Package className="w-4 h-4 text-white" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex justify-between items-center">
+                                      <div>
+                                        <h4 className="font-medium text-gray-900">Processing</h4>
+                                        <p className="text-xs text-gray-600">Preparing order for shipment</p>
+                                      </div>
+                                                                             <span className="text-xs text-gray-500">{(selectedOrder as any).timeline?.processingDays || '1-2 business days'}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Shipped */}
+                                <div className="flex items-center">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
+                                    ['shipped', 'delivered'].includes(selectedOrder.status) 
+                                      ? 'bg-purple-500' 
+                                      : 'bg-gray-300'
+                                  }`}>
+                                    <Truck className="w-4 h-4 text-white" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex justify-between items-center">
+                                      <div>
+                                        <h4 className="font-medium text-gray-900">Shipped</h4>
+                                        <p className="text-xs text-gray-600">Order is on its way</p>
+                                      </div>
+                                                                             <span className="text-xs text-gray-500">{(selectedOrder as any).timeline?.shippedDays || '3-5 business days'}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Delivered */}
+                                <div className="flex items-center">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
+                                    selectedOrder.status === 'delivered' 
+                                      ? 'bg-green-500' 
+                                      : 'bg-gray-300'
+                                  }`}>
+                                    <CheckCircle className="w-4 h-4 text-white" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex justify-between items-center">
+                                      <div>
+                                        <h4 className="font-medium text-gray-900">Delivered</h4>
+                                        <p className="text-xs text-gray-600">Order has been delivered</p>
+                                      </div>
+                                                                             <span className="text-xs text-gray-500">{(selectedOrder as any).timeline?.deliveredDays || '5-7 business days'}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Admin Actions */}
+                          <div className="flex justify-end gap-3 pt-6 border-t">
+                            <Button variant="outline" onClick={() => setIsOrderModalOpen(false)}>
+                              Close
+                            </Button>
+                            <Button onClick={() => setIsEditingOrder(true)} className="bg-amber-950 text-white">
+                              <Edit3 className="w-4 h-4 mr-2" />
+                              Edit Order
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </div>
