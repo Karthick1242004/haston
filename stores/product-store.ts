@@ -69,7 +69,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            productId: product.id.toString(), // Ensure productId is a string for API
+            productId: product.id.toString(),
             name: product.name,
             price: product.price,
             image: product.images?.[0] || product.image,
@@ -126,7 +126,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            productId: productId.toString(), // Ensure productId is a string for API
+            productId: productId.toString(),
             name: itemToRemove.name,
             price: itemToRemove.price,
             image: itemToRemove.image,
@@ -188,7 +188,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            productId: productId.toString(), // Ensure productId is a string for API
+            productId: productId.toString(),
             name: itemToUpdate.name,
             price: itemToUpdate.price,
             image: itemToUpdate.image,
@@ -240,7 +240,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
   syncCartFromDB: (dbCartItems) => {
     // Convert database cart items to local cart items format
     const localCartItems: CartItem[] = dbCartItems.map((dbItem) => ({
-      id: parseInt(dbItem.productId),
+      id: dbItem.productId, // Use string ID directly, don't parse as integer
       name: dbItem.name,
       price: dbItem.price,
       image: dbItem.image, // Set the singular image property for cart display
