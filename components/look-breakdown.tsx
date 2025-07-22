@@ -22,8 +22,9 @@ export default function LookBreakdown() {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false) // Start false until data loads
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isDataLoaded, setIsDataLoaded] = useState(false) // Add loading state
   const prevCurrentIndex = useRef(0)
   const { addProductToCart } = useAuthCart()
   const { toggleWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist()
@@ -35,36 +36,48 @@ export default function LookBreakdown() {
   // state inside component declared later, placeholder removed
 
   // fetch look items
-  useEffect(()=>{
-    async function fetchLooks(){
+  useEffect(() => {
+    async function fetchLooks() {
       try {
+        setIsDataLoaded(false)
+        
         const res = await fetch('/api/products?isLook=true')
         const json = await res.json()
-        const items = (json.products||[]).map((p:any)=>({
+        
+        const items = (json.products || []).map((p: any) => ({
           id: p.id,
           title: p.name,
           description: p.description,
-          image: p.image,
+          image: p.image || p.images?.[0] || '/placeholder.jpg', // Add fallback
           price: `₹${p.price}`,
           sizes: p.sizes || ["S", "M", "L", "XL"]
         }))
-        setCarouselItems(items)
-      }catch(err){console.error(err)}
+        
+        if (items.length > 0) {
+          setCarouselItems(items)
+          setIsDataLoaded(true)
+          // Enable auto-play only after data is loaded
+          setTimeout(() => setIsAutoPlaying(true), 1000)
+        }
+      } catch (err) {
+        console.error('Error fetching look items:', err)
+        setIsDataLoaded(false)
+      }
     }
     fetchLooks()
-  },[])
+  }, [])
 
 
   // Auto-rotate carousel
   useEffect(() => {
-    if (!isAutoPlaying || isTransitioning) return
+    if (!isAutoPlaying || isTransitioning || !isDataLoaded || carouselItems.length === 0) return
     
     const interval = setInterval(() => {
       nextSlide()
     }, 4000)
 
     return () => clearInterval(interval)
-  }, [isAutoPlaying, isTransitioning])
+  }, [isAutoPlaying, isTransitioning, isDataLoaded, carouselItems.length])
 
   const nextSlide = () => {
     if (isTransitioning) return
@@ -92,8 +105,12 @@ export default function LookBreakdown() {
 
   // Generate all items with their positions for smooth transitions
   const getAllItemsWithPositions = () => {
+    if (!carouselItems || carouselItems.length === 0) {
+      return []
+    }
+    
     const allItems = []
-    const visibleRadius = Math.min(3, Math.floor((carouselItems?.length - 1) / 2))
+    const visibleRadius = Math.min(3, Math.floor((carouselItems.length - 1) / 2))
 
     // Generate items in the range -visibleRadius … +visibleRadius
     for (let i = -visibleRadius; i <= visibleRadius; i++) {
@@ -124,13 +141,13 @@ export default function LookBreakdown() {
 
   // Set default size when carousel items change or current index changes
   useEffect(() => {
-    if (carouselItems.length > 0) {
+    if (isDataLoaded && carouselItems.length > 0) {
       const currentItem = carouselItems[safeIndex]
       if (currentItem?.sizes && currentItem.sizes.length > 0) {
         setSelectedSize(currentItem.sizes[0])
       }
     }
-  }, [carouselItems, safeIndex])
+  }, [carouselItems, safeIndex, isDataLoaded])
 
   // Convert carousel item to product format for cart
   const createProductFromCarouselItem = (item: CarouselItem) => {
@@ -197,10 +214,20 @@ export default function LookBreakdown() {
           onMouseLeave={() => setIsAutoPlaying(true)}
           style={{ perspective: "1500px" }}
         >
+          {/* Loading State */}
+          {!isDataLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#F1EFEE]">
+              <div className="text-center">
+                <div className="w-16 h-16 border-4 border-amber-950/20 border-t-amber-950 rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-amber-950 font-medium">Loading looks...</p>
+              </div>
+            </div>
+          )}
           {/* Slider Container */}
-          <div className="relative h-full flex items-center justify-center">
-            <div className="relative w-full h-full">
-              {allItems.map((item) => {
+          {isDataLoaded && carouselItems.length > 0 && (
+            <div className="relative h-full flex items-center justify-center">
+              <div className="relative w-full h-full">
+                {allItems.map((item) => {
                 const { position, isCenter, isVisible, actualIndex } = item
                 
                 // Render all items but hide those outside visible range
@@ -274,8 +301,11 @@ export default function LookBreakdown() {
               })}
             </div>
           </div>
+          )}
 
           {/* Navigation Buttons */}
+          {isDataLoaded && carouselItems.length > 0 && (
+            <>
           <motion.button
             className="absolute left-8 top-1/2 -translate-y-1/2 z-20 p-4 bg-white/95 hover:bg-white rounded-full shadow-2xl border border-stone-200 transition-all duration-300 hover:scale-110 disabled:opacity-50"
             onClick={prevSlide}
@@ -301,9 +331,12 @@ export default function LookBreakdown() {
           >
             <ChevronRight className="w-6 h-6 text-amber-950" />
           </motion.button>
+          </>
+          )}
         </motion.div>
 
         {/* Active Item Details */}
+        {isDataLoaded && carouselItems.length > 0 && (
         <motion.div
           className="text-center mt-12"
           initial={{ opacity: 0, y: 30 }}
@@ -391,8 +424,10 @@ export default function LookBreakdown() {
             </motion.div>
           </AnimatePresence>
         </motion.div>
+        )}
 
         {/* Dots Indicator */}
+        {isDataLoaded && carouselItems.length > 0 && (
         <motion.div
           className="flex justify-center mt-8 space-x-3"
           initial={{ opacity: 0, y: 20 }}
@@ -412,6 +447,7 @@ export default function LookBreakdown() {
             />
           ))}
         </motion.div>
+        )}
 
         {/* Bottom Text */}
         <motion.div

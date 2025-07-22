@@ -8,8 +8,8 @@ interface ProductState {
   isLoading: boolean
   error: string | null
   addToCart: (product: Product, selectedSize: string, selectedColor: string, quantity?: number, syncToDb?: boolean) => Promise<void>
-  removeFromCart: (productId: number, selectedSize: string, selectedColor: string, syncToDb?: boolean) => Promise<void>
-  updateQuantity: (productId: number, selectedSize: string, selectedColor: string, quantity: number, syncToDb?: boolean) => Promise<void>
+  removeFromCart: (productId: string | number, selectedSize: string, selectedColor: string, syncToDb?: boolean) => Promise<void>
+  updateQuantity: (productId: string | number, selectedSize: string, selectedColor: string, quantity: number, syncToDb?: boolean) => Promise<void>
   clearCart: (syncToDb?: boolean) => Promise<void>
   setCartOpen: (open: boolean) => void
   getCartTotal: () => number
@@ -26,11 +26,10 @@ export const useProductStore = create<ProductState>((set, get) => ({
   error: null,
 
   addToCart: async (product, selectedSize, selectedColor, quantity = 1, syncToDb = true) => {
-    // Update local state first for immediate UI response
     set((state) => {
       const existingItemIndex = state.cartItems.findIndex(
         (item) => 
-          item.id === product.id && 
+          item.id.toString() === product.id.toString() && 
           item.selectedSize === selectedSize && 
           item.selectedColor === selectedColor
       )
@@ -70,7 +69,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            productId: product.id,
+            productId: product.id.toString(), // Ensure productId is a string for API
             name: product.name,
             price: product.price,
             image: product.images?.[0] || product.image,
@@ -99,7 +98,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
     const { cartItems } = get()
     const itemToRemove = cartItems.find(
       (item) => 
-        item.id === productId && 
+        item.id.toString() === productId.toString() && 
         item.selectedSize === selectedSize && 
         item.selectedColor === selectedColor
     )
@@ -108,7 +107,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
     set((state) => {
       const newCartItems = state.cartItems.filter(
         (item) => 
-          !(item.id === productId && 
+          !(item.id.toString() === productId.toString() && 
             item.selectedSize === selectedSize && 
             item.selectedColor === selectedColor)
       )
@@ -127,7 +126,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            productId,
+            productId: productId.toString(), // Ensure productId is a string for API
             name: itemToRemove.name,
             price: itemToRemove.price,
             image: itemToRemove.image,
@@ -160,7 +159,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
     const { cartItems } = get()
     const itemToUpdate = cartItems.find(
       (item) => 
-        item.id === productId && 
+        item.id.toString() === productId.toString() && 
         item.selectedSize === selectedSize && 
         item.selectedColor === selectedColor
     )
@@ -168,7 +167,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
     // Update local state first
     set((state) => {
       const newCartItems = state.cartItems.map((item) =>
-        item.id === productId && 
+        item.id.toString() === productId.toString() && 
         item.selectedSize === selectedSize && 
         item.selectedColor === selectedColor
           ? { ...item, quantity }
@@ -189,7 +188,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            productId,
+            productId: productId.toString(), // Ensure productId is a string for API
             name: itemToUpdate.name,
             price: itemToUpdate.price,
             image: itemToUpdate.image,
