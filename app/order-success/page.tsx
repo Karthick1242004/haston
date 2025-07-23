@@ -16,7 +16,8 @@ import {
   ArrowRight,
   Home,
   Receipt,
-  ShoppingBag
+  ShoppingBag,
+  User
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -189,6 +190,38 @@ function OrderSuccessContent() {
               animate={{ opacity: 1, y: 0 }}
               className="text-center mb-12"
             >
+              {/* Welcome Message */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="mb-8"
+              >
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 max-w-2xl mx-auto">
+                  <div className="flex items-center justify-center space-x-4">
+                    {session.user?.image ? (
+                      <Image
+                        src={session.user.image}
+                        alt={session.user.name || 'User'}
+                        width={48}
+                        height={48}
+                        className="rounded-full ring-4 ring-amber-950/10"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-amber-950 rounded-full flex items-center justify-center">
+                        <User className="w-6 h-6 text-white" />
+                      </div>
+                    )}
+                    <div className="text-left">
+                      <h2 className="text-2xl font-bold text-amber-950">
+                        Welcome back, {session.user?.name?.split(' ')[0] || 'Customer'}!
+                      </h2>
+                      <p className="text-gray-600">Thank you for choosing us</p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -213,7 +246,7 @@ function OrderSuccessContent() {
                 transition={{ delay: 0.4 }}
                 className="text-xl text-gray-600 mb-6"
               >
-                Thank you for your purchase! Your order has been successfully placed.
+                Your order has been successfully placed and is being processed.
               </motion.p>
               
               <motion.div
@@ -232,7 +265,7 @@ function OrderSuccessContent() {
               </motion.div>
             </motion.div>
 
-            {/* Order Timeline */}
+            {/* Order Status Information */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -241,90 +274,49 @@ function OrderSuccessContent() {
             >
               <Card className="bg-white shadow-lg border border-gray-200">
                 <CardHeader className="bg-white border-b border-gray-200">
-                  <CardTitle className="text-2xl font-bold text-amber-950">Order Timeline</CardTitle>
+                  <CardTitle className="text-2xl font-bold text-amber-950">Order Status</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <div className="space-y-6">
-                    {/* Order Placed */}
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-4">
-                        <CheckCircle className="w-5 h-5 text-white" />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Order Date */}
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Calendar className="w-6 h-6 text-green-600" />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">Order Placed</h3>
-                            <p className="text-sm text-gray-600">Your order has been received and confirmed</p>
-                          </div>
-                          <span className="text-sm font-medium text-gray-900">
-                            {new Date(order.createdAt).toLocaleDateString('en-IN', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric'
-                            })}
-                          </span>
-                        </div>
-                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-1">Order Placed</h3>
+                      <p className="text-sm text-gray-600">
+                        {new Date(order.createdAt).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </p>
                     </div>
 
-                    {/* Processing */}
-                    <div className="flex items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
-                        ['processing', 'shipped', 'delivered'].includes(order.status) 
-                          ? 'bg-blue-500' 
-                          : 'bg-gray-300'
-                      }`}>
-                        <Package className="w-5 h-5 text-white" />
+                    {/* Current Status */}
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        {getStatusIcon(order.status)}
                       </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">Processing</h3>
-                            <p className="text-sm text-gray-600">We're preparing your order for shipment</p>
-                          </div>
-                          <span className="text-sm text-gray-500">1-2 business days</span>
-                        </div>
-                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-1">Current Status</h3>
+                      <p className="text-sm text-gray-600 capitalize">{order.status}</p>
                     </div>
 
-                    {/* Shipped */}
-                    <div className="flex items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
-                        ['shipped', 'delivered'].includes(order.status) 
-                          ? 'bg-purple-500' 
-                          : 'bg-gray-300'
-                      }`}>
-                        <Truck className="w-5 h-5 text-white" />
+                    {/* Estimated Delivery */}
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Truck className="w-6 h-6 text-purple-600" />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">Shipped</h3>
-                            <p className="text-sm text-gray-600">Your order is on its way</p>
-                          </div>
-                          <span className="text-sm text-gray-500">3-5 business days</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Delivered */}
-                    <div className="flex items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
-                        order.status === 'delivered' 
-                          ? 'bg-green-500' 
-                          : 'bg-gray-300'
-                      }`}>
-                        <CheckCircle className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">Delivered</h3>
-                            <p className="text-sm text-gray-600">Your order has been delivered</p>
-                          </div>
-                          <span className="text-sm text-gray-500">5-7 business days</span>
-                        </div>
-                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-1">Expected Delivery</h3>
+                      <p className="text-sm text-gray-600">
+                        {order.estimatedDelivery 
+                          ? new Date(order.estimatedDelivery).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short'
+                            })
+                          : '7-10 days'
+                        }
+                      </p>
                     </div>
                   </div>
                 </CardContent>
