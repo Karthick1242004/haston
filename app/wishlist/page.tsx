@@ -84,7 +84,7 @@ export default function WishlistPage() {
               <Button
                 variant="ghost"
                 onClick={() => router.back()}
-                className="flex items-center gap-2 text-amber-950 hover:text-amber-800 hover:bg-white transition-all rounded-lg px-4 py-2"
+                className="flex items-center gap-2 text-blue-950 hover:text-blue-800 hover:bg-white transition-all rounded-lg px-4 py-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
@@ -98,8 +98,8 @@ export default function WishlistPage() {
               className="mb-8"
             >
               <div className="flex items-center gap-3 mb-4">
-                <Heart className="w-8 h-8 text-amber-950" />
-                <h1 className="text-3xl md:text-4xl font-bold text-amber-950" style={{ fontFamily: "var(--font-anton)" }}>
+                <Heart className="w-8 h-8 text-blue-950" />
+                <h1 className="text-3xl md:text-4xl font-bold text-blue-950" style={{ fontFamily: "var(--font-anton)" }}>
                   My Wishlist
                 </h1>
               </div>
@@ -114,7 +114,7 @@ export default function WishlistPage() {
             {/* Loading State */}
             {(isLoading || isLoadingProducts) && (
               <div className="flex justify-center items-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-950"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-950"></div>
               </div>
             )}
 
@@ -130,7 +130,7 @@ export default function WishlistPage() {
                 <p className="text-gray-500 mb-6">Start adding items you love to your wishlist</p>
                 <Button
                   onClick={() => router.push('/shop')}
-                  className="bg-amber-950 text-white hover:bg-amber-800 transition-all"
+                  className="bg-blue-950 text-white hover:bg-blue-800 transition-all"
                 >
                   <ShoppingBag className="w-4 h-4 mr-2" />
                   Start Shopping
@@ -202,7 +202,7 @@ export default function WishlistPage() {
                         {/* Action Buttons */}
                         <div className="space-y-2">
                           <Button
-                            className="w-full bg-amber-950 text-white hover:bg-amber-800 transition-all"
+                            className="w-full bg-blue-950 text-white hover:bg-blue-800 transition-all"
                             onClick={() => handleAddToCart(product)}
                           >
                             Add to Cart
@@ -233,7 +233,7 @@ export default function WishlistPage() {
                 <Button
                   variant="outline"
                   onClick={() => router.push('/shop')}
-                  className="border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all"
+                  className="border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white transition-all"
                 >
                   Continue Shopping
                 </Button>

@@ -84,9 +84,9 @@ const Testimonials = () => {
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <div className="border border-amber-950/20 py-2 px-6 rounded-full bg-white/50 backdrop-blur-sm">
+            <div className="border border-blue-950/20 py-2 px-6 rounded-full bg-white/50 backdrop-blur-sm">
               <span 
-                className="text-amber-950 font-bold text-sm"
+                className="text-blue-950 font-bold text-sm"
               >
                 Testimonials
               </span>
@@ -94,7 +94,7 @@ const Testimonials = () => {
           </motion.div>
 
           <motion.h2 
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-normal text-center text-amber-950 mb-6 leading-none"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-normal text-center text-blue-950 mb-6 leading-none"
             style={{ fontFamily: "var(--font-anton)" }}
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -114,7 +114,7 @@ const Testimonials = () => {
         </motion.div>
 
         <motion.div 
-          className="flex justify-center gap-6 [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)] max-h-[740px] overflow-hidden"
+          className="flex justify-center gap-1 sm:gap-6 [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)] max-h-[740px] overflow-hidden"
           initial={{ opacity: 0, y: 50 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 1, delay: 0.5 }}

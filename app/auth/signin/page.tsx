@@ -97,7 +97,7 @@ export default function SignInPage() {
               <Button
                 variant="ghost"
                 onClick={() => router.back()}
-                className="flex items-center gap-2 text-amber-950 hover:text-amber-800 hover:bg-white transition-all rounded-lg px-4 py-2"
+                className="flex items-center gap-2 text-blue-950 hover:text-blue-800 hover:bg-white transition-all rounded-lg px-4 py-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
@@ -112,7 +112,7 @@ export default function SignInPage() {
             >
               <Card className="bg-white shadow-lg border border-gray-200">
                 <CardHeader className="bg-white border-b border-gray-200 text-center">
-                  <CardTitle className="text-2xl font-bold text-amber-950">
+                  <CardTitle className="text-2xl font-bold text-blue-950">
                     Welcome to Hex & Hue
                   </CardTitle>
                   <p className="text-sm text-gray-600 mt-2">
@@ -125,7 +125,7 @@ export default function SignInPage() {
                   <Button
                     onClick={handleGoogleSignIn}
                     disabled={isLoading}
-                    className="w-full bg-amber-950 text-white hover:bg-amber-800 disabled:bg-gray-300 transition-all py-6 text-lg font-medium rounded-lg"
+                    className="w-full bg-blue-950 text-white hover:bg-blue-800 disabled:bg-gray-300 transition-all py-6 text-lg font-medium rounded-lg"
                   >
                     <Chrome className="w-5 h-5 mr-3" />
                     {isLoading ? "Signing in..." : "Sign in with Google"}
@@ -133,24 +133,24 @@ export default function SignInPage() {
 
                   {/* Features List */}
                   <div className="mt-8 space-y-4">
-                    <p className="text-sm font-medium text-amber-950 text-center">
+                    <p className="text-sm font-medium text-blue-950 text-center">
                       What you'll get:
                     </p>
                     <div className="space-y-2 text-sm text-gray-600">
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-amber-950 rounded-full"></div>
+                        <div className="w-2 h-2 bg-blue-950 rounded-full"></div>
                         <span>Personalized shopping experience</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-amber-950 rounded-full"></div>
+                        <div className="w-2 h-2 bg-blue-950 rounded-full"></div>
                         <span>Save your favorite items to wishlist</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-amber-950 rounded-full"></div>
+                        <div className="w-2 h-2 bg-blue-950 rounded-full"></div>
                         <span>Track your order history</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-amber-950 rounded-full"></div>
+                        <div className="w-2 h-2 bg-blue-950 rounded-full"></div>
                         <span>Faster checkout with saved addresses</span>
                       </div>
                     </div>
@@ -174,7 +174,7 @@ export default function SignInPage() {
               <Button
                 variant="outline"
                 onClick={() => router.push('/')}
-                className="text-amber-950 border-amber-950 hover:text-white hover:bg-amber-950 transition-all"
+                className="text-blue-950 border-blue-950 hover:text-white hover:bg-blue-950 transition-all"
               >
                 Continue as Guest
               </Button>

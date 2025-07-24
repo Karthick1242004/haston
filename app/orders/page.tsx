@@ -135,7 +135,7 @@ export default function OrderHistoryPage() {
               <Button
                 variant="ghost"
                 onClick={() => router.back()}
-                className="flex items-center gap-2 text-amber-950 hover:text-amber-800 hover:bg-white transition-all rounded-lg px-4 py-2"
+                className="flex items-center gap-2 text-blue-950 hover:text-blue-800 hover:bg-white transition-all rounded-lg px-4 py-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
@@ -149,7 +149,7 @@ export default function OrderHistoryPage() {
               transition={{ delay: 0.1 }}
               className="mb-8"
             >
-              <h1 className="text-3xl font-bold text-amber-950 mb-2">Order History</h1>
+              <h1 className="text-3xl font-bold text-blue-950 mb-2">Order History</h1>
               <p className="text-gray-600">Track and manage all your orders</p>
             </motion.div>
 
@@ -215,7 +215,7 @@ export default function OrderHistoryPage() {
                       </p>
                       <Button 
                         onClick={() => router.push('/shop')}
-                        className="bg-amber-950 text-white hover:bg-amber-800"
+                        className="bg-blue-950 text-white hover:bg-blue-800"
                       >
                         Start Shopping
                       </Button>
@@ -234,7 +234,7 @@ export default function OrderHistoryPage() {
                       <CardHeader className="bg-white border-b border-gray-200">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                           <div>
-                            <CardTitle className="text-xl font-bold text-amber-950 mb-2">
+                            <CardTitle className="text-xl font-bold text-blue-950 mb-2">
                               Order #{order.orderId}
                             </CardTitle>
                             <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -265,7 +265,7 @@ export default function OrderHistoryPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => router.push(`/order-success?orderId=${order.orderId}`)}
-                              className="border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white"
+                              className="border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white"
                             >
                               <Eye className="w-4 h-4 mr-2" />
                               View Details
@@ -319,11 +319,11 @@ export default function OrderHistoryPage() {
                           {order.estimatedDelivery && (
                             <div className="bg-amber-50 p-4 rounded-lg">
                               <div className="flex items-center">
-                                <Truck className="w-5 h-5 text-amber-700 mr-2" />
-                                <span className="font-medium text-amber-900">
+                                <Truck className="w-5 h-5 text-blue-700 mr-2" />
+                                <span className="font-medium text-blue-900">
                                   {order.status === 'delivered' ? 'Delivered on' : 'Estimated delivery'}:
                                 </span>
-                                <span className="ml-2 text-amber-800">
+                                <span className="ml-2 text-blue-800">
                                   {new Date(order.estimatedDelivery).toLocaleDateString('en-IN', {
                                     weekday: 'short',
                                     month: 'short',

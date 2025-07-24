@@ -321,7 +321,7 @@ export default function AdminPage() {
       <div className="min-h-screen bg-[#F1EFEE] py-20">
         <Header/>
         <div className="max-w-7xl mx-auto bg-white lg:p-10 p-4 shadow-xl border border-gray-200">
-          <h1 className="text-3xl font-bold text-amber-950 mb-8" style={{fontFamily:'var(--font-anton)'}}>Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-blue-950 mb-8" style={{fontFamily:'var(--font-anton)'}}>Admin Dashboard</h1>
           
           <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as 'products' | 'orders' | 'hero' | 'admins')} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
@@ -348,11 +348,11 @@ export default function AdminPage() {
                 <>
                   <div className="flex justify-between flex-wrap items-center mb-8">
                     <div>
-                      <h2 className="text-2xl font-bold text-amber-950 mb-2">Product Management</h2>
+                      <h2 className="text-2xl font-bold text-blue-950 mb-2">Product Management</h2>
                       <p className="text-gray-600">Manage your product catalog</p>
                     </div>
                     <Button 
-                      className="bg-amber-950 text-white mt-2 hover:bg-amber-800 transition-all shadow-lg px-4 py-2"
+                      className="bg-blue-950 text-white mt-2 hover:bg-blue-800 transition-all shadow-lg px-4 py-2"
                       onClick={() => {setMode('create');setName('');setPrice('');setDescription('');setSizes('S,M,L');setImages([]);setExistingImages([]);setIsLook(false);setEditId('')}}
                     >
                       <Plus className="w-4 h-4 mr-2" />
@@ -366,7 +366,7 @@ export default function AdminPage() {
                       <h3 className="text-xl font-semibold text-gray-600 mb-2">No Products Yet</h3>
                       <p className="text-gray-500 mb-6">Start building your catalog by adding your first product</p>
                       <Button 
-                        className="bg-amber-950 text-white hover:bg-amber-800"
+                        className="bg-blue-950 text-white hover:bg-blue-800"
                         onClick={() => {setMode('create');setName('');setPrice('');setDescription('');setSizes('S,M,L');setImages([]);setExistingImages([]);setIsLook(false);setEditId('')}}
                       >
                         Add Product
@@ -405,7 +405,7 @@ export default function AdminPage() {
                                 <p className="text-gray-600 text-sm line-clamp-2 mb-3">{p.description}</p>
                                 
                                 <div className="flex items-center justify-between mb-3">
-                                  <div className="text-2xl font-bold text-amber-950">₹{p.price}</div>
+                                  <div className="text-2xl font-bold text-blue-950">₹{p.price}</div>
                                   <Badge variant="outline" className="text-xs">
                                     {p.images?.length || 1} image{(p.images?.length || 1) > 1 ? 's' : ''}
                                   </Badge>
@@ -434,7 +434,7 @@ export default function AdminPage() {
                                 <Button 
                                   size="sm" 
                                   variant="outline"
-                                  className="flex-1 border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all"
+                                  className="flex-1 border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white transition-all"
                                   onClick={() => {setMode('edit');setEditId(p.id);setName(p.name);setPrice(p.price);setDescription(p.description);setSizes(p.sizes.join(','));setImages([]);setExistingImages(p.images||[]);setIsLook(!!p.isLook)}}
                                 >
                                   <Edit3 className="w-4 h-4 mr-2" />
@@ -483,7 +483,7 @@ export default function AdminPage() {
                                 <Button 
                                   size="sm" 
                                   variant="ghost" 
-                                  className="flex-1 text-xs text-gray-600 hover:text-amber-950"
+                                  className="flex-1 text-xs text-gray-600 hover:text-blue-950"
                                   onClick={() => window.open(`/product/${p.id}`, '_blank')}
                                 >
                                   <ExternalLink className="w-3 h-3 mr-1" />
@@ -492,7 +492,7 @@ export default function AdminPage() {
                                 <Button 
                                   size="sm" 
                                   variant="ghost" 
-                                  className="flex-1 text-xs text-gray-600 hover:text-amber-950"
+                                  className="flex-1 text-xs text-gray-600 hover:text-blue-950"
                                   onClick={() => {
                                     navigator.clipboard.writeText(`${window.location.origin}/product/${p.id}`)
                                     toast({
@@ -520,19 +520,19 @@ export default function AdminPage() {
                   <h2 className="text-2xl font-semibold mb-4">{mode === 'create' ? 'Add New Product' : 'Edit Product'}</h2>
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                      <label className="block mb-1 text-sm font-medium text-amber-950">Product Name</label>
+                      <label className="block mb-1 text-sm font-medium text-blue-950">Product Name</label>
                       <Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-none" required/>
                     </div>
                     <div>
-                      <label className="block mb-1 text-sm font-medium text-amber-950">Price (INR)</label>
+                      <label className="block mb-1 text-sm font-medium text-blue-950">Price (INR)</label>
                       <Input type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} className="rounded-none" required/>
                     </div>
                     <div>
-                      <label className="block mb-1 text-sm font-medium text-amber-950">Description</label>
+                      <label className="block mb-1 text-sm font-medium text-blue-950">Description</label>
                       <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="rounded-none" required/>
                     </div>
                     <div>
-                      <label className="block mb-1 text-sm font-medium text-amber-950">Sizes (comma separated)</label>
+                      <label className="block mb-1 text-sm font-medium text-blue-950">Sizes (comma separated)</label>
                       <Input value={sizes} onChange={(e) => setSizes(e.target.value)} className="rounded-none"/>
                     </div>
                     <div className="flex items-center gap-3">
@@ -541,7 +541,7 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label htmlFor="product-images" className="block mb-3 text-sm font-medium text-amber-950">
+                      <label htmlFor="product-images" className="block mb-3 text-sm font-medium text-blue-950">
                         {isLook ? 'Slider image (transparent) + 4 additional images' : 'Images (up to 5)'}
                         <br/><span className="text-xs text-gray-500">{isLook && 'First image should be backgroundless'}</span>
                       </label>
@@ -565,7 +565,7 @@ export default function AdminPage() {
                     
                     {mode === 'edit' && (
                       <div className="mb-6">
-                        <label className="block mb-2 text-sm font-medium text-amber-950">
+                        <label className="block mb-2 text-sm font-medium text-blue-950">
                           Existing Images
                           <span className="text-xs text-gray-500 ml-2">
                             (Click × to remove - images will be deleted from storage)
@@ -593,7 +593,7 @@ export default function AdminPage() {
                     )}
 
                     <div>
-                      <Button type="submit" disabled={isSubmitting} className="bg-amber-950 text-white rounded-none w-full py-3">
+                      <Button type="submit" disabled={isSubmitting} className="bg-blue-950 text-white rounded-none w-full py-3">
                         {isSubmitting ? 'Submitting...' : 'Submit'}
                       </Button>
                     </div>
@@ -773,7 +773,7 @@ export default function AdminPage() {
               <Dialog open={isOrderModalOpen} onOpenChange={setIsOrderModalOpen}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-amber-950">
+                    <DialogTitle className="text-2xl font-bold text-blue-950">
                       {isEditingOrder ? 'Edit Order' : 'Order Details'} - #{selectedOrder?.orderId}
                     </DialogTitle>
                   </DialogHeader>
@@ -863,7 +863,7 @@ export default function AdminPage() {
                               </div>
                             </div>
                           <div className="flex gap-3">
-                            <Button onClick={handleSaveOrder} className="bg-amber-950 text-white">
+                            <Button onClick={handleSaveOrder} className="bg-blue-950 text-white">
                               Save Changes
                             </Button>
                             <Button variant="outline" onClick={() => setIsEditingOrder(false)}>
@@ -879,7 +879,7 @@ export default function AdminPage() {
                               <CardContent className="p-4">
                                 <div className="flex items-center gap-3">
                                   <div className="p-2 bg-amber-100 rounded-lg">
-                                    <Package className="w-5 h-5 text-amber-950" />
+                                    <Package className="w-5 h-5 text-blue-950" />
                                   </div>
                                   <div>
                                     <p className="text-sm text-gray-600">Order ID</p>
@@ -1196,7 +1196,7 @@ export default function AdminPage() {
                             <Button variant="outline" onClick={() => setIsOrderModalOpen(false)}>
                               Close
                             </Button>
-                            <Button onClick={() => setIsEditingOrder(true)} className="bg-amber-950 text-white">
+                            <Button onClick={() => setIsEditingOrder(true)} className="bg-blue-950 text-white">
                               <Edit3 className="w-4 h-4 mr-2" />
                               Edit Order
                             </Button>

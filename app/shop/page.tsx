@@ -58,7 +58,7 @@ const colorMap: Record<string, string> = {
   "Forest Green": "bg-green-700",
   "Beige": "bg-amber-100",
   "Light Beige": "bg-amber-50",
-  "Brown": "bg-amber-700",
+  "Brown": "bg-blue-700",
   "Pink": "bg-pink-400",
   "Red": "bg-red-500",
   "Portage": "bg-blue-400",

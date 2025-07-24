@@ -41,11 +41,11 @@ export const TestimonialsColumn = (props: {
   // Create testimonial cards
   const testimonialCards = props.testimonials.map(({ text, image, name, role }, i) => (
     <div 
-      className="p-8 rounded-2xl border border-gray-200 shadow-lg shadow-amber-950/5 max-w-xs w-full bg-white hover:shadow-xl transition-shadow duration-300 mb-6" 
+      className="p-4 sm:p-8 rounded-2xl border border-gray-200 shadow-lg shadow-blue-950/5 max-w-xs w-full bg-white hover:shadow-xl transition-shadow duration-300 mb-6" 
       key={`card-${i}`}
     >
       <div className="text-gray-700 leading-relaxed text-sm mb-6">"{text}"</div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center flex-wrap gap-3">
         <img
           width={48}
           height={48}
@@ -55,7 +55,7 @@ export const TestimonialsColumn = (props: {
         />
         <div className="flex flex-col">
           <div 
-            className="font-medium tracking-normal leading-5 text-amber-950 text-sm" 
+            className="font-medium tracking-normal leading-5 text-blue-950 text-sm" 
             style={{ fontFamily: "var(--font-anton)" }}
           >
             {name}

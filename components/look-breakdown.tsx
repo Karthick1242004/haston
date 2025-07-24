@@ -190,9 +190,9 @@ export default function LookBreakdown() {
           transition={{ duration: 0.8 }}
         >
           <div className="flex flex-wrap items-center gap-8 mb-6">
-            <h2 className="text-6xl md:text-8xl mt-4 font-medium tracking-tight text-amber-950" style={{ fontFamily: "var(--font-anton)" }}>
+            <h2 className="text-6xl md:text-8xl mt-4 font-medium tracking-tight text-blue-950" style={{ fontFamily: "var(--font-anton)" }}>
               THE{" "}
-              <span style={{ fontFamily: "var(--font-allura)" }} className="text-7xl md:text-9xl text-amber-950 font-medium">
+              <span style={{ fontFamily: "var(--font-allura)" }} className="text-7xl md:text-9xl text-blue-950 font-medium">
                 Look
               </span>{" "}
               BREAKDOWN
@@ -218,8 +218,8 @@ export default function LookBreakdown() {
           {!isDataLoaded && (
             <div className="absolute inset-0 flex items-center justify-center bg-[#F1EFEE]">
               <div className="text-center">
-                <div className="w-16 h-16 border-4 border-amber-950/20 border-t-amber-950 rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-amber-950 font-medium">Loading looks...</p>
+                <div className="w-16 h-16 border-4 border-blue-950/20 border-t-blue-950 rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-blue-950 font-medium">Loading looks...</p>
               </div>
             </div>
           )}
@@ -316,7 +316,7 @@ export default function LookBreakdown() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
-            <ChevronLeft className="w-6 h-6 text-amber-950" />
+            <ChevronLeft className="w-6 h-6 text-blue-950" />
           </motion.button>
 
           <motion.button
@@ -329,7 +329,7 @@ export default function LookBreakdown() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
-            <ChevronRight className="w-6 h-6 text-amber-950" />
+            <ChevronRight className="w-6 h-6 text-blue-950" />
           </motion.button>
           </>
           )}
@@ -354,7 +354,7 @@ export default function LookBreakdown() {
             >
               {carouselItems?.length>0 && (
                 <>
-                  <h3 className="text-4xl font-bold text-amber-950 mb-4" style={{ fontFamily: "var(--font-anton)" }}>
+                  <h3 className="text-4xl font-bold text-blue-950 mb-4" style={{ fontFamily: "var(--font-anton)" }}>
                     {carouselItems[safeIndex]?.title}
                   </h3>
                   <p className="text-lg text-gray-600 mb-6 leading-relaxed">
@@ -366,7 +366,7 @@ export default function LookBreakdown() {
               {carouselItems?.length > 0 && carouselItems[safeIndex]?.sizes && (
                 <div className="space-y-4 mb-6">
                   <div className="text-center">
-                    <h4 className="text-lg font-semibold text-amber-950 mb-3">Select Size</h4>
+                    <h4 className="text-lg font-semibold text-blue-950 mb-3">Select Size</h4>
                     <div className="flex justify-center">
                       <div className="grid grid-cols-4 gap-2 mx-auto max-w-sm">
                         {carouselItems[safeIndex].sizes.map((size) => (
@@ -375,8 +375,8 @@ export default function LookBreakdown() {
                             onClick={() => setSelectedSize(size)}
                             className={`py-2 px-3 text-sm border rounded transition-all duration-200 font-medium ${
                               selectedSize === size
-                                ? "border-amber-950 bg-amber-950 text-white"
-                                : "border-gray-300 hover:border-amber-700 hover:bg-amber-50"
+                                ? "border-blue-950 bg-blue-950 text-white"
+                                : "border-gray-300 hover:border-blue-700 hover:bg-blue-50"
                             }`}
                           >
                             {size}
@@ -389,14 +389,14 @@ export default function LookBreakdown() {
                 </div>
               )}
 
-              <div className="flex items-center justify-center gap-6 mb-8">
+              <div className="flex items-center flex-wrap justify-center gap-6 mb-8">
                 {carouselItems?.length>0 && (
-                  <span className="text-3xl font-bold text-amber-950">{carouselItems[safeIndex]?.price}</span>
+                  <span className="text-3xl font-bold text-blue-950">{carouselItems[safeIndex]?.price}</span>
                 )}
                 <div className="flex items-center gap-3">
                 <Button 
                   variant="outline"
-                  className="border rounded-none font-semibold bg-transparent border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white px-8 py-3 transition-all duration-300"
+                  className="border rounded-none font-semibold bg-transparent border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white px-8 py-3 transition-all duration-300"
                   onClick={handleAddToCart}
                     disabled={!selectedSize}
                 >
@@ -407,7 +407,7 @@ export default function LookBreakdown() {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="border rounded-none bg-transparent border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all duration-300"
+                    className="border rounded-none bg-transparent border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white transition-all duration-300"
                     onClick={handleToggleWishlist}
                     disabled={wishlistLoading}
                   >
@@ -439,7 +439,7 @@ export default function LookBreakdown() {
               key={index}
               className={`w-4 h-4 rounded-full transition-all duration-300 ${
                 index === currentIndex 
-                  ? 'bg-amber-950 scale-125' 
+                  ? 'bg-blue-950 scale-125' 
                   : 'bg-gray-300 hover:bg-gray-400'
               }`}
               onClick={() => goToSlide(index)}
@@ -463,7 +463,7 @@ export default function LookBreakdown() {
           </p>
           <Button 
             variant="outline"
-            className="border rounded-none font-semibold bg-transparent border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white px-10 py-4 transition-all duration-300"
+            className="border rounded-none font-semibold bg-transparent border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white px-10 py-4 transition-all duration-300"
           >
             View All Outfits
           </Button>

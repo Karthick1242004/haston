@@ -73,40 +73,40 @@ export default function Footer() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <h4 className="text-xl font-bold font-sans tracking-wide text-amber-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>COMPANY</h4>
+            <h4 className="text-xl font-bold font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>COMPANY</h4>
             <ul className="space-y-3 text-xs text-gray-600">
               <li>
-                <a href="#" className="hover:text-amber-950 transition-colors duration-200">
+                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
                   About Us
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-amber-950 transition-colors duration-200">
+                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
                   FAQ
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-amber-950 transition-colors duration-200">
+                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
                   Returns & Exchanges
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-amber-950 transition-colors duration-200">
+                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
                   Shipping Information
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-amber-950 transition-colors duration-200">
+                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
                   Size Guide
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-amber-950 transition-colors duration-200">
+                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-amber-950 transition-colors duration-200">
+                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
                   Terms & Conditions
                 </a>
               </li>
@@ -119,30 +119,30 @@ export default function Footer() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <h4 className="text-xl font-bold font-sans tracking-wide text-amber-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>SHOP</h4>
+            <h4 className="text-xl font-bold font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>SHOP</h4>
             <ul className="space-y-3 text-xs text-gray-600">
               <li>
-                <a href="#" className="hover:text-amber-950 transition-colors duration-200">
+                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
                   Summer Collection 2025
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-amber-950 transition-colors duration-200">
+                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
                   Outfits
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-amber-950 transition-colors duration-200">
+                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
                   Essentials
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-amber-950 transition-colors duration-200">
+                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
                   Best Sellers
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-amber-950 transition-colors duration-200">
+                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
                   Sale
                 </a>
               </li>
@@ -155,7 +155,7 @@ export default function Footer() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <h4 className="text-xl font-bold font-sans tracking-wide text-amber-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>STAY CONNECTED</h4>
+            <h4 className="text-xl font-bold font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>STAY CONNECTED</h4>
             <p className="text-gray-600 mb-6 text-sm">
               Subscribe to Our Newsletter for the Latest Updates, Offers, and Exclusive Releases
             </p>
@@ -180,7 +180,7 @@ export default function Footer() {
               </motion.div>
               <Button
                 type="submit"
-                className="w-full bg-amber-950 rounded-none hover:bg-amber-950 text-white transition-colors duration-200"
+                className="w-full bg-blue-950 rounded-none hover:bg-blue-950 text-white transition-colors duration-200"
               >
                 Subscribe
               </Button>
@@ -191,7 +191,7 @@ export default function Footer() {
                 <motion.a
                   key={index}
                   href="#"
-                  className="p-2 bg-amber-950 text-white rounded-full hover:bg-amber-950 transition-colors duration-200"
+                  className="p-2 bg-blue-950 text-white rounded-full hover:bg-blue-950 transition-colors duration-200"
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
                 >

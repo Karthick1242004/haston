@@ -259,7 +259,7 @@ export default function ProfilePage() {
               <Button
                 variant="ghost"
                 onClick={() => router.back()}
-                className="flex items-center gap-2 text-amber-950 hover:text-amber-800 hover:bg-white transition-all rounded-lg px-4 py-2"
+                className="flex items-center gap-2 text-blue-950 hover:text-blue-800 hover:bg-white transition-all rounded-lg px-4 py-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
@@ -289,13 +289,13 @@ export default function ProfilePage() {
                                 className="rounded-full ring-4 ring-white shadow-lg"
                               />
                             ) : (
-                              <div className="w-20 h-20 bg-amber-950 rounded-full flex items-center justify-center ring-4 ring-white shadow-lg">
+                              <div className="w-20 h-20 bg-blue-950 rounded-full flex items-center justify-center ring-4 ring-white shadow-lg">
                                 <User className="w-8 h-8 text-white" />
                               </div>
                             )}
                           </div>
                           <div>
-                            <h1 className="text-2xl font-bold text-amber-950">
+                            <h1 className="text-2xl font-bold text-blue-950">
                               {userProfile?.firstName && userProfile?.lastName 
                                 ? `${userProfile.firstName} ${userProfile.lastName}`
                                 : session.user?.name || 'Welcome!'}
@@ -313,7 +313,7 @@ export default function ProfilePage() {
                           variant="outline"
                           size="sm"
                           onClick={() => setIsEditing(!isEditing)}
-                          className="border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all"
+                          className="border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white transition-all"
                         >
                           {isEditing ? (
                             <>
@@ -340,7 +340,7 @@ export default function ProfilePage() {
                 >
                   <Card className="bg-white shadow-lg border border-gray-200">
                     <CardHeader className="bg-white border-b border-gray-200">
-                      <CardTitle className="text-xl font-bold text-amber-950 flex items-center">
+                      <CardTitle className="text-xl font-bold text-blue-950 flex items-center">
                         <Settings className="w-5 h-5 mr-2" />
                         Personal Information
                       </CardTitle>
@@ -407,7 +407,7 @@ export default function ProfilePage() {
                             <Button
                               onClick={handleSaveProfile}
                               disabled={isLoading}
-                              className="bg-amber-950 text-white hover:bg-amber-800 transition-all"
+                              className="bg-blue-950 text-white hover:bg-blue-800 transition-all"
                             >
                               <Save className="w-4 h-4 mr-2" />
                               {isLoading ? 'Saving...' : 'Save Changes'}
@@ -418,7 +418,7 @@ export default function ProfilePage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-4">
                             <div className="flex items-center space-x-3">
-                              <User className="w-5 h-5 text-amber-950" />
+                              <User className="w-5 h-5 text-blue-950" />
                               <div>
                                 <p className="text-sm text-gray-500">Full Name</p>
                                 <p className="font-medium">
@@ -429,7 +429,7 @@ export default function ProfilePage() {
                               </div>
                             </div>
                             <div className="flex items-center space-x-3">
-                              <Phone className="w-5 h-5 text-amber-950" />
+                              <Phone className="w-5 h-5 text-blue-950" />
                               <div>
                                 <p className="text-sm text-gray-500">Phone</p>
                                 <p className="font-medium">{userProfile?.phone || 'Not provided'}</p>
@@ -438,7 +438,7 @@ export default function ProfilePage() {
                           </div>
                           <div className="space-y-4">
                             <div className="flex items-center space-x-3">
-                              <Calendar className="w-5 h-5 text-amber-950" />
+                              <Calendar className="w-5 h-5 text-blue-950" />
                               <div>
                                 <p className="text-sm text-gray-500">Date of Birth</p>
                                 <p className="font-medium">
@@ -449,7 +449,7 @@ export default function ProfilePage() {
                               </div>
                             </div>
                             <div className="flex items-center space-x-3">
-                              <User className="w-5 h-5 text-amber-950" />
+                              <User className="w-5 h-5 text-blue-950" />
                               <div>
                                 <p className="text-sm text-gray-500">Gender</p>
                                 <p className="font-medium capitalize">
@@ -473,7 +473,7 @@ export default function ProfilePage() {
                   <Card className="bg-white shadow-lg border border-gray-200">
                     <CardHeader className="bg-white border-b border-gray-200">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl font-bold text-amber-950 flex items-center">
+                        <CardTitle className="text-xl font-bold text-blue-950 flex items-center">
                           <MapPin className="w-5 h-5 mr-2" />
                           Saved Addresses
                         </CardTitle>
@@ -482,7 +482,7 @@ export default function ProfilePage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all"
+                          className="border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white transition-all"
                               onClick={() => {
                                 resetAddressForm()
                                 setIsAddressDialogOpen(true)
@@ -494,7 +494,7 @@ export default function ProfilePage() {
                           </DialogTrigger>
                           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle className="text-xl font-bold text-amber-950">Add New Address</DialogTitle>
+                              <DialogTitle className="text-xl font-bold text-blue-950">Add New Address</DialogTitle>
                             </DialogHeader>
                             <div className="space-y-4 mt-4">
                               {/* Address Type */}
@@ -657,7 +657,7 @@ export default function ProfilePage() {
                                 <Button
                                   onClick={handleSaveAddress}
                                   disabled={isAddingAddress || !addressForm.firstName || !addressForm.lastName || !addressForm.address1 || !addressForm.city || !addressForm.state || !addressForm.zipCode}
-                                  className="bg-amber-950 text-white hover:bg-amber-800 transition-all"
+                                  className="bg-blue-950 text-white hover:bg-blue-800 transition-all"
                                 >
                                   <Save className="w-4 h-4 mr-2" />
                                   {isAddingAddress ? 'Saving...' : 'Save Address'}
@@ -743,12 +743,12 @@ export default function ProfilePage() {
                 >
                   <Card className="bg-white shadow-lg border border-gray-200">
                     <CardHeader className="bg-white border-b border-gray-200">
-                      <CardTitle className="text-xl font-bold text-amber-950">Quick Stats</CardTitle>
+                      <CardTitle className="text-xl font-bold text-blue-950">Quick Stats</CardTitle>
                     </CardHeader>
                     <CardContent className="p-6 space-y-4">
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center space-x-3">
-                          <ShoppingBag className="w-5 h-5 text-amber-950" />
+                          <ShoppingBag className="w-5 h-5 text-blue-950" />
                           <span className="font-medium">Orders</span>
                         </div>
                         <Badge className="bg-gray-100 text-gray-800">
@@ -757,7 +757,7 @@ export default function ProfilePage() {
                       </div>
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center space-x-3">
-                          <Heart className="w-5 h-5 text-amber-950" />
+                          <Heart className="w-5 h-5 text-blue-950" />
                           <span className="font-medium">Wishlist</span>
                         </div>
                         <Badge className="bg-gray-100 text-gray-800">
@@ -766,7 +766,7 @@ export default function ProfilePage() {
                       </div>
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center space-x-3">
-                          <MapPin className="w-5 h-5 text-amber-950" />
+                          <MapPin className="w-5 h-5 text-blue-950" />
                           <span className="font-medium">Addresses</span>
                         </div>
                         <Badge className="bg-gray-100 text-gray-800">
@@ -785,7 +785,7 @@ export default function ProfilePage() {
                 >
                   <Card className="bg-white shadow-lg border border-gray-200">
                     <CardHeader className="bg-white border-b border-gray-200">
-                      <CardTitle className="text-xl font-bold text-amber-950">Quick Actions</CardTitle>
+                      <CardTitle className="text-xl font-bold text-blue-950">Quick Actions</CardTitle>
                     </CardHeader>
                     <CardContent className="p-6 space-y-3">
                       <Button
@@ -812,7 +812,7 @@ export default function ProfilePage() {
                         <ShoppingBag className="w-4 h-4 mr-3" />
                         Order History
                         {orderCount > 0 && (
-                          <Badge className="ml-auto bg-amber-950 text-white">
+                          <Badge className="ml-auto bg-blue-950 text-white">
                             {orderCount}
                           </Badge>
                         )}

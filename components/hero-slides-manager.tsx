@@ -202,7 +202,7 @@ export default function HeroSlidesManager() {
     }
   }
 
-  const SlideForm = ({ isEdit = false }: { isEdit?: boolean }) => (
+  const renderSlideForm = (isEdit = false) => (
     <div className="space-y-6">
       {/* Image Upload */}
       <div className="space-y-4">
@@ -297,7 +297,7 @@ export default function HeroSlidesManager() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-950" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-950" />
       </div>
     )
   }
@@ -307,13 +307,13 @@ export default function HeroSlidesManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-amber-950">Hero Slides</h2>
+          <h2 className="text-2xl font-bold text-blue-950">Hero Slides</h2>
           <p className="text-gray-600">Manage hero section slides and content</p>
         </div>
         
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-amber-950 hover:bg-amber-900">
+            <Button className="bg-blue-950 hover:bg-blue-900">
               <Plus className="w-4 h-4 mr-2" />
               Add Slide
             </Button>
@@ -322,7 +322,7 @@ export default function HeroSlidesManager() {
             <DialogHeader>
               <DialogTitle>Create New Hero Slide</DialogTitle>
             </DialogHeader>
-            <SlideForm />
+            {renderSlideForm()}
             <DialogFooter>
               <Button 
                 variant="outline" 
@@ -336,7 +336,7 @@ export default function HeroSlidesManager() {
               <Button 
                 onClick={handleCreate}
                 disabled={isSubmitting}
-                className="bg-amber-950 hover:bg-amber-900"
+                className="bg-blue-950 hover:bg-blue-900"
               >
                 {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Create Slide
@@ -421,7 +421,7 @@ export default function HeroSlidesManager() {
           <p className="text-gray-400 mb-4">Create your first slide to get started</p>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-amber-950 hover:bg-amber-900">
+              <Button className="bg-blue-950 hover:bg-blue-900">
                 <Plus className="w-4 h-4 mr-2" />
                 Create First Slide
               </Button>
@@ -436,7 +436,7 @@ export default function HeroSlidesManager() {
           <DialogHeader>
             <DialogTitle>Edit Hero Slide</DialogTitle>
           </DialogHeader>
-          <SlideForm isEdit />
+          {renderSlideForm(true)}
           <DialogFooter>
             <Button 
               variant="outline" 
@@ -451,7 +451,7 @@ export default function HeroSlidesManager() {
             <Button 
               onClick={handleUpdate}
               disabled={isSubmitting}
-              className="bg-amber-950 hover:bg-amber-900"
+              className="bg-blue-950 hover:bg-blue-900"
             >
               {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Update Slide

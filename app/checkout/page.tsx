@@ -404,7 +404,7 @@ export default function CheckoutPage() {
           contact: userDetails.phone,
         },
         theme: {
-          color: '#92400e', // amber-950
+          color: '#92400e', // blue-950
         },
       }
 
@@ -433,10 +433,10 @@ export default function CheckoutPage() {
       <PageTransition>
         <div className="min-h-screen bg-[#F1EFEE] flex items-center justify-center">
           <div className="text-center bg-white rounded-2xl p-12 shadow-lg border border-gray-200">
-            <ShoppingBag className="w-16 h-16 mx-auto text-amber-950 mb-4" />
-            <h2 className="text-2xl font-bold text-amber-950 mb-2">Your cart is empty</h2>
+            <ShoppingBag className="w-16 h-16 mx-auto text-blue-950 mb-4" />
+            <h2 className="text-2xl font-bold text-blue-950 mb-2">Your cart is empty</h2>
             <p className="text-gray-600 mb-6">Add some items to proceed to checkout</p>
-            <Button onClick={() => router.push('/')} className="bg-amber-950 text-white hover:bg-amber-800 transition-all">
+            <Button onClick={() => router.push('/')} className="bg-blue-950 text-white hover:bg-blue-800 transition-all">
               Continue Shopping
             </Button>
           </div>
@@ -516,7 +516,7 @@ export default function CheckoutPage() {
               <Button
                 variant="ghost"
                 onClick={() => router.back()}
-                className="flex items-center gap-2 text-amber-950 hover:text-amber-800 hover:bg-white transition-all rounded-lg px-4 py-2"
+                className="flex items-center gap-2 text-blue-950 hover:text-blue-800 hover:bg-white transition-all rounded-lg px-4 py-2"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Back to Shopping
@@ -535,7 +535,7 @@ export default function CheckoutPage() {
                   <Card className="bg-white shadow-lg border border-gray-200">
                     <CardHeader className="bg-white">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-2xl font-bold text-amber-950">Contact Information</CardTitle>
+                        <CardTitle className="text-2xl font-bold text-blue-950">Contact Information</CardTitle>
                         {session?.user && (
                           <div className="flex items-center space-x-3">
                             {session.user.image ? (
@@ -547,10 +547,10 @@ export default function CheckoutPage() {
                                 className="rounded-full"
                               />
                             ) : (
-                              <User className="w-8 h-8 text-amber-950" />
+                              <User className="w-8 h-8 text-blue-950" />
                             )}
                             <div className="text-right">
-                              <p className="text-sm font-medium text-amber-950">{session.user.name}</p>
+                              <p className="text-sm font-medium text-blue-950">{session.user.name}</p>
                               <p className="text-xs text-gray-600">Signed In</p>
                             </div>
                           </div>
@@ -560,7 +560,7 @@ export default function CheckoutPage() {
                         <p className="text-sm text-gray-600 mt-2">
                           <Button 
                             variant="link" 
-                            className="p-0 h-auto text-amber-950 hover:text-amber-800"
+                            className="p-0 h-auto text-blue-950 hover:text-blue-800"
                             onClick={() => router.push('/auth/signin')}
                           >
                             Sign in
@@ -574,7 +574,7 @@ export default function CheckoutPage() {
                       {session?.user && userProfile?.addresses && userProfile.addresses.length > 0 && (
                                                   <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <h3 className="text-lg font-semibold text-amber-950">Saved Addresses</h3>
+                              <h3 className="text-lg font-semibold text-blue-950">Saved Addresses</h3>
                               <Badge className="bg-gray-100 text-gray-800">
                                 {userProfile.addresses.length} saved
                               </Badge>
@@ -585,7 +585,7 @@ export default function CheckoutPage() {
                                 key={address.id}
                                 className={`p-3 border rounded-lg cursor-pointer transition-all ${
                                   selectedAddressId === address.id
-                                    ? 'border-amber-950 bg-gray-50'
+                                    ? 'border-blue-950 bg-gray-50'
                                     : 'border-gray-200 hover:border-gray-300'
                                 }`}
                                 onClick={() => handleAddressSelection(address.id)}
@@ -607,7 +607,7 @@ export default function CheckoutPage() {
                                     </p>
                                   </div>
                                   {selectedAddressId === address.id && (
-                                    <div className="w-5 h-5 bg-amber-950 rounded-full flex items-center justify-center">
+                                    <div className="w-5 h-5 bg-blue-950 rounded-full flex items-center justify-center">
                                       <div className="w-2 h-2 bg-white rounded-full"></div>
                                     </div>
                                   )}
@@ -741,7 +741,7 @@ export default function CheckoutPage() {
                 >
                   <Card className="bg-white shadow-lg border border-gray-200">
                     <CardHeader className="bg-white">
-                      <CardTitle className="text-2xl font-bold text-amber-950">Your Products</CardTitle>
+                      <CardTitle className="text-2xl font-bold text-blue-950">Your Products</CardTitle>
                       <p className="text-sm text-gray-600 font-medium">{getCartItemsCount()} items in your cart</p>
                     </CardHeader>
                     <CardContent>
@@ -832,7 +832,7 @@ export default function CheckoutPage() {
                         <Button
                           variant="outline"
                           onClick={() => router.push('/')}
-                          className="text-amber-950 border-amber-950 hover:text-white hover:bg-amber-950 transition-all"
+                          className="text-blue-950 border-blue-950 hover:text-white hover:bg-blue-950 transition-all"
                         >
                           Continue Shopping
                         </Button>
@@ -852,7 +852,7 @@ export default function CheckoutPage() {
                 >
                   <Card className="bg-white shadow-lg border border-gray-200">
                     <CardHeader className="bg-white">
-                      <CardTitle className="text-2xl font-bold text-amber-950">Order Review</CardTitle>
+                      <CardTitle className="text-2xl font-bold text-blue-950">Order Review</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       {/* Discount Code */}
@@ -869,7 +869,7 @@ export default function CheckoutPage() {
                           <Button
                             variant="outline"
                             onClick={applyDiscountCode}
-                            className="px-6 bg-amber-950 text-white border-0 hover:bg-amber-800"
+                            className="px-6 bg-blue-950 text-white border-0 hover:bg-blue-800"
                           >
                             Apply
                           </Button>
@@ -924,7 +924,7 @@ export default function CheckoutPage() {
                         <Button
                           onClick={handleCheckout}
                           disabled={!isFormValid || isProcessingPayment}
-                          className="w-full bg-amber-950 text-white hover:bg-amber-800 disabled:bg-gray-300 disabled:cursor-not-allowed py-6 text-lg font-medium transition-all"
+                          className="w-full bg-blue-950 text-white hover:bg-blue-800 disabled:bg-gray-300 disabled:cursor-not-allowed py-6 text-lg font-medium transition-all"
                         >
                           {isProcessingPayment ? (
                             <>

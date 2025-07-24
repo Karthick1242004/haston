@@ -32,8 +32,8 @@ export default function HomePage() {
         <Header />
         <main>
           <HeroSection />
-          <LookBreakdown />
           <PopularProducts />
+          <LookBreakdown />
           <Testimonials/>
         </main>
         <Footer />

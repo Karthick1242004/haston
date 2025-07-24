@@ -47,7 +47,7 @@ function ErrorContent() {
               <Button
                 variant="ghost"
                 onClick={() => router.push('/')}
-                className="flex items-center gap-2 text-amber-950 hover:text-amber-800 hover:bg-white transition-all rounded-lg px-4 py-2"
+                className="flex items-center gap-2 text-blue-950 hover:text-blue-800 hover:bg-white transition-all rounded-lg px-4 py-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Home
@@ -67,7 +67,7 @@ function ErrorContent() {
                       <AlertTriangle className="w-8 h-8 text-white" />
                     </div>
                   </div>
-                  <CardTitle className="text-2xl font-bold text-amber-950">
+                  <CardTitle className="text-2xl font-bold text-blue-950">
                     Authentication Error
                   </CardTitle>
                   <p className="text-sm text-gray-600 mt-2">
@@ -80,7 +80,7 @@ function ErrorContent() {
                   <div className="space-y-3">
                     <Button
                       onClick={() => router.push('/auth/signin')}
-                      className="w-full bg-amber-950 text-white hover:bg-amber-800 transition-all py-4 text-lg font-medium rounded-lg"
+                      className="w-full bg-blue-950 text-white hover:bg-blue-800 transition-all py-4 text-lg font-medium rounded-lg"
                     >
                       <RefreshCcw className="w-5 h-5 mr-3" />
                       Try Again
@@ -89,7 +89,7 @@ function ErrorContent() {
                     <Button
                       variant="outline"
                       onClick={() => router.push('/')}
-                      className="w-full text-gray-600 border-gray-300 hover:text-amber-950 hover:bg-gray-50 transition-all py-4"
+                      className="w-full text-gray-600 border-gray-300 hover:text-blue-950 hover:bg-gray-50 transition-all py-4"
                     >
                       Continue as Guest
                     </Button>
@@ -126,8 +126,8 @@ export default function AuthErrorPage() {
       <PageTransition>
         <div className="min-h-screen bg-[#F1EFEE] flex items-center justify-center">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-gray-200 border-t-amber-950 rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-amber-950">Loading...</p>
+            <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-950 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-blue-950">Loading...</p>
           </div>
         </div>
       </PageTransition>

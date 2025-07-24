@@ -121,8 +121,8 @@ function OrderSuccessContent() {
       <PageTransition>
         <div className="min-h-screen bg-[#F1EFEE] flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-amber-950 mb-4">Please sign in to view your order</h2>
-            <Button onClick={() => router.push('/auth/signin')} className="bg-amber-950 text-white">
+            <h2 className="text-2xl font-bold text-blue-950 mb-4">Please sign in to view your order</h2>
+            <Button onClick={() => router.push('/auth/signin')} className="bg-blue-950 text-white">
               Sign In
             </Button>
           </div>
@@ -136,8 +136,8 @@ function OrderSuccessContent() {
       <PageTransition>
         <div className="min-h-screen bg-[#F1EFEE] flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-amber-950 mx-auto mb-4"></div>
-            <p className="text-amber-950 font-medium">Loading your order details...</p>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-950 mx-auto mb-4"></div>
+            <p className="text-blue-950 font-medium">Loading your order details...</p>
           </div>
         </div>
       </PageTransition>
@@ -154,7 +154,7 @@ function OrderSuccessContent() {
             </div>
             <h2 className="text-2xl font-bold text-red-600 mb-2">Order Not Found</h2>
             <p className="text-gray-600 mb-6">{error || 'We couldn\'t find your order details.'}</p>
-            <Button onClick={() => router.push('/')} className="bg-amber-950 text-white">
+            <Button onClick={() => router.push('/')} className="bg-blue-950 text-white">
               <Home className="w-4 h-4 mr-2" />
               Back to Home
             </Button>
@@ -205,15 +205,15 @@ function OrderSuccessContent() {
                         alt={session.user.name || 'User'}
                         width={48}
                         height={48}
-                        className="rounded-full ring-4 ring-amber-950/10"
+                        className="rounded-full ring-4 ring-blue-950/10"
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-amber-950 rounded-full flex items-center justify-center">
+                      <div className="w-12 h-12 bg-blue-950 rounded-full flex items-center justify-center">
                         <User className="w-6 h-6 text-white" />
                       </div>
                     )}
                     <div className="text-left">
-                      <h2 className="text-2xl font-bold text-amber-950">
+                      <h2 className="text-2xl font-bold text-blue-950">
                         Welcome back, {session.user?.name?.split(' ')[0] || 'Customer'}!
                       </h2>
                       <p className="text-gray-600">Thank you for choosing us</p>
@@ -235,7 +235,7 @@ function OrderSuccessContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-4xl font-bold text-amber-950 mb-4"
+                className="text-4xl font-bold text-blue-950 mb-4"
               >
                 Order Confirmed! 🎉
               </motion.h1>
@@ -255,7 +255,7 @@ function OrderSuccessContent() {
                 transition={{ delay: 0.5 }}
                 className="flex items-center justify-center space-x-4"
               >
-                <Badge className="text-lg px-4 py-2 bg-amber-950 text-white">
+                <Badge className="text-lg px-4 py-2 bg-blue-950 text-white">
                   Order #{order.orderId}
                 </Badge>
                 <Badge className={`text-lg px-4 py-2 ${getStatusColor(order.status)}`}>
@@ -274,7 +274,7 @@ function OrderSuccessContent() {
             >
               <Card className="bg-white shadow-lg border border-gray-200">
                 <CardHeader className="bg-white border-b border-gray-200">
-                  <CardTitle className="text-2xl font-bold text-amber-950">Order Status</CardTitle>
+                  <CardTitle className="text-2xl font-bold text-blue-950">Order Status</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -332,7 +332,7 @@ function OrderSuccessContent() {
               >
                 <Card className="bg-white shadow-lg border border-gray-200">
                   <CardHeader className="bg-white border-b border-gray-200">
-                    <CardTitle className="text-2xl font-bold text-amber-950 flex items-center">
+                    <CardTitle className="text-2xl font-bold text-blue-950 flex items-center">
                       <Package className="w-6 h-6 mr-3" />
                       Order Details
                     </CardTitle>
@@ -411,10 +411,10 @@ function OrderSuccessContent() {
                       {/* Delivery Information */}
                       <div className="bg-amber-50 p-4 rounded-lg">
                         <div className="flex items-center mb-2">
-                          <Calendar className="w-5 h-5 text-amber-700 mr-2" />
-                          <span className="font-medium text-amber-900">Estimated Delivery</span>
+                          <Calendar className="w-5 h-5 text-blue-700 mr-2" />
+                          <span className="font-medium text-blue-900">Estimated Delivery</span>
                         </div>
-                        <p className="text-amber-800">
+                        <p className="text-blue-800">
                           {order.estimatedDelivery 
                             ? new Date(order.estimatedDelivery).toLocaleDateString('en-IN', {
                                 weekday: 'long',
@@ -441,7 +441,7 @@ function OrderSuccessContent() {
                 {/* Payment Details */}
                 <Card className="bg-white shadow-lg border border-gray-200">
                   <CardHeader className="bg-white border-b border-gray-200">
-                    <CardTitle className="text-xl font-bold text-amber-950 flex items-center">
+                    <CardTitle className="text-xl font-bold text-blue-950 flex items-center">
                       <CreditCard className="w-5 h-5 mr-3" />
                       Payment Details
                     </CardTitle>
@@ -484,7 +484,7 @@ function OrderSuccessContent() {
                 {/* Shipping Address */}
                 <Card className="bg-white shadow-lg border border-gray-200">
                   <CardHeader className="bg-white border-b border-gray-200">
-                    <CardTitle className="text-xl font-bold text-amber-950 flex items-center">
+                    <CardTitle className="text-xl font-bold text-blue-950 flex items-center">
                       <MapPin className="w-5 h-5 mr-3" />
                       Shipping Address
                     </CardTitle>
@@ -513,7 +513,7 @@ function OrderSuccessContent() {
                 >
                   <Button
                     onClick={() => router.push('/profile')}
-                    className="w-full bg-amber-950 text-white hover:bg-amber-800 transition-all py-6"
+                    className="w-full bg-blue-950 text-white hover:bg-blue-800 transition-all py-6"
                   >
                     <Receipt className="w-5 h-5 mr-3" />
                     View Order History
@@ -523,7 +523,7 @@ function OrderSuccessContent() {
                   <Button
                     variant="outline"
                     onClick={() => router.push('/shop')}
-                    className="w-full border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all py-4"
+                    className="w-full border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white transition-all py-4"
                   >
                     <ShoppingBag className="w-4 h-4 mr-2" />
                     Continue Shopping
@@ -552,8 +552,8 @@ export default function OrderSuccessPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-[#F1EFEE] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-amber-950 mx-auto mb-4"></div>
-          <p className="text-amber-950 font-medium">Loading...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-950 mx-auto mb-4"></div>
+          <p className="text-blue-950 font-medium">Loading...</p>
         </div>
       </div>
     }>

@@ -55,8 +55,8 @@ export default function HeroSection() {
     return (
       <section className="h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-amber-950 mx-auto mb-4"></div>
-          <p className="text-amber-950 text-lg">Loading...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-950 mx-auto mb-4"></div>
+          <p className="text-blue-950 text-lg">Loading...</p>
         </div>
       </section>
     )
@@ -69,7 +69,7 @@ export default function HeroSection() {
           <p className="text-red-600 text-lg mb-4">{error || 'No slides available'}</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-amber-950 text-white rounded hover:bg-amber-900 transition-colors"
+            className="px-4 py-2 bg-blue-950 text-white rounded hover:bg-blue-900 transition-colors"
           >
             Retry
           </button>

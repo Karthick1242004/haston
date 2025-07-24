@@ -69,14 +69,14 @@ export default function AboutPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => router.back()}
-                className="flex items-center gap-2 text-amber-950 hover:text-amber-800 mb-8"
+                className="flex items-center gap-2 text-blue-950 hover:text-blue-800 mb-8"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Back
               </Button>
               
               <motion.h1
-                className="text-6xl md:text-8xl lg:text-9xl text-amber-950 leading-none tracking-tight mb-6"
+                className="text-6xl md:text-8xl lg:text-9xl text-blue-950 leading-none tracking-tight mb-6"
                 style={{ fontFamily: "var(--font-anton)" }}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={heroInView ? { scale: 1, opacity: 1 } : {}}
@@ -85,7 +85,7 @@ export default function AboutPage() {
                 ABOUT{" "}
                 <span 
                   style={{ fontFamily: "var(--font-allura)" }} 
-                  className="text-7xl md:text-9xl lg:text-[10rem] text-amber-950"
+                  className="text-7xl md:text-9xl lg:text-[10rem] text-blue-950"
                 >
                   Us
                 </span>
@@ -117,7 +117,7 @@ export default function AboutPage() {
               >
                 <div>
                   <motion.h2
-                    className="text-5xl md:text-7xl text-amber-950 leading-tight mb-6"
+                    className="text-5xl md:text-7xl text-blue-950 leading-tight mb-6"
                     style={{ fontFamily: "var(--font-anton)" }}
                     initial={{ opacity: 0, y: 30 }}
                     animate={contentInView ? { opacity: 1, y: 0 } : {}}
@@ -126,7 +126,7 @@ export default function AboutPage() {
                     HEX{" "}
                     <span 
                       style={{ fontFamily: "var(--font-allura)" }}
-                      className="text-6xl md:text-8xl text-amber-950"
+                      className="text-6xl md:text-8xl text-blue-950"
                     >
                       and
                     </span>{" "}
@@ -160,7 +160,7 @@ export default function AboutPage() {
                   transition={{ duration: 0.8, delay: 0.6 }}
                 >
                   <Button
-                    className="bg-transparent border-2 border-amber-950 text-amber-950 hover:bg-amber-950 hover:text-white transition-all duration-300 px-8 py-4 text-sm rounded-none"
+                    className="bg-transparent border-2 border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white transition-all duration-300 px-8 py-4 text-sm rounded-none"
                     onClick={() => router.push('/shop')}
                   >
                     Explore Our Collection
@@ -176,7 +176,7 @@ export default function AboutPage() {
                 className="relative"
               >
                 <div className="space-y-6">
-                  <h3 className="text-2xl font-bold text-amber-950 mb-8 text-center" style={{ fontFamily: "var(--font-anton)" }}>
+                  <h3 className="text-2xl font-bold text-blue-950 mb-8 text-center" style={{ fontFamily: "var(--font-anton)" }}>
                     What Our Customers Say
                   </h3>
                   
@@ -285,11 +285,11 @@ export default function AboutPage() {
                     animate={statsInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                   >
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-950 text-white rounded-full mb-4">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-950 text-white rounded-full mb-4">
                       <IconComponent className="w-8 h-8" />
                     </div>
                     <h3 
-                      className="text-4xl md:text-5xl font-bold text-amber-950 mb-2"
+                      className="text-4xl md:text-5xl font-bold text-blue-950 mb-2"
                       style={{ fontFamily: "var(--font-anton)" }}
                     >
                       {stat.number}
@@ -312,13 +312,13 @@ export default function AboutPage() {
               transition={{ duration: 0.8 }}
             >
               <h2 
-                className="text-5xl md:text-7xl text-amber-950 leading-tight mb-6"
+                className="text-5xl md:text-7xl text-blue-950 leading-tight mb-6"
                 style={{ fontFamily: "var(--font-anton)" }}
               >
                 OUR{" "}
                 <span 
                   style={{ fontFamily: "var(--font-allura)" }}
-                  className="text-6xl md:text-8xl text-amber-950"
+                  className="text-6xl md:text-8xl text-blue-950"
                 >
                   Values
                 </span>
@@ -342,7 +342,7 @@ export default function AboutPage() {
                       className={`h-48 bg-gradient-to-br ${value.color} transition-transform duration-300 group-hover:scale-110`}
                     />
                   </div>
-                  <h3 className="text-2xl font-bold text-amber-950 mb-4" style={{ fontFamily: "var(--font-anton)" }}>
+                  <h3 className="text-2xl font-bold text-blue-950 mb-4" style={{ fontFamily: "var(--font-anton)" }}>
                     {value.title}
                   </h3>
                   <p className="text-gray-600 leading-relaxed">

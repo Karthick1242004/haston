@@ -31,7 +31,7 @@ export default function AdminsManager() {
     <div className="space-y-4">
       <div className="flex gap-2">
         <Input placeholder="admin@example.com" value={newEmail} onChange={e=>setNewEmail(e.target.value)} className="rounded-none"/>
-        <Button onClick={addAdmin} className="bg-amber-950 text-white">Add</Button>
+        <Button onClick={addAdmin} className="bg-blue-950 text-white">Add</Button>
       </div>
       <ul className="space-y-2">
         {admins.map(email=> (
