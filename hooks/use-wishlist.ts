@@ -31,7 +31,9 @@ export const useWishlist = () => {
   }, [fetchWishlist])
 
   // Add product to wishlist
-  const addToWishlist = async (productId: number) => {
+  const addToWishlist = async (productId: string | number) => {
+    console.log("addToWishlist called with:", productId, "Type:", typeof productId)
+    
     if (!session?.user) {
       toast({
         title: "Sign In Required",
@@ -41,29 +43,57 @@ export const useWishlist = () => {
       return false
     }
 
+    if (!productId) {
+      console.error("Invalid productId:", productId)
+      toast({
+        title: "Error",
+        description: "Invalid product ID",
+        variant: "destructive"
+      })
+      return false
+    }
+
     setIsLoading(true)
     try {
+      const requestBody = {
+        productId,
+        action: 'add'
+      }
+      
+      console.log("Sending wishlist request:", requestBody)
+      
       const response = await fetch('/api/user/wishlist', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          productId,
-          action: 'add'
-        }),
+        body: JSON.stringify(requestBody),
       })
 
+      console.log("Wishlist response status:", response.status)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log("Wishlist response data:", data)
         setWishlist(data.wishlist)
         return true
       } else {
-        console.error('Failed to add to wishlist')
+        const errorData = await response.json()
+        console.error('Failed to add to wishlist:', errorData)
+        toast({
+          title: "Error",
+          description: errorData.error || "Failed to add to wishlist",
+          variant: "destructive"
+        })
         return false
       }
     } catch (error) {
       console.error('Error adding to wishlist:', error)
+      toast({
+        title: "Error",
+        description: "Network error. Please try again.",
+        variant: "destructive"
+      })
       return false
     } finally {
       setIsLoading(false)
@@ -71,32 +101,64 @@ export const useWishlist = () => {
   }
 
   // Remove product from wishlist
-  const removeFromWishlist = async (productId: number) => {
-    if (!session?.user) return false
+  const removeFromWishlist = async (productId: string | number) => {
+    console.log("removeFromWishlist called with:", productId, "Type:", typeof productId)
+    
+    if (!session?.user) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to manage your wishlist",
+        variant: "destructive"
+      })
+      return false
+    }
+
+    if (!productId) {
+      console.error("Invalid productId:", productId)
+      return false
+    }
 
     setIsLoading(true)
     try {
+      const requestBody = {
+        productId,
+        action: 'remove'
+      }
+      
+      console.log("Sending wishlist remove request:", requestBody)
+      
       const response = await fetch('/api/user/wishlist', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          productId,
-          action: 'remove'
-        }),
+        body: JSON.stringify(requestBody),
       })
+
+      console.log("Wishlist remove response status:", response.status)
 
       if (response.ok) {
         const data = await response.json()
+        console.log("Wishlist remove response data:", data)
         setWishlist(data.wishlist)
         return true
       } else {
-        console.error('Failed to remove from wishlist')
+        const errorData = await response.json()
+        console.error('Failed to remove from wishlist:', errorData)
+        toast({
+          title: "Error",
+          description: errorData.error || "Failed to remove from wishlist",
+          variant: "destructive"
+        })
         return false
       }
     } catch (error) {
       console.error('Error removing from wishlist:', error)
+      toast({
+        title: "Error",
+        description: "Network error. Please try again.",
+        variant: "destructive"
+      })
       return false
     } finally {
       setIsLoading(false)
@@ -104,10 +166,11 @@ export const useWishlist = () => {
   }
 
   // Toggle wishlist status
-  const toggleWishlist = async (productId: number) => {
-    const isInWishlist = wishlist.includes(productId.toString())
+  const toggleWishlist = async (productId: string | number) => {
+    const productIdStr = productId.toString()
+    const isCurrentlyInWishlist = wishlist.includes(productIdStr)
     
-    if (isInWishlist) {
+    if (isCurrentlyInWishlist) {
       return await removeFromWishlist(productId)
     } else {
       return await addToWishlist(productId)
@@ -115,8 +178,9 @@ export const useWishlist = () => {
   }
 
   // Check if product is in wishlist
-  const isInWishlist = (productId: number) => {
-    return wishlist.includes(productId?.toString())
+  const isInWishlist = (productId: string | number) => {
+    if (!productId) return false
+    return wishlist.includes(productId.toString())
   }
 
   return {

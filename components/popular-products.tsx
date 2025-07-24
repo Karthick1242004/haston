@@ -8,6 +8,9 @@ import Image from "next/image"
 import { Heart, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useWishlist } from "@/hooks/use-wishlist"
+import { useToast } from "@/hooks/use-toast"
+import { useProductStore } from "@/stores/product-store"
+import { useSession } from "next-auth/react"
 import type { Product, ProductColor } from "@/types/product"
 
 // Default color fallback for products without colors
@@ -22,6 +25,9 @@ export default function PopularProducts() {
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const router = useRouter()
   const { toggleWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist()
+  const { toast } = useToast()
+  const { addToCart } = useProductStore()
+  const { data: session } = useSession()
 
   useEffect(() => {
     async function fetchProducts() {
@@ -42,7 +48,33 @@ export default function PopularProducts() {
 
   const handleToggleWishlist = async (productId: string | number, e: React.MouseEvent) => {
     e.stopPropagation()
-    await toggleWishlist(Number(productId))
+    
+    if (!productId) {
+      toast({
+        title: "Error",
+        description: "Invalid product ID",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      const wasInWishlist = isInWishlist(productId)
+      const result = await toggleWishlist(productId) // Keep as string, don't convert to number
+      
+      if (result) {
+        toast({
+          title: "Success",
+          description: wasInWishlist ? "Removed from wishlist" : "Added to wishlist",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update wishlist",
+        variant: "destructive"
+      })
+    }
   }
 
   const handleColorSelect = (productId: string | number, colorIndex: number, e: React.MouseEvent) => {
@@ -51,6 +83,59 @@ export default function PopularProducts() {
       ...prev,
       [productId.toString()]: colorIndex
     }))
+  }
+
+  const handleAddToCart = async (product: Product, actualPrice: number) => {
+    // Check if user is signed in
+    if (!session?.user) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to add items to your cart",
+        variant: "destructive"
+      })
+      router.push('/auth/signin')
+      return
+    }
+
+    try {
+      const productColors = getProductColors(product)
+      const selectedColorIndex = selectedColors[product.id.toString()] || 0
+      const selectedColor = productColors[selectedColorIndex]
+      
+      // Get the first available size or default
+      const selectedSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : 'One Size'
+      
+      // console.log('Adding to cart:', {
+      //   productId: product.id,
+      //   selectedSize,
+      //   selectedColor: selectedColor.name,
+      //   price: actualPrice
+      // })
+
+      // Create a proper product object with the updated price for cart
+      const productForCart: Product = {
+        ...product,
+        price: actualPrice // Use the actual selling price (with discount applied)
+      }
+
+      // Use the proper cart store method - this will:
+      // 1. Add item to cart
+      // 2. Open the cart sidebar
+      // 3. Update cart count in header
+      // 4. Sync to database
+      await addToCart(productForCart, selectedSize, selectedColor.name, 1)
+      
+      toast({
+        title: "Added to Cart!",
+        description: `${product.name} has been added to your cart.`,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      })
+    }
   }
 
   const getProductColors = (product: Product): ProductColor[] => {
@@ -138,13 +223,11 @@ export default function PopularProducts() {
           const badges = product.badges.split(',').map(b => b.trim().replace(/"/g, '')).filter(b => b)
           return badges
         }
-        console.warn('Failed to parse badges string for product:', product.id, product.badges)
       }
       return []
     }
     
     if (!Array.isArray(product.badges)) {
-      console.warn('Product badges is not an array for product:', product.id, 'badges:', product.badges)
       return []
     }
     
@@ -171,10 +254,22 @@ export default function PopularProducts() {
     return product.image || "/placeholder.svg"
   }
 
-  const getDiscountedPrice = (originalPrice: number) => {
-    // Apply a 10-25% discount randomly for demonstration
-    const discountPercent = 0.1 + Math.random() * 0.15
-    return Math.round(originalPrice * (1 - discountPercent))
+  const getPricingInfo = (product: Product) => {
+    // Use real discount data from database if available
+    if (product.hasDiscount && product.originalPrice && product.discountPercentage) {
+      return {
+        actualPrice: product.price, // Selling price from DB
+        originalPrice: product.originalPrice, // Original price from DB
+        discountPercent: product.discountPercentage // Discount percentage from DB
+      }
+    }
+    
+    // For products without discount, just return the price
+    return {
+      actualPrice: product.price,
+      originalPrice: product.price,
+      discountPercent: 0
+    }
   }
 
   return (
@@ -198,10 +293,10 @@ export default function PopularProducts() {
             const productColors = getProductColors(product)
             const productBadges = getProductBadges(product)
             const selectedColorIndex = selectedColors[product.id.toString()] || 0
-            const discountedPrice = getDiscountedPrice(product.price)
+            const pricingInfo = getPricingInfo(product)
             
             // Debug logging for each product (can be removed in production)
-            // console.log(`Product ${product.id} - Name: ${product.name}`)
+            // console.log(`Product ${product.id} - Name: ${product.name}, ID Type: ${typeof product.id}`)
             // console.log(`  Colors:`, productColors)
             // console.log(`  Badges:`, productBadges)
             
@@ -258,17 +353,25 @@ export default function PopularProducts() {
                     onClick={(e) => handleToggleWishlist(product.id, e)}
                     disabled={wishlistLoading}
                   >
-                    <Heart
-                      className={`w-4 h-4 transition-colors ${
-                        isInWishlist(Number(product.id))
-                          ? "fill-red-500 text-red-500"
-                          : "text-gray-600 hover:text-red-400"
-                      }`}
-                    />
+                                         <Heart
+                       className={`w-4 h-4 transition-colors ${
+                         isInWishlist(product.id)
+                           ? "fill-red-500 text-red-500"
+                           : "text-gray-600 hover:text-red-400"
+                       }`}
+                     />
                   </Button>
                 </motion.div>
 
-                <div className="p-4 space-y-3" onClick={() => handleProductClick(product.id)}>
+                <div className="p-4 space-y-3"
+                     onClick={(e) => {
+                       // Only navigate if not clicking on interactive elements
+                       const target = e.target as HTMLElement
+                       if (!target.closest('button') && !target.closest('[role="button"]')) {
+                         handleProductClick(product.id)
+                       }
+                     }}
+                >
                   {/* Product Name */}
                   <h3 className="font-semibold text-gray-900 text-sm md:text-base leading-tight line-clamp-1 group-hover:text-orange-700 transition-colors duration-200">
                     {product.name}
@@ -278,34 +381,55 @@ export default function PopularProducts() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xl font-bold text-gray-900 group-hover:text-orange-700 transition-colors duration-200">
-                        ₹{discountedPrice}
+                        ₹{pricingInfo.actualPrice}
                       </span>
-                      <span className="text-sm text-gray-500 line-through">
-                        ₹{product.price}
-                      </span>
+                      {pricingInfo.discountPercent > 0 && (
+                        <>
+                          <span className="text-sm text-gray-500 line-through">
+                            ₹{pricingInfo.originalPrice}
+                          </span>
+                          <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
+                            {pricingInfo.discountPercent}% OFF
+                          </span>
+                        </>
+                      )}
                     </div>
-                    <p className="text-sm text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full inline-block">
-                      Get it for ₹{discountedPrice}
-                    </p>
+                    {pricingInfo.discountPercent > 0 ? (
+                      <p className="text-sm text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full inline-block">
+                        Get it for ₹{pricingInfo.actualPrice}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-gray-600 font-medium">
+                        Regular Price
+                      </p>
+                    )}
                   </div>
 
                   {/* Color Options */}
-                  <div className="flex items-center gap-2.5">
-                    {productColors.length > 0 ? productColors.map((color: ProductColor, colorIndex: number) => (
-                      <button
-                        key={colorIndex}
-                        className={`w-6 h-6 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
-                          selectedColorIndex === colorIndex
-                            ? 'border-orange-500 scale-110 shadow-lg'
-                            : 'border-gray-300 hover:border-gray-400 shadow-sm'
-                        }`}
-                        style={{ backgroundColor: color.value }}
-                        onClick={(e) => handleColorSelect(product.id, colorIndex, e)}
-                        title={color.name}
-                      />
-                    )) : (
-                      <span className="text-xs text-gray-500">No colors available</span>
-                    )}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {productColors.length > 0 ? productColors.slice(0, 4).map((color: ProductColor, colorIndex: number) => (
+                        <button
+                          key={colorIndex}
+                          className={`w-5 h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
+                            selectedColorIndex === colorIndex
+                              ? 'border-orange-500 scale-110 shadow-lg'
+                              : 'border-gray-300 hover:border-gray-400 shadow-sm'
+                          }`}
+                          style={{ backgroundColor: color.value }}
+                          onClick={(e) => handleColorSelect(product.id, colorIndex, e)}
+                          title={color.name}
+                        />
+                      )) : (
+                        <span className="text-xs text-gray-500">No colors</span>
+                      )}
+                      {productColors.length > 4 && (
+                        <span className="text-xs text-gray-500">+{productColors.length - 4}</span>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {productColors.length} color{productColors.length !== 1 ? 's' : ''}
+                    </div>
                   </div>
 
                   {/* Badges */}
@@ -326,6 +450,57 @@ export default function PopularProducts() {
                     )) : (
                       ''
                     )}
+                  </div>
+
+                  {/* Size Options Preview */}
+                  {product.sizes && product.sizes.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-600 font-medium">Available Sizes:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {product.sizes.slice(0, 4).map((size: string, sizeIndex: number) => (
+                          <span 
+                            key={sizeIndex}
+                            className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded border hover:bg-gray-200 transition-colors"
+                          >
+                            {size}
+                          </span>
+                        ))}
+                        {product.sizes.length > 4 && (
+                          <span className="px-2 py-1 text-xs text-gray-500">
+                            +{product.sizes.length - 4}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+
+
+                  {/* Delivery Info */}
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+                        <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1V8a1 1 0 00-.293-.707L15 4.586A1 1 0 0014.414 4H14v3z"/>
+                      </svg>
+                      <span>Fast Delivery</span>
+                    </div>
+                    <span>2-3 days</span>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="pt-2 border-t border-gray-100">
+                    <Button
+                      size="sm"
+                      className="w-full text-xs bg-gray-900 hover:bg-gray-800 text-white transition-all duration-200 hover:scale-105"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleAddToCart(product, pricingInfo.actualPrice)
+                      }}
+                    >
+                      <ShoppingBag className="w-4 h-4 mr-2" />
+                      Add to Cart - ₹{pricingInfo.actualPrice}
+                    </Button>
                   </div>
                 </div>
               </motion.div>

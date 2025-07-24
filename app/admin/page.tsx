@@ -43,6 +43,10 @@ export default function AdminPage() {
   const [productColors, setProductColors] = useState<ProductColor[]>([{name: '', value: '#000000'}])
   const [selectedBadges, setSelectedBadges] = useState<string[]>([])
   const [colorMode, setColorMode] = useState<'single' | 'multiple'>('single')
+  
+  // Discount states
+  const [hasDiscount, setHasDiscount] = useState(false)
+  const [discountPercentage, setDiscountPercentage] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Order management state
@@ -175,12 +179,16 @@ export default function AdminPage() {
       setProductColors([{name: '', value: '#000000'}])
       setSelectedBadges([])
       setColorMode('single')
+      setHasDiscount(false)
+      setDiscountPercentage('')
     } catch (error) {
       console.error('Error resetting form:', error)
       // Ensure at least basic state is reset
       setProductColors([{name: '', value: '#000000'}])
       setSelectedBadges([])
       setColorMode('single')
+      setHasDiscount(false)
+      setDiscountPercentage('')
     }
   }
 
@@ -208,6 +216,23 @@ export default function AdminPage() {
         ? prev.filter(b => b !== badge)
         : [...prev, badge]
     )
+  }
+
+  const calculateOriginalPrice = (sellingPrice: number, discountPercent: number) => {
+    if (!discountPercent || discountPercent <= 0 || discountPercent >= 100) return sellingPrice
+    return Math.round(sellingPrice / (1 - discountPercent / 100))
+  }
+
+  const getDiscountPreview = () => {
+    const sellingPrice = parseFloat(price) || 0
+    const discount = parseFloat(discountPercentage) || 0
+    
+    if (!hasDiscount || !discount || !sellingPrice) {
+      return { originalPrice: sellingPrice, sellingPrice, discount: 0 }
+    }
+    
+    const originalPrice = calculateOriginalPrice(sellingPrice, discount)
+    return { originalPrice, sellingPrice, discount }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -261,13 +286,15 @@ export default function AdminPage() {
       formData.append('colors', JSON.stringify(validColors))
       formData.append('badges', JSON.stringify(selectedBadges.filter(badge => badge && typeof badge === 'string')))
       
-      // Debug logging
-      console.log('Form submission debug:')
-      console.log('  - Original productColors:', productColors)
-      console.log('  - Color mode:', colorMode)
-      console.log('  - Filtered validColors:', validColors)
-      console.log('  - Has valid colors:', hasValidColors)
-      console.log('  - Submitting badges:', selectedBadges)
+      // Add discount data
+      formData.append('hasDiscount', hasDiscount.toString())
+      if (hasDiscount && discountPercentage) {
+        const discountPreview = getDiscountPreview()
+        formData.append('discountPercentage', discountPercentage)
+        formData.append('originalPrice', discountPreview.originalPrice.toString())
+      }
+      
+    
       images.forEach((file) => formData.append('images', file))
 
       const url = mode === 'edit' ? `/api/admin/product/${editId}` : '/api/admin/product'
@@ -537,7 +564,6 @@ export default function AdminPage() {
                                     setIsLook(!!p.isLook)
                                     // Handle both old string format and new object format
                                     if (p.colors) {
-                                      console.log('Edit form - Original colors:', p.colors, typeof p.colors)
                                       
                                       // Handle string that looks like JSON
                                       if (typeof p.colors === 'string') {
@@ -577,7 +603,6 @@ export default function AdminPage() {
                                     }
                                     // Handle badges safely
                                     if (p.badges) {
-                                      console.log('Edit form - Original badges:', p.badges, typeof p.badges)
                                       
                                       if (typeof p.badges === 'string') {
                                         try {
@@ -605,6 +630,10 @@ export default function AdminPage() {
                                       setSelectedBadges([])
                                     }
                                     setColorMode(p.colors && p.colors.length > 1 ? 'multiple' : 'single')
+                                    
+                                    // Handle discount data
+                                    setHasDiscount(!!p.hasDiscount)
+                                    setDiscountPercentage(p.discountPercentage?.toString() || '')
                                   }}
                                 >
                                   <Edit3 className="w-4 h-4 mr-2" />
@@ -694,8 +723,69 @@ export default function AdminPage() {
                       <Input value={name} onChange={(e) => setName(e.target.value)} className="rounded-none" required/>
                     </div>
                     <div>
-                      <label className="block mb-1 text-sm font-medium text-blue-950">Price (INR)</label>
+                      <label className="block mb-1 text-sm font-medium text-blue-950">Selling Price (INR)</label>
                       <Input type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} className="rounded-none" required/>
+                      <p className="text-xs text-gray-500 mt-1">This is the final price customers will pay</p>
+                    </div>
+
+                    {/* Discount Section */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <input 
+                          id="hasDiscount" 
+                          type="checkbox" 
+                          checked={hasDiscount} 
+                          onChange={e => {
+                            setHasDiscount(e.target.checked)
+                            if (!e.target.checked) {
+                              setDiscountPercentage('')
+                            }
+                          }} 
+                        />
+                        <label htmlFor="hasDiscount" className="text-sm font-medium text-blue-950">Enable Discount</label>
+                      </div>
+
+                      {hasDiscount && (
+                        <div className="space-y-4 pl-6 border-l-2 border-blue-100">
+                          <div>
+                            <label className="block mb-1 text-sm font-medium text-blue-950">Discount Percentage (%)</label>
+                            <Input 
+                              type="number" 
+                              min="1" 
+                              max="99" 
+                              step="1" 
+                              value={discountPercentage} 
+                              onChange={(e) => setDiscountPercentage(e.target.value)} 
+                              className="rounded-none" 
+                              placeholder="e.g., 25"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Enter discount percentage (1-99%)</p>
+                          </div>
+
+                          {price && discountPercentage && (
+                            <div className="bg-blue-50 p-4 rounded-lg">
+                              <h4 className="text-sm font-medium text-blue-950 mb-2">Pricing Preview:</h4>
+                              <div className="space-y-1 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Original Price:</span>
+                                  <span className="font-medium">₹{getDiscountPreview().originalPrice}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Discount:</span>
+                                  <span className="text-red-600 font-medium">-{discountPercentage}%</span>
+                                </div>
+                                <div className="flex justify-between border-t pt-1">
+                                  <span className="text-gray-900 font-medium">Selling Price:</span>
+                                  <span className="text-green-600 font-bold">₹{getDiscountPreview().sellingPrice}</span>
+                                </div>
+                              </div>
+                              <p className="text-xs text-blue-600 mt-2">
+                                Customers will see: <span className="line-through">₹{getDiscountPreview().originalPrice}</span> ₹{getDiscountPreview().sellingPrice} <span className="bg-red-100 text-red-700 px-1 rounded">{discountPercentage}% OFF</span>
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="block mb-1 text-sm font-medium text-blue-950">Description</label>

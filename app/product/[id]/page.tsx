@@ -204,9 +204,30 @@ export default function ProductDetailPage() {
                   <span className="text-sm text-gray-500">({product.stock})</span>
                 </div>
 
-                <p className="text-4xl font-bold text-gray-900 mb-3">
-                  ₹{product.price.toFixed(2)}
-                </p>
+                <div className="mb-3">
+                  {product.hasDiscount && product.originalPrice && product.discountPercentage ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <p className="text-4xl font-bold text-gray-900">
+                          ₹{product.price.toFixed(2)}
+                        </p>
+                        <p className="text-2xl text-gray-500 line-through">
+                          ₹{product.originalPrice.toFixed(2)}
+                        </p>
+                        <span className="text-sm bg-red-100 text-red-700 px-3 py-1 rounded-full font-medium">
+                          {product.discountPercentage}% OFF
+                        </span>
+                      </div>
+                      <p className="text-lg text-green-600 font-medium">
+                        You save ₹{(product.originalPrice - product.price).toFixed(2)}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-4xl font-bold text-gray-900">
+                      ₹{product.price.toFixed(2)}
+                    </p>
+                  )}
+                </div>
 
                 <p className="text-gray-600 leading-relaxed mb-0">
                   {product.description}
@@ -417,9 +438,30 @@ export default function ProductDetailPage() {
               {product.name}
             </h1>
             
-            <p className="text-2xl font-bold text-gray-900">
-              ${product.price.toFixed(2)}
-            </p>
+            <div>
+              {product.hasDiscount && product.originalPrice && product.discountPercentage ? (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-2xl font-bold text-gray-900">
+                      ₹{product.price.toFixed(2)}
+                    </p>
+                    <p className="text-lg text-gray-500 line-through">
+                      ₹{product.originalPrice.toFixed(2)}
+                    </p>
+                    <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
+                      {product.discountPercentage}% OFF
+                    </span>
+                  </div>
+                  <p className="text-sm text-green-600 font-medium">
+                    You save ₹{(product.originalPrice - product.price).toFixed(2)}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-2xl font-bold text-gray-900">
+                  ₹{product.price.toFixed(2)}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Color Selection */}
