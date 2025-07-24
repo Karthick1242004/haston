@@ -43,6 +43,8 @@ export default function PopularProducts() {
   }, [])
 
   const handleProductClick = (productId: string | number) => {
+    console.log('handleProductClick called with productId:', productId)
+    console.log('Navigating to:', `/product/${productId}`)
     router.push(`/product/${productId}`)
   }
 
@@ -322,6 +324,18 @@ export default function PopularProducts() {
                   boxShadow: "0 4px 20px rgba(0,0,0,0.08), 0 8px 40px rgba(0,0,0,0.04)",
                   transformStyle: "preserve-3d"
                 }}
+                onClick={(e) => {
+                  // Only navigate if not clicking on interactive elements
+                  const target = e.target as HTMLElement
+                  if (!target.closest('button') && 
+                      !target.closest('[role="button"]') && 
+                      !target.closest('input') &&
+                      !target.closest('select') &&
+                      target.tagName !== 'BUTTON') {
+                    console.log('Card clicked - navigating to product:', product.id)
+                    handleProductClick(product.id)
+                  }
+                }}
               >
                 <motion.div
                   className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100"
@@ -350,7 +364,10 @@ export default function PopularProducts() {
                     size="icon"
                     className="absolute top-3 left-3 w-9 h-9 bg-white/95 hover:bg-white transition-all backdrop-blur-sm rounded-full p-0 shadow-lg transform -translate-y-1 opacity-0 group-hover:translate-y-0 group-hover:opacity-100"
                     style={{ transitionDelay: "50ms" }}
-                    onClick={(e) => handleToggleWishlist(product.id, e)}
+                                          onClick={(e) => {
+                        e.stopPropagation()
+                        handleToggleWishlist(product.id, e)
+                      }}
                     disabled={wishlistLoading}
                   >
                                          <Heart
@@ -363,15 +380,7 @@ export default function PopularProducts() {
                   </Button>
                 </motion.div>
 
-                <div className="p-4 space-y-3"
-                     onClick={(e) => {
-                       // Only navigate if not clicking on interactive elements
-                       const target = e.target as HTMLElement
-                       if (!target.closest('button') && !target.closest('[role="button"]')) {
-                         handleProductClick(product.id)
-                       }
-                     }}
-                >
+                <div className="p-4 space-y-3">
                   {/* Product Name */}
                   <h3 className="font-semibold text-gray-900 text-sm md:text-base leading-tight line-clamp-1 group-hover:text-orange-700 transition-colors duration-200">
                     {product.name}
@@ -417,7 +426,10 @@ export default function PopularProducts() {
                               : 'border-gray-300 hover:border-gray-400 shadow-sm'
                           }`}
                           style={{ backgroundColor: color.value }}
-                          onClick={(e) => handleColorSelect(product.id, colorIndex, e)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleColorSelect(product.id, colorIndex, e)
+                          }}
                           title={color.name}
                         />
                       )) : (
