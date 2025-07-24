@@ -8,47 +8,12 @@ import Image from "next/image"
 import { Heart, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useWishlist } from "@/hooks/use-wishlist"
-import type { Product } from "@/types/product"
+import type { Product, ProductColor } from "@/types/product"
 
-// Sample color data - in a real app, this would come from the API
-const productVariants = {
-  1: {
-    colors: [
-      { name: "Black", value: "#000000", image: "/placeholder.svg" },
-      { name: "Beige", value: "#f5f5dc", image: "/placeholder.svg" }
-    ],
-    badge: "New-in",
-    originalPrice: 1190,
-    discountedPrice: 890
-  },
-  2: {
-    colors: [
-      { name: "Cream", value: "#fffdd0", image: "/placeholder.svg" },
-      { name: "White", value: "#ffffff", image: "/placeholder.svg" }
-    ],
-    badge: "Trendy",
-    originalPrice: 1690,
-    discountedPrice: 1590
-  },
-  3: {
-    colors: [
-      { name: "Black", value: "#000000", image: "/placeholder.svg" },
-      { name: "Beige", value: "#f5f5dc", image: "/placeholder.svg" }
-    ],
-    badge: "Trendy",
-    originalPrice: 1490,
-    discountedPrice: 1390
-  },
-  4: {
-    colors: [
-      { name: "White", value: "#ffffff", image: "/placeholder.svg" },
-      { name: "Gray", value: "#808080", image: "/placeholder.svg" }
-    ],
-    badge: "New-in",
-    originalPrice: 1490,
-    discountedPrice: 1011
-  }
-}
+// Default color fallback for products without colors
+const getDefaultColors = (): ProductColor[] => [
+  { name: "Default", value: "#000000" }
+]
 
 export default function PopularProducts() {
   const [products, setProducts] = useState<Product[]>([])
@@ -88,20 +53,114 @@ export default function PopularProducts() {
     }))
   }
 
-  const getProductVariant = (productId: string | number) => {
-    const numericId = typeof productId === 'string' ? parseInt(productId) : productId
-    return productVariants[numericId as keyof typeof productVariants] || productVariants[1]
+  const getProductColors = (product: Product): ProductColor[] => {
+    // Handle case where colors might be undefined, not an array, or in old string format
+    if (!product.colors) {
+      return getDefaultColors()
+    }
+    
+    // Handle string that looks like JSON array
+    if (typeof product.colors === 'string') {
+      try {
+        const parsed = JSON.parse(product.colors)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((color: any) => ({
+            name: color.name || 'Color',
+            value: color.value || '#000000'
+          }))
+        }
+      } catch (e) {
+        console.warn('Failed to parse colors string for product:', product.id, product.colors)
+      }
+      return getDefaultColors()
+    }
+    
+    if (!Array.isArray(product.colors) || product.colors.length === 0) {
+      return getDefaultColors()
+    }
+    
+    // Check if it's the new format (objects with name and value)
+    if (typeof product.colors[0] === 'object' && 'name' in product.colors[0] && 'value' in product.colors[0]) {
+      return product.colors as ProductColor[]
+    }
+    
+    // Handle old format (array of strings) - convert to new format
+    if (typeof product.colors[0] === 'string') {
+      return (product.colors as any[]).map((colorName: string, index: number) => ({
+        name: colorName,
+        value: getColorValueFromName(colorName)
+      }))
+    }
+    
+    // Fallback to default
+    return getDefaultColors()
+  }
+
+  const getColorValueFromName = (colorName: string): string => {
+    const colorMap: { [key: string]: string } = {
+      'black': '#000000',
+      'white': '#ffffff',
+      'red': '#dc2626',
+      'blue': '#2563eb',
+      'green': '#16a34a',
+      'yellow': '#eab308',
+      'purple': '#9333ea',
+      'pink': '#ec4899',
+      'gray': '#6b7280',
+      'brown': '#a3a3a3',
+      'navy': '#1e3a8a',
+      'beige': '#f5f5dc',
+      'cream': '#fffdd0'
+    }
+    
+    const lowerName = colorName.toLowerCase()
+    return colorMap[lowerName] || '#000000'
+  }
+
+  const getProductBadges = (product: Product): string[] => {
+    // Handle case where badges might be undefined, not an array, or invalid
+    if (!product.badges) {
+      return []
+    }
+    
+    // Handle string that looks like JSON array
+    if (typeof product.badges === 'string') {
+      try {
+        // Try to parse as JSON first
+        const parsed = JSON.parse(product.badges)
+        if (Array.isArray(parsed)) {
+          const validBadges = parsed.filter(badge => badge && typeof badge === 'string')
+          return validBadges
+        }
+      } catch (e) {
+        // If JSON parsing fails, try to split by comma (legacy format)
+        if (product.badges.includes(',')) {
+          const badges = product.badges.split(',').map(b => b.trim().replace(/"/g, '')).filter(b => b)
+          return badges
+        }
+        console.warn('Failed to parse badges string for product:', product.id, product.badges)
+      }
+      return []
+    }
+    
+    if (!Array.isArray(product.badges)) {
+      console.warn('Product badges is not an array for product:', product.id, 'badges:', product.badges)
+      return []
+    }
+    
+    // Filter out any invalid badges (non-strings or empty strings)
+    const validBadges = product.badges.filter(badge => badge && typeof badge === 'string')
+    
+    // Log if there were invalid badges filtered out
+    if (product.badges.length !== validBadges.length) {
+      console.warn('Some invalid badges filtered out for product:', product.id, 'original:', product.badges, 'valid:', validBadges)
+    }
+    
+    return validBadges
   }
 
   const getSelectedImage = (product: Product) => {
-    const variant = getProductVariant(product.id)
     const selectedColorIndex = selectedColors[product.id.toString()] || 0
-    const colorVariantImage = variant.colors[selectedColorIndex]?.image
-    
-    // Use the actual product image instead of placeholder color variant images
-    if (colorVariantImage && colorVariantImage !== "/placeholder.svg") {
-      return colorVariantImage
-    }
     
     // If we have multiple images for the product, use them for color switching
     if (product.images && product.images.length > selectedColorIndex) {
@@ -110,6 +169,12 @@ export default function PopularProducts() {
     
     // Fallback to the main product image
     return product.image || "/placeholder.svg"
+  }
+
+  const getDiscountedPrice = (originalPrice: number) => {
+    // Apply a 10-25% discount randomly for demonstration
+    const discountPercent = 0.1 + Math.random() * 0.15
+    return Math.round(originalPrice * (1 - discountPercent))
   }
 
   return (
@@ -130,8 +195,15 @@ export default function PopularProducts() {
 
         <div className="flex flex-row flex-wrap gap-3">
           {products.map((product, index) => {
-            const variant = getProductVariant(product.id)
+            const productColors = getProductColors(product)
+            const productBadges = getProductBadges(product)
             const selectedColorIndex = selectedColors[product.id.toString()] || 0
+            const discountedPrice = getDiscountedPrice(product.price)
+            
+            // Debug logging for each product (can be removed in production)
+            // console.log(`Product ${product.id} - Name: ${product.name}`)
+            // console.log(`  Colors:`, productColors)
+            // console.log(`  Badges:`, productBadges)
             
             return (
               <motion.div
@@ -206,20 +278,20 @@ export default function PopularProducts() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xl font-bold text-gray-900 group-hover:text-orange-700 transition-colors duration-200">
-                        ₹{variant.discountedPrice}
+                        ₹{discountedPrice}
                       </span>
                       <span className="text-sm text-gray-500 line-through">
-                        ₹{variant.originalPrice}
+                        ₹{product.price}
                       </span>
                     </div>
                     <p className="text-sm text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full inline-block">
-                      Get it for ₹{variant.discountedPrice}
+                      Get it for ₹{discountedPrice}
                     </p>
                   </div>
 
                   {/* Color Options */}
                   <div className="flex items-center gap-2.5">
-                    {variant.colors.map((color, colorIndex) => (
+                    {productColors.length > 0 ? productColors.map((color: ProductColor, colorIndex: number) => (
                       <button
                         key={colorIndex}
                         className={`w-6 h-6 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
@@ -231,18 +303,28 @@ export default function PopularProducts() {
                         onClick={(e) => handleColorSelect(product.id, colorIndex, e)}
                         title={color.name}
                       />
-                    ))}
+                    )) : (
+                      <span className="text-xs text-gray-500">No colors available</span>
+                    )}
                   </div>
 
                   {/* Badges */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-full shadow-sm">
-                      {variant.badge}
-                    </span>
-                    {index === 1 && (
-                      <span className="px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-green-100 to-green-200 text-green-700 rounded-full shadow-sm">
-                        Trendy
+                  <div className="flex items-center gap-2 flex-wrap min-h-[24px]">
+                    {productBadges.length > 0 ? productBadges.map((badge: string) => (
+                      <span 
+                        key={badge}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-full shadow-sm ${
+                          badge === 'new-arrival' 
+                            ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700' 
+                            : badge === 'trendy'
+                            ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-700'
+                            : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700'
+                        }`}
+                      >
+                        {badge === 'new-arrival' ? 'New Arrival' : badge === 'trendy' ? 'Trendy' : badge}
                       </span>
+                    )) : (
+                      ''
                     )}
                   </div>
                 </div>

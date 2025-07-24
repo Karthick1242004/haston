@@ -20,6 +20,7 @@ import Header from '@/components/header'
 import AdminsManager from '@/components/admins-manager'
 import HeroSlidesManager from '@/components/hero-slides-manager'
 import { Order } from '@/types/order'
+import { ProductColor } from '@/types/product'
 import { useToast } from '@/hooks/use-toast'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Package, ShoppingBag, Users, User, DollarSign, TrendingUp, Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, Filter, ExternalLink, Edit3, Search, Eye, Trash2, Image as ImageIcon, Plus } from 'lucide-react'
@@ -37,6 +38,11 @@ export default function AdminPage() {
   const [products, setProducts] = useState<any[]>([])
   const [mode, setMode] = useState<'list' | 'create' | 'edit'>('list')
   const [editId, setEditId] = useState<string | null>(null)
+  
+  // Color and badge states
+  const [productColors, setProductColors] = useState<ProductColor[]>([{name: '', value: '#000000'}])
+  const [selectedBadges, setSelectedBadges] = useState<string[]>([])
+  const [colorMode, setColorMode] = useState<'single' | 'multiple'>('single')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Order management state
@@ -156,15 +162,75 @@ export default function AdminPage() {
     }
   }
 
+  const resetForm = () => {
+    try {
+      setName('')
+      setPrice('')
+      setDescription('')
+      setSizes('S,M,L')
+      setImages([])
+      setExistingImages([])
+      setIsLook(false)
+      setEditId('')
+      setProductColors([{name: '', value: '#000000'}])
+      setSelectedBadges([])
+      setColorMode('single')
+    } catch (error) {
+      console.error('Error resetting form:', error)
+      // Ensure at least basic state is reset
+      setProductColors([{name: '', value: '#000000'}])
+      setSelectedBadges([])
+      setColorMode('single')
+    }
+  }
+
+  const addColor = () => {
+    if (productColors.length < 5) {
+      setProductColors([...productColors, {name: '', value: '#000000'}])
+    }
+  }
+
+  const removeColor = (index: number) => {
+    if (productColors.length > 1) {
+      setProductColors(productColors.filter((_, i) => i !== index))
+    }
+  }
+
+  const updateColor = (index: number, field: 'name' | 'value', value: string) => {
+    const updated = [...productColors]
+    updated[index][field] = value
+    setProductColors(updated)
+  }
+
+  const toggleBadge = (badge: string) => {
+    setSelectedBadges(prev => 
+      prev.includes(badge) 
+        ? prev.filter(b => b !== badge)
+        : [...prev, badge]
+    )
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     const hasImages = images.length > 0 || (mode === 'edit' && existingImages.length > 0)
     
+    // Check if at least one color has a non-default value
+    const hasValidColors = productColors.some(c => c.value && c.value !== '#000000')
+    
     if (!name || !price || !description || !hasImages) {
       toast({
         title: "Validation Error",
         description: "Please fill all fields and ensure at least one image is present",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    if (!hasValidColors) {
+      toast({
+        title: "Validation Error", 
+        description: "Please select at least one color (change from default black)",
         variant: "destructive"
       })
       return
@@ -179,6 +245,29 @@ export default function AdminPage() {
       formData.append('sizes', sizes)
       formData.append('existingImages', JSON.stringify(existingImages))
       formData.append('isLook', isLook ? 'true' : 'false')
+      // Filter colors: be more lenient with validation
+      const validColors = productColors.filter((c, index) => {
+        // Must have a color value (not default black)
+        if (!c.value || c.value === '#000000') return false
+        
+        // If no name provided, auto-generate one
+        if (!c.name || c.name.trim() === '') {
+          c.name = colorMode === 'single' ? 'Default' : `Color ${index + 1}`
+        }
+        
+        return true
+      })
+      
+      formData.append('colors', JSON.stringify(validColors))
+      formData.append('badges', JSON.stringify(selectedBadges.filter(badge => badge && typeof badge === 'string')))
+      
+      // Debug logging
+      console.log('Form submission debug:')
+      console.log('  - Original productColors:', productColors)
+      console.log('  - Color mode:', colorMode)
+      console.log('  - Filtered validColors:', validColors)
+      console.log('  - Has valid colors:', hasValidColors)
+      console.log('  - Submitting badges:', selectedBadges)
       images.forEach((file) => formData.append('images', file))
 
       const url = mode === 'edit' ? `/api/admin/product/${editId}` : '/api/admin/product'
@@ -200,6 +289,7 @@ export default function AdminPage() {
         } else {
           await fetchProducts()
           setMode('list')
+          resetForm()
         }
       } else {
         toast({
@@ -353,7 +443,7 @@ export default function AdminPage() {
                     </div>
                     <Button 
                       className="bg-blue-950 text-white mt-2 hover:bg-blue-800 transition-all shadow-lg px-4 py-2"
-                      onClick={() => {setMode('create');setName('');setPrice('');setDescription('');setSizes('S,M,L');setImages([]);setExistingImages([]);setIsLook(false);setEditId('')}}
+                      onClick={() => {setMode('create'); resetForm()}}
                     >
                       <Plus className="w-4 h-4 mr-2" />
                        New Product
@@ -367,7 +457,7 @@ export default function AdminPage() {
                       <p className="text-gray-500 mb-6">Start building your catalog by adding your first product</p>
                       <Button 
                         className="bg-blue-950 text-white hover:bg-blue-800"
-                        onClick={() => {setMode('create');setName('');setPrice('');setDescription('');setSizes('S,M,L');setImages([]);setExistingImages([]);setIsLook(false);setEditId('')}}
+                        onClick={() => {setMode('create'); resetForm()}}
                       >
                         Add Product
                       </Button>
@@ -435,7 +525,87 @@ export default function AdminPage() {
                                   size="sm" 
                                   variant="outline"
                                   className="flex-1 border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white transition-all"
-                                  onClick={() => {setMode('edit');setEditId(p.id);setName(p.name);setPrice(p.price);setDescription(p.description);setSizes(p.sizes.join(','));setImages([]);setExistingImages(p.images||[]);setIsLook(!!p.isLook)}}
+                                  onClick={() => {
+                                    setMode('edit')
+                                    setEditId(p.id)
+                                    setName(p.name)
+                                    setPrice(p.price)
+                                    setDescription(p.description)
+                                    setSizes(p.sizes.join(','))
+                                    setImages([])
+                                    setExistingImages(p.images||[])
+                                    setIsLook(!!p.isLook)
+                                    // Handle both old string format and new object format
+                                    if (p.colors) {
+                                      console.log('Edit form - Original colors:', p.colors, typeof p.colors)
+                                      
+                                      // Handle string that looks like JSON
+                                      if (typeof p.colors === 'string') {
+                                        try {
+                                          const parsed = JSON.parse(p.colors)
+                                          if (Array.isArray(parsed) && parsed.length > 0) {
+                                            setProductColors(parsed.map((color: any) => ({
+                                              name: color.name || 'Color',
+                                              value: color.value || '#000000'
+                                            })))
+                                          } else {
+                                            setProductColors([{name: '', value: '#000000'}])
+                                          }
+                                        } catch (e) {
+                                          setProductColors([{name: '', value: '#000000'}])
+                                        }
+                                      } else if (Array.isArray(p.colors)) {
+                                        if (p.colors.length > 0) {
+                                          // Check if it's the new format (objects) or old format (strings)
+                                          if (typeof p.colors[0] === 'object' && p.colors[0].name && p.colors[0].value) {
+                                            setProductColors(p.colors)
+                                          } else {
+                                            // Convert old string format to new object format
+                                            setProductColors(p.colors.map((color: any, index: number) => ({
+                                              name: typeof color === 'string' ? color : `Color ${index + 1}`,
+                                              value: '#000000'
+                                            })))
+                                          }
+                                        } else {
+                                          setProductColors([{name: '', value: '#000000'}])
+                                        }
+                                      } else {
+                                        setProductColors([{name: '', value: '#000000'}])
+                                      }
+                                    } else {
+                                      setProductColors([{name: '', value: '#000000'}])
+                                    }
+                                    // Handle badges safely
+                                    if (p.badges) {
+                                      console.log('Edit form - Original badges:', p.badges, typeof p.badges)
+                                      
+                                      if (typeof p.badges === 'string') {
+                                        try {
+                                          const parsed = JSON.parse(p.badges)
+                                          if (Array.isArray(parsed)) {
+                                            setSelectedBadges(parsed.filter((badge: any) => badge && typeof badge === 'string'))
+                                          } else {
+                                            setSelectedBadges([])
+                                          }
+                                        } catch (e) {
+                                          // Handle comma-separated string format
+                                          if (p.badges.includes(',')) {
+                                            const badges = p.badges.split(',').map((b: string) => b.trim().replace(/"/g, '')).filter((b: string) => b)
+                                            setSelectedBadges(badges)
+                                          } else {
+                                            setSelectedBadges([])
+                                          }
+                                        }
+                                      } else if (Array.isArray(p.badges)) {
+                                        setSelectedBadges(p.badges.filter((badge: any) => badge && typeof badge === 'string'))
+                                      } else {
+                                        setSelectedBadges([])
+                                      }
+                                    } else {
+                                      setSelectedBadges([])
+                                    }
+                                    setColorMode(p.colors && p.colors.length > 1 ? 'multiple' : 'single')
+                                  }}
                                 >
                                   <Edit3 className="w-4 h-4 mr-2" />
                                   Edit
@@ -516,7 +686,7 @@ export default function AdminPage() {
 
               {(mode === 'create' || mode === 'edit') && (
                 <>
-                  <Button className="mb-6" variant="outline" onClick={() => setMode('list')}>Back to list</Button>
+                  <Button className="mb-6" variant="outline" onClick={() => {setMode('list'); resetForm()}}>Back to list</Button>
                   <h2 className="text-2xl font-semibold mb-4">{mode === 'create' ? 'Add New Product' : 'Edit Product'}</h2>
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
@@ -538,6 +708,142 @@ export default function AdminPage() {
                     <div className="flex items-center gap-3">
                       <input id="isLook" type="checkbox" checked={isLook} onChange={e => setIsLook(e.target.checked)} />
                       <label htmlFor="isLook" className="text-sm">Use in Look Breakdown slider</label>
+                    </div>
+
+                    {/* Color Mode Selection */}
+                    <div className="space-y-4">
+                      <label className="block text-sm font-medium text-blue-950">Color Options</label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2">
+                          <input 
+                            type="radio" 
+                            value="single" 
+                            checked={colorMode === 'single'} 
+                            onChange={(e) => {
+                              setColorMode('single')
+                              if (productColors.length > 1) {
+                                setProductColors([productColors[0]])
+                              }
+                            }}
+                          />
+                          <span className="text-sm">Single Color (5 images of same color)</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input 
+                            type="radio" 
+                            value="multiple" 
+                            checked={colorMode === 'multiple'} 
+                            onChange={(e) => setColorMode('multiple')}
+                          />
+                          <span className="text-sm">Multiple Colors (images must match color order)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Color Inputs */}
+                    <div className="space-y-4">
+                      <label className="block text-sm font-medium text-blue-950">
+                        Product Colors (Max 5)
+                        {colorMode === 'multiple' && (
+                          <span className="block text-xs text-orange-600 mt-1">
+                            ⚠️ Important: Upload images in the EXACT same order as colors below. 
+                            First color = First set of images, Second color = Second set of images, etc.
+                            <br />
+                            💡 Tip: Color names are optional - will auto-generate if left empty.
+                          </span>
+                        )}
+                        {colorMode === 'single' && (
+                          <span className="block text-xs text-blue-600 mt-1">
+                            📝 Note: All 5 images should be of the same color specified below.
+                            <br />
+                            💡 Tip: Color name is optional - will use "Default" if left empty.
+                          </span>
+                        )}
+                      </label>
+                      <div className="space-y-3">
+                        {productColors.map((color, index) => (
+                          <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium">Color {index + 1}:</span>
+                              <input
+                                type="color"
+                                value={color.value}
+                                onChange={(e) => updateColor(index, 'value', e.target.value)}
+                                className="w-10 h-8 border border-gray-300 rounded cursor-pointer"
+                              />
+                              <input
+                                type="text"
+                                placeholder="Color name (optional - e.g., Black, Navy Blue)"
+                                value={color.name}
+                                onChange={(e) => updateColor(index, 'name', e.target.value)}
+                                className="px-3 py-1 border border-gray-300 rounded text-sm flex-1 min-w-40"
+                              />
+                            </div>
+                            {colorMode === 'multiple' && productColors.length > 1 && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => removeColor(index)}
+                                className="text-red-600 hover:bg-red-50"
+                              >
+                                Remove
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                        {colorMode === 'multiple' && productColors.length < 5 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={addColor}
+                            className="w-full"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Color (Max 5)
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Badge Selection */}
+                    <div className="space-y-3">
+                      <label className="block text-sm font-medium text-blue-950">Product Badges</label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedBadges.includes('new-arrival')}
+                            onChange={() => toggleBadge('new-arrival')}
+                          />
+                          <span className="text-sm">New Arrival</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedBadges.includes('trendy')}
+                            onChange={() => toggleBadge('trendy')}
+                          />
+                          <span className="text-sm">Trendy</span>
+                        </label>
+                      </div>
+                      {selectedBadges.length > 0 && (
+                        <div className="flex gap-2 mt-2">
+                          <span className="text-xs text-gray-600">Preview:</span>
+                          {selectedBadges.map(badge => (
+                            <span 
+                              key={badge}
+                              className={`px-2 py-1 text-xs rounded-full ${
+                                badge === 'new-arrival' 
+                                  ? 'bg-blue-100 text-blue-700' 
+                                  : 'bg-green-100 text-green-700'
+                              }`}
+                            >
+                              {badge === 'new-arrival' ? 'New Arrival' : 'Trendy'}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div>
