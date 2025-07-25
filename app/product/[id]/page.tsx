@@ -30,6 +30,7 @@ export default function ProductDetailPage() {
   const { cartCount } = useUIStore()
   
   const [product, setProduct] = useState<Product | null>(null)
+  
 
   useEffect(() => {
     async function fetchProduct() {
