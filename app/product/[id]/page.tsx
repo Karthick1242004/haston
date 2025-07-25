@@ -378,12 +378,12 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Product Image */}
-        <div className="relative aspect-square bg-gradient-to-br from-blue-200 to-purple-200">
+        <div className="relative aspect-[3/4] bg-gradient-to-br from-blue-50 to-purple-50">
           <Image
             src={product.images?.[selectedImageIndex] || product.image || '/placeholder.jpg'}
             alt={product.name}
             fill
-            className="object-cover"
+            className="object-contain p-4"
             unoptimized
           />
           
