@@ -11,6 +11,7 @@ import { useProductStore } from "@/stores/product-store"
 import { useUIStore } from "@/stores/ui-store"
 import { useAuthCart } from "@/hooks/use-auth-cart"
 import Header from "@/components/header"
+import ReviewSection from "@/components/review-section"
 import type { Product } from "@/types/product"
 
 
@@ -306,6 +307,22 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
+              {/* Delivery Information */}
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center gap-3 text-green-700">
+                  <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+                    <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1V8a1 1 0 00-.293-.707L15 4.586A1 1 0 0014.414 4H14v3z"/>
+                  </svg>
+                  <div>
+                    <h4 className="font-medium">Fast Delivery</h4>
+                    <p className="text-sm text-green-600">
+                      Estimated delivery: {product.deliveryDays || '2-3 days'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Action Buttons */}
               <div className="space-y-2 pt-2">
                 <Button
@@ -328,25 +345,9 @@ export default function ProductDetailPage() {
                   Buy it now
                 </Button>
               </div>
-
-              {/* Product Details Accordion */}
-              <div className="space-y-4 pt-8 border-t">
-                <div className="space-y-4">
-                  <button className="flex justify-between items-center w-full text-left">
-                    <span className="text-lg font-medium">Description</span>
-                    <ChevronLeft className="w-5 h-5 -rotate-90" />
-                  </button>
-                  
-                  <button className="flex justify-between items-center w-full text-left">
-                    <span className="text-lg font-medium">Shipping & Returns</span>
-                    <ChevronLeft className="w-5 h-5 -rotate-90" />
-                  </button>
-                  
-                  <button className="flex justify-between items-center w-full text-left">
-                    <span className="text-lg font-medium">Details</span>
-                    <ChevronLeft className="w-5 h-5 -rotate-90" />
-                  </button>
-                </div>
+              {/* Reviews Section */}
+              <div className="pt-8 border-t">
+                <ReviewSection productId={product.id} />
               </div>
             </motion.div>
           </div>
@@ -532,6 +533,20 @@ export default function ProductDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Delivery Information */}
+          <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center gap-2 text-green-700">
+              <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+                <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1V8a1 1 0 00-.293-.707L15 4.586A1 1 0 0014.414 4H14v3z"/>
+              </svg>
+              <span className="font-medium text-sm">Fast Delivery</span>
+            </div>
+            <p className="text-sm text-green-600 mt-1">
+              Estimated delivery: {product.deliveryDays || '2-3 days'}
+            </p>
+          </div>
         </div>
 
         {/* Fixed Bottom Button */}
@@ -543,6 +558,11 @@ export default function ProductDetailPage() {
           >
             Add to cart
           </Button>
+        </div>
+
+        {/* Mobile Reviews Section */}
+        <div className="p-4">
+          <ReviewSection productId={product.id} />
         </div>
       </div>
     </motion.div>

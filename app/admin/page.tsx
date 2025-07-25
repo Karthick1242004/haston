@@ -31,6 +31,7 @@ export default function AdminPage() {
   const [price, setPrice] = useState('')
   const [description, setDescription] = useState('')
   const [sizes, setSizes] = useState('S,M,L')
+  const [deliveryDays, setDeliveryDays] = useState('2-3 days')
   const [images, setImages] = useState<File[]>([])
   const [existingImages, setExistingImages] = useState<string[]>([])
   const [isLook, setIsLook] = useState(false)
@@ -172,6 +173,7 @@ export default function AdminPage() {
       setPrice('')
       setDescription('')
       setSizes('S,M,L')
+      setDeliveryDays('2-3 days')
       setImages([])
       setExistingImages([])
       setIsLook(false)
@@ -268,6 +270,7 @@ export default function AdminPage() {
       formData.append('price', price)
       formData.append('description', description)
       formData.append('sizes', sizes)
+      formData.append('deliveryDays', deliveryDays)
       formData.append('existingImages', JSON.stringify(existingImages))
       formData.append('isLook', isLook ? 'true' : 'false')
       // Filter colors: be more lenient with validation
@@ -559,6 +562,7 @@ export default function AdminPage() {
                                     setPrice(p.price)
                                     setDescription(p.description)
                                     setSizes(p.sizes.join(','))
+                                    setDeliveryDays(p.deliveryDays || '2-3 days')
                                     setImages([])
                                     setExistingImages(p.images||[])
                                     setIsLook(!!p.isLook)
@@ -794,6 +798,31 @@ export default function AdminPage() {
                     <div>
                       <label className="block mb-1 text-sm font-medium text-blue-950">Sizes (comma separated)</label>
                       <Input value={sizes} onChange={(e) => setSizes(e.target.value)} className="rounded-none"/>
+                    </div>
+                    <div>
+                      <label className="block mb-1 text-sm font-medium text-blue-950">Delivery Time</label>
+                      <Select value={deliveryDays} onValueChange={setDeliveryDays}>
+                        <SelectTrigger className="rounded-none">
+                          <SelectValue placeholder="Select delivery time" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Same day">Same day</SelectItem>
+                          <SelectItem value="1 day">1 day</SelectItem>
+                          <SelectItem value="2-3 days">2-3 days</SelectItem>
+                          <SelectItem value="3-5 days">3-5 days</SelectItem>
+                          <SelectItem value="5-7 days">5-7 days</SelectItem>
+                          <SelectItem value="1 week">1 week</SelectItem>
+                          <SelectItem value="2 weeks">2 weeks</SelectItem>
+                          <SelectItem value="Custom">Custom</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {deliveryDays === 'Custom' && (
+                        <Input 
+                          placeholder="Enter custom delivery time (e.g. 10-15 days)" 
+                          className="mt-2 rounded-none"
+                          onChange={(e) => setDeliveryDays(e.target.value)}
+                        />
+                      )}
                     </div>
                     <div className="flex items-center gap-3">
                       <input id="isLook" type="checkbox" checked={isLook} onChange={e => setIsLook(e.target.checked)} />

@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
     const price = form.get('price') as string | null
     const description = form.get('description') as string | null
     const sizes = form.get('sizes') as string | null // comma-separated
+    const deliveryDays = form.get('deliveryDays') as string | null
     const isLookFlag = form.get('isLook') === 'true'
 
     if (!name || !price || !description || !sizes) {
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
       price: parseFloat(price),
       description,
       sizes: sizeArray,
+      deliveryDays: deliveryDays || '2-3 days',
       image: imageUrls[0],
       images: imageUrls,
       colors: ['Default'],

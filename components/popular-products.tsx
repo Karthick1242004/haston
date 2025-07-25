@@ -497,7 +497,7 @@ export default function PopularProducts() {
                       </svg>
                       <span>Fast Delivery</span>
                     </div>
-                    <span>2-3 days</span>
+                    <span>{product.deliveryDays || '2-3 days'}</span>
                   </div>
 
                   {/* Action Buttons */}
