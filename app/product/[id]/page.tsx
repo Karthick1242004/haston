@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Image from "next/image"
-import { ChevronLeft, Star, Heart, ShoppingCart } from "lucide-react"
+import { ChevronLeft, Star, Heart, ShoppingCart, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useProductStore } from "@/stores/product-store"
@@ -55,7 +55,7 @@ export default function ProductDetailPage() {
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Product not found</p>
+        <Loader2 className="w-10 h-10 animate-spin" />
       </div>
     )
   }
@@ -75,7 +75,7 @@ export default function ProductDetailPage() {
 
   return (
     <motion.div 
-      className="min-h-screen bg-white"
+      className="min-h-screen pb-8 bg-[#F1EEE6]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -91,7 +91,7 @@ export default function ProductDetailPage() {
           {/* Left side - Product Images */}
           <div className="w-[60%] flex">
             {/* Thumbnail Images */}
-            <div className="w-32 bg-gray-50 p-4 space-y-4 overflow-y-auto">
+            <div className="w-32 p-4 space-y-4 overflow-y-auto">
               {product.images?.map((image, index) => (
                 <motion.div
                   key={index}
@@ -160,7 +160,7 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Right side - Product Details */}
-          <div className="w-[500px] px-12 overflow-y-auto scrollbar-hide"
+          <div className="w-[500px] shadow-xl bg-gray-50 rounded-md px-12 overflow-y-auto scrollbar-hide pb-6"
           style={{
             scrollbarWidth: "none",
           }}

@@ -51,17 +51,17 @@ export default function Footer() {
             <div className="space-y-3 text-xs text-gray-600">
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4" />
-                <span>Hexhueclothing.com</span>
+                <span>hexhueclothing@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4" />
-                <span>+1917-408-3508</span>
+                <span>+91 9876543210</span>
               </div>
               <div className="flex items-start space-x-3">
                 <MapPin className="w-4 h-4 mt-1" />
                 <div>
-                  <p>123 Fashion Avenue, Suite 45,</p>
-                  <p>New York, NY 10001, USA</p>
+                  <p>1247 Fashion District, Noida</p>
+                  <p>201301, India</p>
                 </div>
               </div>
             </div>

@@ -80,7 +80,7 @@ export default function SignInPage() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-[#F1EFEE]">
+      <div className="min-h-screen bg-[#F1EEE6]">
         {/* Header */}
         <div className="relative bg-white shadow-sm">
           <Header />
@@ -125,7 +125,7 @@ export default function SignInPage() {
                   <Button
                     onClick={handleGoogleSignIn}
                     disabled={isLoading}
-                    className="w-full bg-blue-950 text-white hover:bg-blue-800 disabled:bg-gray-300 transition-all py-6 text-lg font-medium rounded-lg"
+                    className="w-full bg-[#FED66E] text-black hover:bg-[#fdd162] disabled:bg-gray-300 transition-all py-6 lg:text-lg text-sm font-medium rounded-lg"
                   >
                     <Chrome className="w-5 h-5 mr-3" />
                     {isLoading ? "Signing in..." : "Sign in with Google"}
@@ -174,7 +174,7 @@ export default function SignInPage() {
               <Button
                 variant="outline"
                 onClick={() => router.push('/')}
-                className="text-blue-950 border-blue-950 hover:text-white hover:bg-blue-950 transition-all"
+                className="text-blue-950 bg-[#FED66E] border-[#FED66E] hover:bg-[#ffd15d] transition-all"
               >
                 Continue as Guest
               </Button>
