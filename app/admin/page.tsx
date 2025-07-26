@@ -23,7 +23,7 @@ import { Order } from '@/types/order'
 import { ProductColor } from '@/types/product'
 import { useToast } from '@/hooks/use-toast'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Package, ShoppingBag, Users, User, DollarSign, TrendingUp, Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, Filter, ExternalLink, Edit3, Search, Eye, Trash2, Image as ImageIcon, Plus } from 'lucide-react'
+import { Package, ShoppingBag, Users, User, DollarSign, TrendingUp, Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, Filter, ExternalLink, Edit3, Search, Eye, Trash2, Image as ImageIcon, Plus, Mail, Send, Upload, Check } from 'lucide-react'
 
 export default function AdminPage() {
   const { toast } = useToast()
@@ -51,7 +51,7 @@ export default function AdminPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Order management state
-  const [currentView, setCurrentView] = useState<'products' | 'orders' | 'hero' | 'admins'>('products')
+  const [currentView, setCurrentView] = useState<'products' | 'orders' | 'hero' | 'admins' | 'email'>('products')
   const [orders, setOrders] = useState<Order[]>([])
   const [orderStats, setOrderStats] = useState<any>({})
   const [orderFilters, setOrderFilters] = useState({
@@ -73,6 +73,29 @@ export default function AdminPage() {
       shippedDays: '3-5 business days', 
       deliveredDays: '5-7 business days'
     }
+  })
+
+  // Email marketing state
+  const [users, setUsers] = useState<any[]>([])
+  const [userFilters, setUserFilters] = useState({
+    search: '',
+    orderFilter: 'all',
+    page: 1,
+    limit: 50
+  })
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([])
+  const [emailForm, setEmailForm] = useState({
+    subject: '',
+    content: '',
+    imageUrl: ''
+  })
+  const [emailImage, setEmailImage] = useState<File | null>(null)
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
+  const [usersPagination, setUsersPagination] = useState({
+    page: 1,
+    limit: 50,
+    total: 0,
+    pages: 0
   })
   
   // Delete confirmation state
@@ -119,6 +142,27 @@ export default function AdminPage() {
     }
   }
 
+  const fetchUsers = async () => {
+    try {
+      const queryParams = new URLSearchParams({
+        search: userFilters.search,
+        orderFilter: userFilters.orderFilter,
+        page: userFilters.page.toString(),
+        limit: userFilters.limit.toString()
+      })
+
+      const res = await fetch(`/api/admin/users?${queryParams}`)
+      const data = await res.json()
+
+      if (data.success) {
+        setUsers(data.users)
+        setUsersPagination(data.pagination)
+      }
+    } catch (err) {
+      console.error('Error fetching users:', err)
+    }
+  }
+
   const updateOrder = async (orderId: string, updateData: any) => {
     try {
       const res = await fetch(`/api/admin/orders/${orderId}`, {
@@ -139,12 +183,106 @@ export default function AdminPage() {
     }
   }
 
+  const uploadEmailImage = async (file: File): Promise<string> => {
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('upload_preset', 'ml_default') // You might need to set this in Cloudinary
+      
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      )
+      
+      const data = await response.json()
+      return data.secure_url
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      throw new Error('Failed to upload image')
+    }
+  }
+
+  const sendEmail = async () => {
+    if (!emailForm.subject || !emailForm.content) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in both subject and content",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (selectedUsers.length === 0) {
+      toast({
+        title: "Validation Error", 
+        description: "Please select at least one user to send email to",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsSendingEmail(true)
+    try {
+      let imageUrl = emailForm.imageUrl
+
+      // Upload image if provided
+      if (emailImage) {
+        imageUrl = await uploadEmailImage(emailImage)
+      }
+
+      const response = await fetch('/api/admin/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipients: selectedUsers,
+          subject: emailForm.subject,
+          content: emailForm.content,
+          imageUrl
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        toast({
+          title: "Success",
+          description: data.message
+        })
+        // Reset form
+        setEmailForm({ subject: '', content: '', imageUrl: '' })
+        setEmailImage(null)
+        setSelectedUsers([])
+      } else {
+        throw new Error(data.error || 'Failed to send email')
+      }
+    } catch (error) {
+      console.error('Error sending email:', error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send email",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSendingEmail(false)
+    }
+  }
+
   useEffect(() => { fetchProducts() }, [])
   useEffect(() => { 
     if (currentView === 'orders') {
       fetchOrders() 
     }
   }, [currentView, orderFilters])
+  useEffect(() => {
+    if (currentView === 'email') {
+      fetchUsers()
+    }
+  }, [currentView, userFilters])
 
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -443,8 +581,8 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto bg-white lg:p-10 p-4 shadow-xl border border-gray-200">
           <h1 className="text-3xl font-bold text-blue-950 mb-8" style={{fontFamily:'var(--font-anton)'}}>Admin Dashboard</h1>
           
-          <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as 'products' | 'orders' | 'hero' | 'admins')} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
+          <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as 'products' | 'orders' | 'hero' | 'admins' | 'email')} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-5 lg:w-[750px]">
               <TabsTrigger value="products" className="flex items-center gap-2">
                 <Package className="w-4 h-4" />
                 Products
@@ -452,6 +590,10 @@ export default function AdminPage() {
               <TabsTrigger value="orders" className="flex items-center gap-2">
                 <ShoppingBag className="w-4 h-4" />
                 Orders
+              </TabsTrigger>
+              <TabsTrigger value="email" className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Email
               </TabsTrigger>
               <TabsTrigger value="hero" className="flex items-center gap-2">
                 <ImageIcon className="w-4 h-4" />
@@ -1632,6 +1774,269 @@ export default function AdminPage() {
                   )}
                 </DialogContent>
               </Dialog>
+            </TabsContent>
+
+            <TabsContent value="email" className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold text-blue-950 mb-2">Email Marketing</h2>
+                <p className="text-gray-600 mb-6">Send promotional emails to your customers</p>
+              </div>
+
+              {/* Email Composition Form */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Mail className="w-5 h-5" />
+                    Compose Email
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="email-subject">Subject</Label>
+                        <Input
+                          id="email-subject"
+                          placeholder="Enter email subject..."
+                          value={emailForm.subject}
+                          onChange={(e) => setEmailForm(prev => ({ ...prev, subject: e.target.value }))}
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="email-content">Content</Label>
+                        <Textarea
+                          id="email-content"
+                          placeholder="Write your email content here..."
+                          value={emailForm.content}
+                          onChange={(e) => setEmailForm(prev => ({ ...prev, content: e.target.value }))}
+                          rows={8}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="email-image">Email Image (Optional)</Label>
+                        <Input
+                          id="email-image"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) {
+                              setEmailImage(file)
+                            }
+                          }}
+                        />
+                        {emailImage && (
+                          <div className="mt-3">
+                            <img
+                              src={URL.createObjectURL(emailImage)}
+                              alt="Email preview"
+                              className="w-full max-w-sm h-40 object-cover border rounded-lg"
+                            />
+                          </div>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          Recommended size: 600x400px. Will be displayed in email template.
+                        </p>
+                      </div>
+
+                      {/* Email Preview */}
+                      {(emailForm.subject || emailForm.content) && (
+                        <div className="border rounded-lg p-4 bg-gray-50">
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">Preview:</h4>
+                          <div className="bg-white border rounded p-3 text-sm">
+                            {emailForm.subject && (
+                              <div className="font-semibold mb-2">Subject: {emailForm.subject}</div>
+                            )}
+                            {emailImage && (
+                              <div className="mb-2">
+                                <img src={URL.createObjectURL(emailImage)} alt="Preview" className="w-20 h-12 object-cover rounded" />
+                              </div>
+                            )}
+                            <div className="text-gray-600">
+                              {emailForm.content.split('\n').map((line, i) => (
+                                <div key={i}>{line || '\u00A0'}</div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* User Selection */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Select Recipients ({selectedUsers.length} selected)
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedUsers(users.map(u => u.email))}
+                      >
+                        Select All
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedUsers([])}
+                      >
+                        Clear All
+                      </Button>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* User Filters */}
+                  <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <div className="flex-1">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Input
+                          placeholder="Search users by name or email..."
+                          value={userFilters.search}
+                          onChange={(e) => setUserFilters(prev => ({ ...prev, search: e.target.value, page: 1 }))}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+                    <div className="md:w-48">
+                      <Select 
+                        value={userFilters.orderFilter} 
+                        onValueChange={(value) => setUserFilters(prev => ({ ...prev, orderFilter: value, page: 1 }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Filter by orders" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Users</SelectItem>
+                          <SelectItem value="hasOrders">Has Orders</SelectItem>
+                          <SelectItem value="noOrders">No Orders</SelectItem>
+                          <SelectItem value="highValue">High Value (₹1000+)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Users List */}
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {users.map((user) => (
+                      <div key={user.email} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedUsers.includes(user.email)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedUsers(prev => [...prev, user.email])
+                              } else {
+                                setSelectedUsers(prev => prev.filter(email => email !== user.email))
+                              }
+                            }}
+                            className="w-4 h-4"
+                          />
+                          <div className="flex items-center gap-3">
+                            {user.image ? (
+                              <img src={user.image} alt={user.name} className="w-8 h-8 rounded-full" />
+                            ) : (
+                              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                <User className="w-4 h-4 text-gray-600" />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-medium text-gray-900">{user.name || 'No Name'}</p>
+                              <p className="text-sm text-gray-500">{user.email}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right text-sm">
+                          <div className="text-gray-900">{user.orderCount || 0} orders</div>
+                          <div className="text-gray-500">₹{(user.totalSpent || 0).toFixed(2)} spent</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {users.length === 0 && (
+                    <div className="text-center py-8">
+                      <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500">No users found</p>
+                    </div>
+                  )}
+
+                  {/* Pagination */}
+                  {usersPagination.pages > 1 && (
+                    <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                      <div className="text-sm text-gray-500">
+                        Showing {((usersPagination.page - 1) * usersPagination.limit) + 1} to{' '}
+                        {Math.min(usersPagination.page * usersPagination.limit, usersPagination.total)} of{' '}
+                        {usersPagination.total} users
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={usersPagination.page <= 1}
+                          onClick={() => setUserFilters(prev => ({ ...prev, page: prev.page - 1 }))}
+                        >
+                          Previous
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={usersPagination.page >= usersPagination.pages}
+                          onClick={() => setUserFilters(prev => ({ ...prev, page: prev.page + 1 }))}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Send Email Button */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Ready to Send?</h3>
+                      <p className="text-sm text-gray-600">
+                        {selectedUsers.length > 0 
+                          ? `Email will be sent to ${selectedUsers.length} recipient${selectedUsers.length > 1 ? 's' : ''}`
+                          : 'Please select at least one recipient'
+                        }
+                      </p>
+                    </div>
+                    <Button
+                      onClick={sendEmail}
+                      disabled={isSendingEmail || selectedUsers.length === 0 || !emailForm.subject || !emailForm.content}
+                      className="bg-blue-950 text-white hover:bg-blue-800"
+                    >
+                      {isSendingEmail ? (
+                        <>
+                          <Clock className="w-4 h-4 mr-2 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          Send Email
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="hero" className="space-y-6">
