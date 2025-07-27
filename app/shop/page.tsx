@@ -116,7 +116,7 @@ export default function ShopPage() {
       
       // Color filter
       if (filters.colors.length > 0) {
-        const hasMatchingColor = product.colors?.some(color => filters.colors.includes(color))
+        const hasMatchingColor = Array.isArray(product.colors) && product.colors.some(color => filters.colors.includes(color))
         if (!hasMatchingColor) {
           return false
         }
@@ -516,7 +516,7 @@ export default function ShopPage() {
                           )}
                           
                           {/* Color Options */}
-                          {product.colors && product.colors.length > 1 && (
+                          {product.colors && Array.isArray(product.colors) && product.colors.length > 1 && (
                             <div className="absolute top-2 left-2 flex gap-1 bg-white/90 backdrop-blur-sm rounded px-1 py-0.5">
                               {product.colors.slice(0, 2).map((color, colorIndex) => (
                                 <div
@@ -526,7 +526,7 @@ export default function ShopPage() {
                                   }`}
                                 />
                               ))}
-                              {product.colors.length > 2 && (
+                              {Array.isArray(product.colors) && product.colors.length > 2 && (
                                 <span className="text-[8px] text-gray-600 font-medium">+{product.colors.length - 2}</span>
                               )}
                             </div>
@@ -557,7 +557,7 @@ export default function ShopPage() {
                               onClick={(e) => {
                                 e.stopPropagation()
                                 const defaultSize = product.sizes?.[0] || "M"
-                                const defaultColor = product.colors?.[0] || "Black"
+                                const defaultColor = Array.isArray(product.colors) ? product.colors[0] : "Black"
                                 addProductToCart(product, defaultSize, defaultColor, 1)
                               }}
                               disabled={(product.stock || 0) === 0}
