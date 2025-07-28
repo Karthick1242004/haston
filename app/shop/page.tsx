@@ -323,6 +323,7 @@ export default function ShopPage() {
         <Header />
       </div>
 
+
       {/* Banner Section */}
       <section className="relative pt-20 pb-8 px-6 md:px-8 lg:px-12  rounded-3xl mx-4  overflow-hidden">
         <div className="container mt-10 mx-auto">
