@@ -55,7 +55,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4" />
-                <span>+91 9876543210</span>
+                <span>+91 70604 77331</span>
               </div>
               <div className="flex items-start space-x-3">
                 <MapPin className="w-4 h-4 mt-1" />
@@ -73,16 +73,11 @@ export default function Footer() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <h4 className="text-xl font-bold font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>COMPANY</h4>
+            <h4 className="text-xl font-light font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>COMPANY</h4>
             <ul className="space-y-3 text-xs text-gray-600">
               <li>
-                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
+                <a href="/about" className="hover:text-blue-950 transition-colors duration-200">
                   About Us
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
-                  FAQ
                 </a>
               </li>
               <li>
@@ -91,22 +86,22 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
+                <a href="/orders" className="hover:text-blue-950 transition-colors duration-200">
                   Shipping Information
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
+                <a href="/size-guide" className="hover:text-blue-950 transition-colors duration-200">
                   Size Guide
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
+                <a href="/privacy-policy" className="hover:text-blue-950 transition-colors duration-200">
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
+                <a href="/privacy-policy" className="hover:text-blue-950 transition-colors duration-200">
                   Terms & Conditions
                 </a>
               </li>
@@ -119,7 +114,7 @@ export default function Footer() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <h4 className="text-xl font-bold font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>SHOP</h4>
+            <h4 className="text-xl font-thin font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>SHOP</h4>
             <ul className="space-y-3 text-xs text-gray-600">
               <li>
                 <a href="#" className="hover:text-blue-950 transition-colors duration-200">
@@ -141,11 +136,6 @@ export default function Footer() {
                   Best Sellers
                 </a>
               </li>
-              <li>
-                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
-                  Sale
-                </a>
-              </li>
             </ul>
           </motion.div>
 
@@ -155,7 +145,7 @@ export default function Footer() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <h4 className="text-xl font-bold font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>STAY CONNECTED</h4>
+            <h4 className="text-xl font-thin font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>STAY CONNECTED</h4>
             <p className="text-gray-600 mb-6 text-sm">
               Subscribe to Our Newsletter for the Latest Updates, Offers, and Exclusive Releases
             </p>

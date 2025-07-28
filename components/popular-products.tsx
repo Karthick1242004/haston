@@ -364,7 +364,7 @@ Products
             return (
               <motion.div
                 key={product.id}
-                className="group mx-auto w-[300px] cursor-pointer bg-white rounded-md shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden relative"
+                className="group mx-auto w-full sm:w-[300px] cursor-pointer bg-white rounded-md shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden relative"
                 initial={{ opacity: 0, y: 50, scale: 0.9 }}
                 animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
                 transition={{
