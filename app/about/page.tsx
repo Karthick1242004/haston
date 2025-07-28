@@ -176,7 +176,7 @@ export default function AboutPage() {
                 className="relative"
               >
                 <div className="space-y-6">
-                  <h3 className="text-2xl font-bold text-blue-950 mb-8 text-center" style={{ fontFamily: "var(--font-anton)" }}>
+                  <h3 className="text-2xl font-light text-blue-950 mb-8 text-center" style={{ fontFamily: "var(--font-anton)" }}>
                     What Our Customers Say
                   </h3>
                   
@@ -289,7 +289,7 @@ export default function AboutPage() {
                       <IconComponent className="w-8 h-8" />
                     </div>
                     <h3 
-                      className="text-4xl md:text-5xl font-bold text-blue-950 mb-2"
+                      className="text-4xl md:text-5xl font-thin text-blue-950 mb-2"
                       style={{ fontFamily: "var(--font-anton)" }}
                     >
                       {stat.number}

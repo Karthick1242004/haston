@@ -109,7 +109,7 @@ export default function PrivacyPolicyPage() {
               </Button>
               
               <motion.h1
-                className="text-5xl md:text-7xl lg:text-8xl text-blue-950 leading-none tracking-tight mb-6"
+                className="text-5xl md:text-7xl lg:text-8xl text-blue-950 leading-none tracking-tight mb-6 font-light"
                 style={{ fontFamily: "var(--font-anton)" }}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={heroInView ? { scale: 1, opacity: 1 } : {}}
