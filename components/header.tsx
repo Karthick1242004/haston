@@ -49,160 +49,167 @@ export default function Header() {
       >
         <div className="w-full px-6 py-0">
           <div className="flex items-center justify-between">
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
-              {navItems.map((item, index) => (
-                <motion.a
-                  key={item}
-                  href={item === "Shop" ? "/shop" : item === "About Us" ? "/about" : item === "Privacy Policy" ? "/privacy-policy" : "#"}
-                  className="text-gray-700 hover:text-gray-900 text-md transition-colors duration-200 relative group !font-light"
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  style={{
-                    fontFamily: "var(--font-anton)",
-                  }}
-                >
-                  {item}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-900 transition-all duration-200 group-hover:w-full" />
-                </motion.a>
-              ))}
-            </nav>
-
-            {/* Mobile Menu Button */}
-            <motion.button
-              className="md:hidden p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
-              onClick={toggleMobileMenu}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {isMobileMenuOpen ? (
-                <X className="w-6 h-6 text-gray-700" />
-              ) : (
-                <Menu className="w-6 h-6 text-gray-700" />
-              )}
-            </motion.button>
-
-            {/* Logo */}
-            <motion.a
-              href="/"
-              className="md:mr-20 hover:opacity-80 transition-opacity cursor-pointer"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <Image
-                src="/logomain.png"
-                alt="HEX & HUE"
-                width={100}
-                height={100}
-                className="object-contain"
-                priority
-              />
-            </motion.a>
-
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-4">
-              {/* <motion.button
-                className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Search className="w-5 h-5 text-gray-700" />
-              </motion.button> */}
-              
-              {/* User Authentication Button */}
-              <div className="relative">
-                {session ? (
-                  <>
-                    <motion.button
-                      className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200 flex items-center"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                    >
-                      {session.user?.image ? (
-                        <Image
-                          src={session.user.image}
-                          alt={session.user.name || 'User'}
-                          width={22}
-                          height={22}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <User className="w-5 h-5 text-gray-700" />
-                      )}
-                    </motion.button>
-
-                    {/* User Dropdown */}
-                    <AnimatePresence>
-                      {isUserDropdownOpen && (
-                        <motion.div
-                          className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <div className="px-4 py-2 border-b border-gray-100">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {session.user?.name}
-                            </p>
-                            <p className="text-xs text-gray-500 truncate">
-                              {session.user?.email}
-                            </p>
-                          </div>
-                          <button
-                            onClick={handleProfile}
-                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          >
-                            <Settings className="w-4 h-4 mr-3" />
-                            Profile
-                          </button>
-                          {isAdmin && (
-                            <button
-                              onClick={() => router.push('/admin')}
-                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                            >
-                              <Shield className="w-4 h-4 mr-3" />
-                              Admin Dashboard
-                            </button>
-                          )}
-                          <button
-                            onClick={handleSignOut}
-                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          >
-                            <LogOut className="w-4 h-4 mr-3" />
-                            Sign Out
-                          </button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </>
-                ) : (
-                  <motion.button
-                    className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleSignIn}
+            {/* Left Section - Desktop Navigation / Mobile Menu */}
+            <div className="flex-1 flex justify-start">
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex items-center space-x-8">
+                {navItems.map((item, index) => (
+                  <motion.a
+                    key={item}
+                    href={item === "Shop" ? "/shop" : item === "About Us" ? "/about" : item === "Privacy Policy" ? "/privacy-policy" : "#"}
+                    className="text-gray-700 hover:text-gray-900 text-md transition-colors duration-200 relative group !font-light"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    style={{
+                      fontFamily: "var(--font-anton)",
+                    }}
                   >
-                    <User className="w-5 h-5 text-gray-700" />
-                  </motion.button>
-                )}
-              </div>
+                    {item}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-900 transition-all duration-200 group-hover:w-full" />
+                  </motion.a>
+                ))}
+              </nav>
+
+              {/* Mobile Menu Button */}
               <motion.button
-                className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200 relative"
+                className="md:hidden p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
+                onClick={toggleMobileMenu}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setCartOpen(true)}
               >
-                <ShoppingBag className="w-5 h-5 text-gray-700" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-gray-900 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartCount}
-                  </span>
+                {isMobileMenuOpen ? (
+                  <X className="w-6 h-6 text-gray-700" />
+                ) : (
+                  <Menu className="w-6 h-6 text-gray-700" />
                 )}
               </motion.button>
+            </div>
+
+            {/* Center Section - Logo */}
+            <div className="flex justify-center">
+              <motion.a
+                href="/"
+                className="hover:opacity-80 transition-opacity cursor-pointer"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                <Image
+                  src="/logomain.png"
+                  alt="HEX & HUE"
+                  width={100}
+                  height={100}
+                  className="object-contain"
+                  priority
+                />
+              </motion.a>
+            </div>
+
+            {/* Right Section - Action Buttons */}
+            <div className="flex-1 flex justify-end">
+              <div className="flex items-center space-x-4">
+                {/* <motion.button
+                  className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Search className="w-5 h-5 text-gray-700" />
+                </motion.button> */}
+                
+                {/* User Authentication Button */}
+                <div className="relative">
+                  {session ? (
+                    <>
+                      <motion.button
+                        className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200 flex items-center"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                      >
+                        {session.user?.image ? (
+                          <Image
+                            src={session.user.image}
+                            alt={session.user.name || 'User'}
+                            width={22}
+                            height={22}
+                            className="rounded-full"
+                          />
+                        ) : (
+                          <User className="w-5 h-5 text-gray-700" />
+                        )}
+                      </motion.button>
+
+                      {/* User Dropdown */}
+                      <AnimatePresence>
+                        {isUserDropdownOpen && (
+                          <motion.div
+                            className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <div className="px-4 py-2 border-b border-gray-100">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {session.user?.name}
+                              </p>
+                              <p className="text-xs text-gray-500 truncate">
+                                {session.user?.email}
+                              </p>
+                            </div>
+                            <button
+                              onClick={handleProfile}
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              <Settings className="w-4 h-4 mr-3" />
+                              Profile
+                            </button>
+                            {isAdmin && (
+                              <button
+                                onClick={() => router.push('/admin')}
+                                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                              >
+                                <Shield className="w-4 h-4 mr-3" />
+                                Admin Dashboard
+                              </button>
+                            )}
+                            <button
+                              onClick={handleSignOut}
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              <LogOut className="w-4 h-4 mr-3" />
+                              Sign Out
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  ) : (
+                    <motion.button
+                      className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleSignIn}
+                    >
+                      <User className="w-5 h-5 text-gray-700" />
+                    </motion.button>
+                  )}
+                </div>
+                <motion.button
+                  className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200 relative"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setCartOpen(true)}
+                >
+                  <ShoppingBag className="w-5 h-5 text-gray-700" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-gray-900 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </motion.button>
+              </div>
             </div>
           </div>
         </div>
