@@ -324,8 +324,8 @@ export default function ShopPage() {
       </div>
 
       {/* Banner Section */}
-      <section className="relative pt-20 pb-8 px-6 md:px-8 lg:px-12 bg-gradient-to-r from-orange-50 via-pink-50 to-purple-50 rounded-3xl mx-4 mt-4 overflow-hidden">
-        <div className="container mx-auto">
+      <section className="relative pt-20 pb-8 px-6 md:px-8 lg:px-12  rounded-3xl mx-4  overflow-hidden">
+        <div className="container mt-10 mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between">
             {/* Left Side - Text Content */}
             <motion.div
