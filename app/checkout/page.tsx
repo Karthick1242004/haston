@@ -431,12 +431,12 @@ export default function CheckoutPage() {
   if (cartItems.length === 0) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-[#F1EFEE] flex items-center justify-center">
-          <div className="text-center bg-white rounded-2xl p-12 shadow-lg border border-gray-200">
+        <div className="min-h-screen bg-[#F1EFEE] flex items-center justify-center px-4">
+          <div className="text-center bg-white rounded-2xl p-8 sm:p-12 shadow-lg border border-gray-200 max-w-md w-full">
             <ShoppingBag className="w-16 h-16 mx-auto text-blue-950 mb-4" />
-            <h2 className="text-2xl font-bold text-blue-950 mb-2">Your cart is empty</h2>
-            <p className="text-gray-600 mb-6">Add some items to proceed to checkout</p>
-            <Button onClick={() => router.push('/')} className="bg-blue-950 text-white hover:bg-blue-800 transition-all">
+            <h2 className="text-xl sm:text-2xl font-bold text-blue-950 mb-2">Your cart is empty</h2>
+            <p className="text-gray-600 mb-6 text-sm sm:text-base">Add some items to proceed to checkout</p>
+            <Button onClick={() => router.push('/')} className="bg-blue-950 text-white hover:bg-blue-800 transition-all w-full sm:w-auto">
               Continue Shopping
             </Button>
           </div>
@@ -519,13 +519,14 @@ export default function CheckoutPage() {
                 className="flex items-center gap-2 text-blue-950 hover:text-blue-800 hover:bg-white transition-all rounded-lg px-4 py-2"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Back to Shopping
+                <span className="hidden sm:inline">Back to Shopping</span>
+                <span className="sm:hidden">Back</span>
               </Button>
             </motion.div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
               {/* Left Column - Customer Details and Cart Items */}
-              <div className="lg:col-span-2 space-y-8">
+              <div className="lg:col-span-2 space-y-6 lg:space-y-8">
                 {/* Customer Details Form */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -533,9 +534,9 @@ export default function CheckoutPage() {
                   transition={{ delay: 0.1 }}
                 >
                   <Card className="bg-white shadow-lg border border-gray-200">
-                    <CardHeader className="bg-white">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-2xl font-bold text-blue-950">Contact Information</CardTitle>
+                    <CardHeader className="bg-white px-4 sm:px-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <CardTitle className="text-xl sm:text-2xl font-bold text-blue-950">Contact Information</CardTitle>
                         {session?.user && (
                           <div className="flex items-center space-x-3">
                             {session.user.image ? (
@@ -550,7 +551,7 @@ export default function CheckoutPage() {
                               <User className="w-8 h-8 text-blue-950" />
                             )}
                             <div className="text-right">
-                              <p className="text-sm font-medium text-blue-950">{session.user.name}</p>
+                              <p className="text-sm font-medium text-blue-950 truncate max-w-[120px]">{session.user.name}</p>
                               <p className="text-xs text-gray-600">Signed In</p>
                             </div>
                           </div>
@@ -569,17 +570,17 @@ export default function CheckoutPage() {
                         </p>
                       )}
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="space-y-6 px-4 sm:px-6">
                       {/* Saved Addresses Section for Authenticated Users */}
                       {session?.user && userProfile?.addresses && userProfile.addresses.length > 0 && (
-                                                  <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                              <h3 className="text-lg font-semibold text-blue-950">Saved Addresses</h3>
-                              <Badge className="bg-gray-100 text-gray-800">
-                                {userProfile.addresses.length} saved
-                              </Badge>
-                            </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <h3 className="text-lg font-semibold text-blue-950">Saved Addresses</h3>
+                            <Badge className="bg-gray-100 text-gray-800 w-fit">
+                              {userProfile.addresses.length} saved
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-1 gap-3">
                             {userProfile.addresses.map((address) => (
                               <div
                                 key={address.id}
@@ -591,8 +592,8 @@ export default function CheckoutPage() {
                                 onClick={() => handleAddressSelection(address.id)}
                               >
                                 <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                                       <Badge variant={address.isDefault ? "default" : "secondary"} className="text-xs">
                                         {address.type}
                                       </Badge>
@@ -600,14 +601,14 @@ export default function CheckoutPage() {
                                         <Badge className="bg-green-100 text-green-800 text-xs">Default</Badge>
                                       )}
                                     </div>
-                                    <p className="text-sm font-medium">{address.firstName} {address.lastName}</p>
-                                    <p className="text-xs text-gray-600">{address.address1}</p>
-                                    <p className="text-xs text-gray-600">
+                                    <p className="text-sm font-medium truncate">{address.firstName} {address.lastName}</p>
+                                    <p className="text-xs text-gray-600 break-words">{address.address1}</p>
+                                    <p className="text-xs text-gray-600 break-words">
                                       {address.city}, {address.state} {address.zipCode}
                                     </p>
                                   </div>
                                   {selectedAddressId === address.id && (
-                                    <div className="w-5 h-5 bg-blue-950 rounded-full flex items-center justify-center">
+                                    <div className="w-5 h-5 bg-blue-950 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
                                       <div className="w-2 h-2 bg-white rounded-full"></div>
                                     </div>
                                   )}
@@ -679,7 +680,7 @@ export default function CheckoutPage() {
                       </div>
 
                       {/* Country, State, City Selection - Dynamic */}
-                        <div>
+                      <div>
                         <Label htmlFor="country">Country *</Label>
                         <div className="mt-1">
                           <CountrySelect
@@ -721,13 +722,13 @@ export default function CheckoutPage() {
 
                       <div>
                         <Label htmlFor="zipCode">ZIP/PIN Code *</Label>
-                          <Input
-                            id="zipCode"
-                            value={userDetails.zipCode}
-                            onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                        <Input
+                          id="zipCode"
+                          value={userDetails.zipCode}
+                          onChange={(e) => handleInputChange("zipCode", e.target.value)}
                           placeholder="Enter ZIP/PIN code"
-                            className="mt-1"
-                          />
+                          className="mt-1"
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -740,25 +741,25 @@ export default function CheckoutPage() {
                   transition={{ delay: 0.2 }}
                 >
                   <Card className="bg-white shadow-lg border border-gray-200">
-                    <CardHeader className="bg-white">
-                      <CardTitle className="text-2xl font-bold text-blue-950">Your Products</CardTitle>
+                    <CardHeader className="bg-white px-4 sm:px-6">
+                      <CardTitle className="text-xl sm:text-2xl font-bold text-blue-950">Your Products</CardTitle>
                       <p className="text-sm text-gray-600 font-medium">{getCartItemsCount()} items in your cart</p>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-6">
+                    <CardContent className="px-4 sm:px-6">
+                      <div className="space-y-4 sm:space-y-6">
                         {cartItems.map((item, index) => (
                           <motion.div
                             key={`${item.id}-${item.selectedSize}-${item.selectedColor}`}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="flex gap-4 p-4 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow"
+                            className="flex gap-3 sm:gap-4 p-3 sm:p-4 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow"
                           >
                             {/* Product Image */}
                             <div className="flex-shrink-0">
-                              <div className="relative w-24 h-32 rounded-lg overflow-hidden bg-gray-100">
+                              <div className="relative w-20 h-24 sm:w-24 sm:h-32 rounded-lg overflow-hidden bg-gray-100">
                                 <Image
-                                  src={item.image}
+                                  src={item.image || 'https://via.placeholder.com/150'}
                                   alt={item.name}
                                   fill
                                   className="object-cover"
@@ -768,11 +769,11 @@ export default function CheckoutPage() {
                             </div>
 
                             {/* Product Details */}
-                            <div className="flex-1 space-y-2">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h3 className="font-semibold text-gray-900">{item.name}</h3>
-                                  <p className="text-sm text-gray-600">
+                            <div className="flex-1 space-y-2 min-w-0">
+                              <div className="flex justify-between items-start gap-2">
+                                <div className="min-w-0 flex-1">
+                                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base break-words line-clamp-2">{item.name}</h3>
+                                  <p className="text-xs sm:text-sm text-gray-600 break-words">
                                     Color: {item.selectedColor} • Size: {item.selectedSize}
                                   </p>
                                 </div>
@@ -780,13 +781,13 @@ export default function CheckoutPage() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={async () => await removeFromCart(item.id, item.selectedSize, item.selectedColor)}
-                                  className="text-gray-400 hover:text-red-600"
+                                  className="text-gray-400 hover:text-red-600 flex-shrink-0 h-8 w-8"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
 
-                              <div className="flex items-center justify-between">
+                              <div className="flex items-center justify-between gap-2 flex-wrap-reverse">
                                 {/* Quantity Controls */}
                                 <div className="flex items-center border border-gray-200 rounded-lg">
                                   <Button
@@ -798,7 +799,7 @@ export default function CheckoutPage() {
                                   >
                                     <Minus className="h-3 w-3" />
                                   </Button>
-                                  <span className="px-4 text-sm font-medium min-w-[3rem] text-center">
+                                  <span className="px-2 sm:px-4 text-sm font-medium min-w-[2rem] sm:min-w-[3rem] text-center">
                                     {item.quantity.toString().padStart(2, '0')}
                                   </span>
                                   <Button
@@ -812,12 +813,12 @@ export default function CheckoutPage() {
                                 </div>
 
                                 {/* Price */}
-                                <div className="text-right">
-                                  <p className="text-lg font-bold text-gray-900">
+                                <div className="text-right flex-shrink-0">
+                                  <p className="text-base sm:text-lg font-bold text-gray-900">
                                     ₹{(item.price * item.quantity).toFixed(2)}
                                   </p>
                                   {item.quantity > 1 && (
-                                    <p className="text-sm text-gray-500">
+                                    <p className="text-xs sm:text-sm text-gray-500">
                                       ₹{item.price.toFixed(2)} each
                                     </p>
                                   )}
@@ -832,7 +833,7 @@ export default function CheckoutPage() {
                         <Button
                           variant="outline"
                           onClick={() => router.push('/')}
-                          className="text-blue-950 border-blue-950 hover:text-white hover:bg-blue-950 transition-all"
+                          className="text-blue-950 border-blue-950 hover:text-white hover:bg-blue-950 transition-all w-full sm:w-auto"
                         >
                           Continue Shopping
                         </Button>
@@ -851,10 +852,10 @@ export default function CheckoutPage() {
                   className="sticky top-24"
                 >
                   <Card className="bg-white shadow-lg border border-gray-200">
-                    <CardHeader className="bg-white">
-                      <CardTitle className="text-2xl font-bold text-blue-950">Order Review</CardTitle>
+                    <CardHeader className="bg-white px-4 sm:px-6">
+                      <CardTitle className="text-xl sm:text-2xl font-bold text-blue-950">Order Review</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="space-y-6 px-4 sm:px-6">
                       {/* Discount Code */}
                       <div>
                         <Label htmlFor="discount">Discount Code</Label>
@@ -869,7 +870,7 @@ export default function CheckoutPage() {
                           <Button
                             variant="outline"
                             onClick={applyDiscountCode}
-                            className="px-6 bg-blue-950 text-white border-0 hover:bg-blue-800"
+                            className="px-4 sm:px-6 bg-blue-950 text-white border-0 hover:bg-blue-800 flex-shrink-0"
                           >
                             Apply
                           </Button>
@@ -924,32 +925,37 @@ export default function CheckoutPage() {
                         <Button
                           onClick={handleCheckout}
                           disabled={!isFormValid || isProcessingPayment}
-                          className="w-full bg-blue-950 text-white hover:bg-blue-800 disabled:bg-gray-300 disabled:cursor-not-allowed py-6 text-lg font-medium transition-all"
+                          className="w-full bg-blue-950 text-white hover:bg-blue-800 disabled:bg-gray-300 disabled:cursor-not-allowed py-4 sm:py-6 text-base sm:text-lg font-medium transition-all"
                         >
                           {isProcessingPayment ? (
                             <>
                               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                              Processing Payment...
+                              <span className="hidden sm:inline">Processing Payment...</span>
+                              <span className="sm:hidden">Processing...</span>
                             </>
                           ) : paymentStatus === 'success' ? (
                             <>
                               <CreditCard className="w-5 h-5 mr-2" />
-                              Payment Successful!
+                              <span className="hidden sm:inline">Payment Successful!</span>
+                              <span className="sm:hidden">Success!</span>
                             </>
                           ) : paymentStatus === 'failed' ? (
                             <>
                               <CreditCard className="w-5 h-5 mr-2" />
-                              Payment Failed - Try Again
+                              <span className="hidden sm:inline">Payment Failed - Try Again</span>
+                              <span className="sm:hidden">Try Again</span>
                             </>
                           ) : !isFormValid ? (
                             <>
                               <CreditCard className="w-5 h-5 mr-2" />
-                              Complete Details to Continue
+                              <span className="hidden sm:inline">Complete Details to Continue</span>
+                              <span className="sm:hidden">Complete Details</span>
                             </>
                           ) : (
                             <>
-                          <CreditCard className="w-5 h-5 mr-2" />
-                              Proceed to Payment
+                              <CreditCard className="w-5 h-5 mr-2" />
+                              <span className="hidden sm:inline">Proceed to Payment</span>
+                              <span className="sm:hidden">Pay Now</span>
                             </>
                           )}
                         </Button>
@@ -959,14 +965,14 @@ export default function CheckoutPage() {
                           <Button
                             variant="outline"
                             disabled={!isFormValid || isProcessingPayment}
-                            className="py-3 bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-500 transition-all"
+                            className="py-3 bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-500 transition-all text-sm"
                           >
                             Shop Pay
                           </Button>
                           <Button
                             variant="outline"
                             disabled={!isFormValid || isProcessingPayment}
-                            className="py-3 bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-500 transition-all"
+                            className="py-3 bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-500 transition-all text-sm"
                           >
                             PayPal
                           </Button>
@@ -976,7 +982,7 @@ export default function CheckoutPage() {
                       {/* Status Messages */}
                       {paymentStatus === 'success' && (
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-                          <p className="text-sm text-green-800 font-medium">
+                          <p className="text-sm text-green-800 font-medium break-words">
                             🎉 Payment successful! Redirecting you shortly...
                           </p>
                         </div>
@@ -984,25 +990,25 @@ export default function CheckoutPage() {
                       
                       {paymentStatus === 'failed' && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-                          <p className="text-sm text-red-800 font-medium">
+                          <p className="text-sm text-red-800 font-medium break-words">
                             ❌ Payment failed. Please try again or contact support.
                           </p>
                         </div>
                       )}
 
                       {!isFormValid && !isProcessingPayment && (
-                        <p className="text-sm text-red-600 text-center">
+                        <p className="text-sm text-red-600 text-center break-words">
                           Please fill in all required fields to enable payment options
                         </p>
                       )}
 
                       {isProcessingPayment && (
-                        <p className="text-sm text-blue-600 text-center">
+                        <p className="text-sm text-blue-600 text-center break-words">
                           🔐 Redirecting to secure payment gateway...
                         </p>
                       )}
 
-                      <p className="text-xs text-gray-500 text-center">
+                      <p className="text-xs text-gray-500 text-center break-words">
                         Your payment information is secure and encrypted
                       </p>
                     </CardContent>

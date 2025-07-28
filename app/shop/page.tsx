@@ -204,105 +204,107 @@ export default function ShopPage() {
     router.push(`/product/${productId}`)
   }
 
-  const FilterSidebar = ({ className }: { className?: string }) => (
-    <div className={className}>
-      <div className="space-y-6">
-        {/* Filter Header */}
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearAllFilters}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
-            Clear all
-          </Button>
-        </div>
-
-        {/* Categories */}
-        <div className="space-y-3">
-          <h4 className="font-medium text-gray-900">Category</h4>
-          <div className="space-y-2">
-            {categories.map((category) => (
-              <label key={category} className="flex items-center space-x-2 cursor-pointer">
-                <Checkbox
-                  checked={filters.categories.includes(category)}
-                  onCheckedChange={() => toggleFilter("categories", category)}
-                />
-                <span className="text-sm text-gray-600">{category}</span>
-              </label>
-            ))}
+  const FilterSidebar = () => (
+    <div>
+      <div className="h-full max-h-[calc(100vh-100px)] overflow-y-auto overscroll-contain pr-2 -mr-2">
+        <div className="space-y-6 pb-4">
+          {/* Filter Header */}
+          <div className="flex items-center justify-between sticky top-0 bg-white py-2 z-10">
+            <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAllFilters}
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
+              Clear all
+            </Button>
           </div>
-        </div>
 
-        {/* Colors */}
-        <div className="space-y-3">
-          <h4 className="font-medium text-gray-900">Color</h4>
-          <div className="grid grid-cols-4 gap-2">
-            {colors.map((color) => (
-              <button
-                key={color}
-                onClick={() => toggleFilter("colors", color)}
-                className={`w-8 h-8 rounded-full border-2 transition-all ${
-                  filters.colors.includes(color)
-                    ? "border-black scale-110"
-                    : "border-gray-300 hover:border-gray-400"
-                } ${colorMap[color] || "bg-gray-400"}`}
-                title={color}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Sizes */}
-        <div className="space-y-3">
-          <h4 className="font-medium text-gray-900">Size</h4>
-          <div className="grid grid-cols-3 gap-2">
-            {sizes.map((size) => (
-              <button
-                key={size}
-                onClick={() => toggleFilter("sizes", size)}
-                className={`py-1 px-1 text-sm border rounded transition-all ${
-                  filters.sizes.includes(size)
-                    ? "border-black bg-black text-white"
-                    : "border-gray-300 hover:border-gray-400"
-                }`}
-              >
-                {size}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Price Range */}
-        <div className="space-y-3">
-          <h4 className="font-medium text-gray-900">Price</h4>
-          <div className="px-2">
-            <Slider
-              value={filters.priceRange}
-              onValueChange={(value) => handleFilterChange("priceRange", value as [number, number])}
-              max={10000}
-              min={0}
-              step={100}
-              className="w-full"
-            />
-            <div className="flex justify-between text-sm text-gray-500 mt-2">
-              <span>₹{filters.priceRange[0]}</span>
-              <span>₹{filters.priceRange[1]}</span>
+          {/* Categories */}
+          <div className="space-y-3">
+            <h4 className="font-medium text-gray-900">Category</h4>
+            <div className="space-y-2">
+              {categories.map((category) => (
+                <label key={category} className="flex items-center space-x-2 cursor-pointer">
+                  <Checkbox
+                    checked={filters.categories.includes(category)}
+                    onCheckedChange={() => toggleFilter("categories", category)}
+                  />
+                  <span className="text-sm text-gray-600">{category}</span>
+                </label>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* In Stock */}
-        <div className="space-y-3">
-          <label className="flex items-center space-x-2 cursor-pointer">
-            <Checkbox
-              checked={filters.inStock}
-              onCheckedChange={(checked) => handleFilterChange("inStock", checked)}
-            />
-            <span className="text-sm text-gray-600">In stock only</span>
-          </label>
+          {/* Colors */}
+          <div className="space-y-3">
+            <h4 className="font-medium text-gray-900">Color</h4>
+            <div className="grid grid-cols-4 gap-2">
+              {colors.map((color) => (
+                <button
+                  key={color}
+                  onClick={() => toggleFilter("colors", color)}
+                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                    filters.colors.includes(color)
+                      ? "border-black scale-110"
+                      : "border-gray-300 hover:border-gray-400"
+                  } ${colorMap[color] || "bg-gray-400"}`}
+                  title={color}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Sizes */}
+          <div className="space-y-3">
+            <h4 className="font-medium text-gray-900">Size</h4>
+            <div className="grid grid-cols-3 gap-2">
+              {sizes.map((size) => (
+                <button
+                  key={size}
+                  onClick={() => toggleFilter("sizes", size)}
+                  className={`py-1 px-1 text-sm border rounded transition-all ${
+                    filters.sizes.includes(size)
+                      ? "border-black bg-black text-white"
+                      : "border-gray-300 hover:border-gray-400"
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Price Range */}
+          <div className="space-y-3">
+            <h4 className="font-medium text-gray-900">Price</h4>
+            <div className="px-2">
+              <Slider
+                value={filters.priceRange}
+                onValueChange={(value) => handleFilterChange("priceRange", value as [number, number])}
+                max={10000}
+                min={0}
+                step={100}
+                className="w-full"
+              />
+              <div className="flex justify-between text-sm text-gray-500 mt-2">
+                <span>₹{filters.priceRange[0]}</span>
+                <span>₹{filters.priceRange[1]}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* In Stock */}
+          <div className="space-y-3">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <Checkbox
+                checked={filters.inStock}
+                onCheckedChange={(checked) => handleFilterChange("inStock", checked)}
+              />
+              <span className="text-sm text-gray-600">In stock only</span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -384,7 +386,9 @@ export default function ShopPage() {
       <div id="products-section" className="container mx-auto px-4 pb-20">
         <div className="flex gap-4">
           {/* Desktop Filters Sidebar */}
-          <FilterSidebar className="hidden lg:block w-48 shrink-0" />
+          <div className="hidden lg:block w-48 shrink-0 sticky top-24 h-fit">
+            <FilterSidebar />
+          </div>
 
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
@@ -408,11 +412,11 @@ export default function ShopPage() {
                       Filters
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="left" className="w-72">
-                    <SheetHeader>
+                  <SheetContent side="left" className="w-72 flex flex-col">
+                    <SheetHeader className="flex-shrink-0">
                       <SheetTitle>Filters</SheetTitle>
                     </SheetHeader>
-                    <div className="mt-6">
+                    <div className="flex-1 mt-6 min-h-0">
                       <FilterSidebar />
                     </div>
                   </SheetContent>

@@ -197,8 +197,8 @@ export default function PrivacyPolicyPage() {
                       <IconComponent className="w-8 h-8" />
                     </div>
                     <h3 
-                      className="text-xl font-bold text-blue-950 mb-3"
-                      style={{ fontFamily: "var(--font-anton)" }}
+                      className="text-xl font-bold  text-blue-950 mb-3"
+                      // style={{ fontFamily: "var(--font-anton)" }}
                     >
                       {highlight.title}
                     </h3>
@@ -225,7 +225,7 @@ export default function PrivacyPolicyPage() {
                   transition={{ duration: 0.8, delay: index * 0.1 }}
                 >
                   <h3 
-                    className="text-2xl md:text-3xl font-bold text-blue-950 mb-6 flex items-center gap-3"
+                    className="text-2xl md:text-3xl font-thin text-blue-950 mb-6 flex items-center gap-3"
                     style={{ fontFamily: "var(--font-anton)" }}
                   >
                     <div className="w-8 h-8 bg-blue-950 text-white rounded-full flex items-center justify-center text-sm">
