@@ -46,6 +46,17 @@ export default function CheckoutPage() {
   const { cartItems, updateQuantity, removeFromCart, getCartTotal, getCartItemsCount, clearCart } = useProductStore()
   const { toast } = useToast()
   
+  // Helper function to safely get color name
+  const getColorName = (color: string | { name: string; value: string } | any): string => {
+    if (typeof color === 'string') {
+      return color
+    }
+    if (color && typeof color === 'object' && color.name) {
+      return color.name
+    }
+    return 'Unknown'
+  }
+  
   const [userProfile, setUserProfile] = useState<ExtendedUser | null>(null)
   const [userDetails, setUserDetails] = useState<UserDetails>({
     email: "",
@@ -774,7 +785,7 @@ export default function CheckoutPage() {
                                 <div className="min-w-0 flex-1">
                                   <h3 className="font-semibold text-gray-900 text-sm sm:text-base break-words line-clamp-2">{item.name}</h3>
                                   <p className="text-xs sm:text-sm text-gray-600 break-words">
-                                    Color: {item.selectedColor} • Size: {item.selectedSize}
+                                    Color: {getColorName(item.selectedColor)} • Size: {item.selectedSize}
                                   </p>
                                 </div>
                                 <Button

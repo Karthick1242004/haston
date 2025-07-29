@@ -20,13 +20,28 @@ import Header from '@/components/header'
 import AdminsManager from '@/components/admins-manager'
 import HeroSlidesManager from '@/components/hero-slides-manager'
 import { Order } from '@/types/order'
-import { ProductColor } from '@/types/product'
+import { ProductColor, Product } from '@/types/product'
 import { useToast } from '@/hooks/use-toast'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Package, ShoppingBag, Users, User, DollarSign, TrendingUp, Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, Filter, ExternalLink, Edit3, Search, Eye, Trash2, Image as ImageIcon, Plus, X } from 'lucide-react'
 
 export default function AdminPage() {
+  const { data: session, status } = useSession()
   const { toast } = useToast()
+  const router = useRouter()
+  
+  // Helper function to safely get color name
+  const getColorName = (color: string | { name: string; value: string } | any): string => {
+    if (typeof color === 'string') {
+      return color
+    }
+    if (color && typeof color === 'object' && color.name) {
+      return color.name
+    }
+    return 'Unknown'
+  }
+  
+  const [products, setProducts] = useState<Product[]>([])
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
   const [description, setDescription] = useState('')
@@ -36,7 +51,6 @@ export default function AdminPage() {
   const [existingImages, setExistingImages] = useState<string[]>([])
   const [isLook, setIsLook] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [products, setProducts] = useState<any[]>([])
   const [mode, setMode] = useState<'list' | 'create' | 'edit'>('list')
   const [editId, setEditId] = useState<string | null>(null)
   
@@ -167,8 +181,6 @@ export default function AdminPage() {
     }
   }, [currentView, orderFilters])
 
-  const { data: session, status } = useSession()
-  const router = useRouter()
   const isAdmin = useIsAdmin()
 
   if (status === 'loading') return null
@@ -638,7 +650,7 @@ export default function AdminPage() {
                         <Card key={p.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg overflow-hidden">
                           <div className="relative overflow-hidden">
                             <Image 
-                              src={p.image} 
+                              src={p.image || '/placeholder.jpg'} 
                               alt={p.name} 
                               width={400} 
                               height={300} 
@@ -653,7 +665,7 @@ export default function AdminPage() {
                                 </Badge>
                               )}
                               <Badge className="bg-white/90 text-gray-800">
-                                ID: {p.id.slice(-6)}
+                                ID: {String(p.id).slice(-6)}
                               </Badge>
                             </div>
                           </div>
@@ -697,11 +709,11 @@ export default function AdminPage() {
                                   className="flex-1 border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white transition-all"
                                   onClick={() => {
                                     setMode('edit')
-                                    setEditId(p.id)
+                                    setEditId(String(p.id))
                                     setName(p.name)
-                                    setPrice(p.price)
-                                    setDescription(p.description)
-                                    setSizes(p.sizes.join(','))
+                                    setPrice(String(p.price))
+                                    setDescription(p.description || '')
+                                    setSizes(p.sizes?.join(',') || 'S,M,L')
                                     setDeliveryDays(p.deliveryDays || '2-3 days')
                                     setImages([])
                                     setExistingImages(p.images||[])
@@ -1956,7 +1968,7 @@ export default function AdminPage() {
                                     <div className="flex-1">
                                       <h4 className="font-medium text-gray-900">{item.name}</h4>
                                       <p className="text-sm text-gray-600">
-                                        Size: {item.selectedSize} • Color: {item.selectedColor}
+                                        Size: {item.selectedSize} • Color: {getColorName(item.selectedColor)}
                                       </p>
                                       <div className="flex items-center justify-between mt-2">
                                         <div className="flex items-center gap-4">

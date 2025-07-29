@@ -39,6 +39,17 @@ export default function OrderHistoryPage() {
   const { data: session, status } = useSession()
   const { toast } = useToast()
   
+  // Helper function to safely get color name
+  const getColorName = (color: string | { name: string; value: string } | any): string => {
+    if (typeof color === 'string') {
+      return color
+    }
+    if (color && typeof color === 'object' && color.name) {
+      return color.name
+    }
+    return 'Unknown'
+  }
+  
   const [orders, setOrders] = useState<Order[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -408,7 +419,7 @@ export default function OrderHistoryPage() {
                                   >
                                     <div className="relative w-12 h-16 rounded overflow-hidden bg-gray-100">
                                       <Image
-                                        src={item.image}
+                                        src={item.image || '/placeholder.jpg'}
                                         alt={item.name}
                                         fill
                                         className="object-cover"
@@ -418,7 +429,7 @@ export default function OrderHistoryPage() {
                                     <div className="flex-1 min-w-0">
                                       <h5 className="font-medium text-sm text-gray-900 truncate">{item.name}</h5>
                                       <p className="text-xs text-gray-600">
-                                        {item.selectedColor} • {item.selectedSize}
+                                        {getColorName(item.selectedColor)} • {item.selectedSize}
                                       </p>
                                       <div className="flex justify-between items-center mt-1">
                                         <span className="text-xs text-gray-600">Qty: {item.quantity}</span>

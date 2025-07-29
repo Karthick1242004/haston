@@ -64,6 +64,7 @@ export interface Product {
   reviewCount?: number // Total number of reviews
   deliveryDays?: string // Delivery time (e.g., "2-3 days", "1 week", "Same day")
   createdAt?: string | Date
+  isLook?: boolean // Whether this product should be used in Look Breakdown slider
   
   // Product specifications
   specifications?: ProductSpecifications

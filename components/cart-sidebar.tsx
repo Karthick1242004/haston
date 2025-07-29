@@ -30,6 +30,17 @@ export default function CartSidebar() {
   const total = getCartTotal()
   const itemCount = getCartItemsCount()
 
+  // Helper function to safely get color name
+  const getColorName = (color: string | { name: string; value: string } | any): string => {
+    if (typeof color === 'string') {
+      return color
+    }
+    if (color && typeof color === 'object' && color.name) {
+      return color.name
+    }
+    return 'Unknown'
+  }
+
   return (
     <Sheet open={isCartOpen} onOpenChange={setCartOpen}>
       <SheetContent className="w-full sm:max-w-lg bg-white p-0 overflow-hidden">
@@ -92,7 +103,7 @@ export default function CartSidebar() {
                       <div className="flex-shrink-0">
                         <div className="relative w-24 h-32 rounded-lg overflow-hidden bg-gray-100">
                           <Image
-                            src={item.image}
+                            src={item.image || '/placeholder.jpg'}
                             alt={item.name}
                             fill
                             className="object-cover"
@@ -124,7 +135,7 @@ export default function CartSidebar() {
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <span>Size: {item.selectedSize}</span>
                           <span>•</span>
-                          <span>Color: {item.selectedColor}</span>
+                          <span>Color: {getColorName(item.selectedColor)}</span>
                         </div>
 
                         {/* Quantity Controls */}

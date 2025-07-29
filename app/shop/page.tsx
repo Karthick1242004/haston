@@ -357,11 +357,15 @@ export default function ShopPage() {
               className="flex-shrink-0 md:ml-8"
             >
               <div className="relative">
-                {/* Fashion Item Image/Icon */}
-                <div className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 bg-gray-700 rounded-2xl flex items-center justify-center shadow-lg transform rotate-6 hover:rotate-3 transition-transform duration-300">
-                  <div className="text-white text-3xl md:text-4xl lg:text-5xl">
-                    👕
-                  </div>
+                {/* Fashion Item Image */}
+                <div className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-2xl shadow-lg transform rotate-6 hover:rotate-3 transition-transform duration-300 overflow-hidden">
+                  <Image
+                    src="/bannerimage.jpg"
+                    alt="Fashion banner"
+                    width={192}
+                    height={192}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 
                 {/* Small decorative dots */}

@@ -33,6 +33,17 @@ function OrderSuccessContent() {
   const searchParams = useSearchParams()
   const { data: session } = useSession()
   
+  // Helper function to safely get color name
+  const getColorName = (color: string | { name: string; value: string } | any): string => {
+    if (typeof color === 'string') {
+      return color
+    }
+    if (color && typeof color === 'object' && color.name) {
+      return color.name
+    }
+    return 'Unknown'
+  }
+  
   const [order, setOrder] = useState<Order | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showConfetti, setShowConfetti] = useState(true)
@@ -353,7 +364,7 @@ function OrderSuccessContent() {
                             >
                               <div className="relative w-16 h-20 rounded-lg overflow-hidden bg-gray-100">
                                 <Image
-                                  src={item.image}
+                                  src={item.image || '/placeholder.jpg'}
                                   alt={item.name}
                                   fill
                                   className="object-cover"
@@ -363,7 +374,7 @@ function OrderSuccessContent() {
                               <div className="flex-1">
                                 <h4 className="font-medium text-gray-900">{item.name}</h4>
                                 <p className="text-sm text-gray-600">
-                                  {item.selectedColor} • {item.selectedSize}
+                                  {getColorName(item.selectedColor)} • {item.selectedSize}
                                 </p>
                                 <div className="flex justify-between items-center mt-2">
                                   <span className="text-sm text-gray-600">Qty: {item.quantity}</span>

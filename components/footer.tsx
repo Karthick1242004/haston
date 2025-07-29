@@ -30,7 +30,7 @@ export default function Footer() {
       transition={{ duration: 0.8 }}
     >
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-12">
+        <div className="grid md:grid-cols-3 gap-12">
           {/* Brand */}
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -81,11 +81,6 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
-                  Returns & Exchanges
-                </a>
-              </li>
-              <li>
                 <a href="/orders" className="hover:text-blue-950 transition-colors duration-200">
                   Shipping Information
                 </a>
@@ -101,7 +96,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/privacy-policy" className="hover:text-blue-950 transition-colors duration-200">
+                <a href="/terms" className="hover:text-blue-950 transition-colors duration-200">
                   Terms & Conditions
                 </a>
               </li>
@@ -109,7 +104,7 @@ export default function Footer() {
           </motion.div>
 
           {/* Shop */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -117,27 +112,27 @@ export default function Footer() {
             <h4 className="text-xl font-thin font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>SHOP</h4>
             <ul className="space-y-3 text-xs text-gray-600">
               <li>
-                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
+                <a href="/shop" className="hover:text-blue-950 transition-colors duration-200">
                   Summer Collection 2025
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
+                <a href="/shop" className="hover:text-blue-950 transition-colors duration-200">
                   Outfits
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
+                <a href="/shop" className="hover:text-blue-950 transition-colors duration-200">
                   Essentials
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-blue-950 transition-colors duration-200">
+                <a href="/shop" className="hover:text-blue-950 transition-colors duration-200">
                   Best Sellers
                 </a>
               </li>
             </ul>
-          </motion.div>
+          </motion.div> */}
 
           {/* Newsletter */}
           <motion.div
@@ -176,7 +171,7 @@ export default function Footer() {
               </Button>
             </form>
 
-            <div className="flex space-x-4 mt-8">
+            {/* <div className="flex space-x-4 mt-8">
               {[Facebook, Instagram, MapPin].map((Icon, index) => (
                 <motion.a
                   key={index}
@@ -188,7 +183,7 @@ export default function Footer() {
                   <Icon className="w-5 h-5" />
                 </motion.a>
               ))}
-            </div>
+            </div> */}
           </motion.div>
         </div>
       </div>
