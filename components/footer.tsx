@@ -15,10 +15,48 @@ export default function Footer() {
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [email, setEmail] = useState("")
   const [focused, setFocused] = useState(false)
+  const [subscribeState, setSubscribeState] = useState<'idle' | 'subscribing' | 'subscribed'>('idle')
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault()
-    setEmail("")
+    
+    if (subscribeState !== 'idle') return
+    
+    setSubscribeState('subscribing')
+    
+    setTimeout(() => {
+      setSubscribeState('subscribed')
+      setEmail("")
+      
+      // Reset to idle after showing "Subscribed" for a while
+      setTimeout(() => {
+        setSubscribeState('idle')
+      }, 2000)
+    }, 1500)
+  }
+
+  const getButtonText = () => {
+    switch (subscribeState) {
+      case 'subscribing':
+        return 'Subscribing...'
+      case 'subscribed':
+        return 'Subscribed'
+      default:
+        return 'Subscribe'
+    }
+  }
+
+  const getButtonClassName = () => {
+    const baseClass = "w-full rounded-none text-white transition-colors duration-200"
+    
+    switch (subscribeState) {
+      case 'subscribing':
+        return `${baseClass} bg-blue-800 cursor-not-allowed`
+      case 'subscribed':
+        return `${baseClass} bg-green-600 hover:bg-green-700`
+      default:
+        return `${baseClass} bg-blue-950 hover:bg-blue-800`
+    }
   }
 
   return (
@@ -161,21 +199,23 @@ export default function Footer() {
                   onBlur={() => setFocused(false)}
                   className="w-full rounded-none"
                   required
+                  disabled={subscribeState !== 'idle'}
                 />
               </motion.div>
               <Button
                 type="submit"
-                className="w-full bg-blue-950 rounded-none hover:bg-blue-950 text-white transition-colors duration-200"
+                className={getButtonClassName()}
+                disabled={subscribeState !== 'idle'}
               >
-                Subscribe
+                {getButtonText()}
               </Button>
             </form>
 
-            {/* <div className="flex space-x-4 mt-8">
-              {[Facebook, Instagram, MapPin].map((Icon, index) => (
+            <div className="flex space-x-4 mt-8">
+              {[Facebook, Instagram].map((Icon, index) => (
                 <motion.a
                   key={index}
-                  href="#"
+                  href="https://www.instagram.com/thatprosperinegirl?igsh=NTA5ZzUxeTZ3eXBh"
                   className="p-2 bg-blue-950 text-white rounded-full hover:bg-blue-950 transition-colors duration-200"
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
@@ -183,7 +223,7 @@ export default function Footer() {
                   <Icon className="w-5 h-5" />
                 </motion.a>
               ))}
-            </div> */}
+            </div>
           </motion.div>
         </div>
       </div>
