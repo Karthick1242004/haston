@@ -1,3 +1,30 @@
+export interface Order {
+  _id?: string
+  orderId: string
+  userEmail: string
+  items: OrderItem[]
+  shippingAddress: ShippingAddress
+  paymentDetails: PaymentDetails
+  orderSummary: OrderSummary
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  estimatedDelivery?: string
+  createdAt: string
+  updatedAt?: string
+  
+  // Cancellation fields
+  cancelledAt?: string
+  cancellationReason?: string
+  refundDetails?: RefundDetails
+}
+
+export interface RefundDetails {
+  refund_id: string
+  amount: number
+  status: string
+  created_at: number
+  speed_processed?: string
+}
+
 export interface OrderItem {
   id: string
   name: string
@@ -7,17 +34,6 @@ export interface OrderItem {
   selectedSize: string
   selectedColor: string
   subtotal: number
-}
-
-export interface PaymentDetails {
-  razorpay_payment_id: string
-  razorpay_order_id: string
-  razorpay_signature: string
-  amount: number
-  currency: string
-  status: 'success' | 'failed' | 'pending'
-  payment_method?: string
-  created_at: Date
 }
 
 export interface ShippingAddress {
@@ -32,6 +48,15 @@ export interface ShippingAddress {
   country: string
 }
 
+export interface PaymentDetails {
+  razorpay_payment_id: string
+  razorpay_order_id: string
+  razorpay_signature: string
+  amount: number
+  currency: string
+  status: 'success' | 'failed'
+}
+
 export interface OrderSummary {
   subtotal: number
   shipping: number
@@ -39,19 +64,4 @@ export interface OrderSummary {
   discount: number
   discountCode?: string
   total: number
-}
-
-export interface Order {
-  _id?: string
-  orderId: string
-  userId: string
-  userEmail: string
-  items: OrderItem[]
-  shippingAddress: ShippingAddress
-  paymentDetails: PaymentDetails
-  orderSummary: OrderSummary
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
-  createdAt: Date
-  updatedAt: Date
-  estimatedDelivery?: Date
 } 

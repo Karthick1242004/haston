@@ -23,7 +23,7 @@ import { Order } from '@/types/order'
 import { ProductColor } from '@/types/product'
 import { useToast } from '@/hooks/use-toast'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Package, ShoppingBag, Users, User, DollarSign, TrendingUp, Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, Filter, ExternalLink, Edit3, Search, Eye, Trash2, Image as ImageIcon, Plus } from 'lucide-react'
+import { Package, ShoppingBag, Users, User, DollarSign, TrendingUp, Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, Filter, ExternalLink, Edit3, Search, Eye, Trash2, Image as ImageIcon, Plus, X } from 'lucide-react'
 
 export default function AdminPage() {
   const { toast } = useToast()
@@ -1106,7 +1106,9 @@ export default function AdminPage() {
               {/* Orders List */}
               <div className="space-y-4">
                 {orders.map((order) => (
-                  <Card key={order.orderId} className="hover:shadow-lg transition-shadow">
+                  <Card key={order.orderId} className={`transition-shadow hover:shadow-lg ${
+                    order.status === 'cancelled' ? 'border-red-300 bg-red-50' : ''
+                  }`}>
                     <CardContent className="p-6">
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div className="flex-1">
@@ -1118,6 +1120,11 @@ export default function AdminPage() {
                               {getStatusIcon(order.status)}
                               <span className="ml-1 capitalize">{order.status}</span>
                             </Badge>
+                            {order.status === 'cancelled' && (
+                              <Badge className="bg-red-500 text-white">
+                                CANCELLED & REFUNDED
+                              </Badge>
+                            )}
                             <span className="text-sm text-gray-600">
                               {new Date(order.createdAt).toLocaleDateString('en-IN', {
                                 year: 'numeric',
@@ -1136,7 +1143,12 @@ export default function AdminPage() {
                             <div>
                               <p className="font-medium text-gray-900">Items & Total</p>
                               <p className="text-gray-600">{order.items.length} item{order.items.length > 1 ? 's' : ''}</p>
-                              <p className="font-medium">₹{order.orderSummary.total.toFixed(2)}</p>
+                              <p className={`font-medium ${order.status === 'cancelled' ? 'line-through text-red-600' : ''}`}>
+                                ₹{order.orderSummary.total.toFixed(2)}
+                                {order.status === 'cancelled' && (
+                                  <span className="ml-2 text-xs text-red-600">(REFUNDED)</span>
+                                )}
+                              </p>
                             </div>
                             <div>
                               <p className="font-medium text-gray-900">Delivery</p>
@@ -1149,6 +1161,39 @@ export default function AdminPage() {
                               <p className="text-gray-600">{order.shippingAddress.city}, {order.shippingAddress.state}</p>
                             </div>
                           </div>
+
+                          {/* Cancellation and Refund Information */}
+                          {order.status === 'cancelled' && (order as any).refundDetails && (
+                            <div className="mt-4 p-3 bg-red-100 rounded-lg border border-red-200">
+                              <h5 className="font-medium text-red-900 mb-2">🔴 Refund Information</h5>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                <div>
+                                  <p className="text-red-800">
+                                    <strong>Refund ID:</strong> {(order as any).refundDetails.refund_id}
+                                  </p>
+                                  <p className="text-red-800">
+                                    <strong>Amount:</strong> ₹{(order as any).refundDetails.amount}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-red-800">
+                                    <strong>Status:</strong> {(order as any).refundDetails.status}
+                                  </p>
+                                  <p className="text-red-800">
+                                    <strong>Cancelled:</strong> {(order as any).cancelledAt ? 
+                                      new Date((order as any).cancelledAt).toLocaleDateString('en-IN') : 'N/A'}
+                                  </p>
+                                </div>
+                              </div>
+                              {(order as any).cancellationReason && (
+                                <div className="mt-2 pt-2 border-t border-red-300">
+                                  <p className="text-red-800 text-sm">
+                                    <strong>Reason:</strong> {(order as any).cancellationReason}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex gap-2">
@@ -1164,14 +1209,16 @@ export default function AdminPage() {
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOrderEdit(order)}
-                          >
-                            <Edit3 className="w-4 h-4 mr-1" />
-                            Edit
-                          </Button>
+                          {order.status !== 'cancelled' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOrderEdit(order)}
+                            >
+                              <Edit3 className="w-4 h-4 mr-1" />
+                              Edit
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -1337,17 +1384,84 @@ export default function AdminPage() {
                             <Card>
                               <CardContent className="p-4">
                                 <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-blue-100 rounded-lg">
-                                    <DollarSign className="w-5 h-5 text-blue-700" />
+                                  <div className={`p-2 rounded-lg ${
+                                    selectedOrder.status === 'cancelled' ? 'bg-red-100' : 'bg-blue-100'
+                                  }`}>
+                                    <DollarSign className={`w-5 h-5 ${
+                                      selectedOrder.status === 'cancelled' ? 'text-red-700' : 'text-blue-700'
+                                    }`} />
                                   </div>
                                   <div>
                                     <p className="text-sm text-gray-600">Total Amount</p>
-                                    <p className="font-semibold text-gray-900">₹{selectedOrder.orderSummary.total.toFixed(2)}</p>
+                                    <p className={`font-semibold ${
+                                      selectedOrder.status === 'cancelled' ? 'text-red-600 line-through' : 'text-gray-900'
+                                    }`}>
+                                      ₹{selectedOrder.orderSummary.total.toFixed(2)}
+                                      {selectedOrder.status === 'cancelled' && (
+                                        <span className="ml-2 text-xs text-red-600">(REFUNDED)</span>
+                                      )}
+                                    </p>
                                   </div>
                                 </div>
                               </CardContent>
                             </Card>
                           </div>
+
+                          {/* Cancellation and Refund Information */}
+                          {selectedOrder.status === 'cancelled' && (selectedOrder as any).refundDetails && (
+                            <Card className="border-red-300 bg-red-50">
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-red-900">
+                                  <X className="w-5 h-5" />
+                                  Order Cancellation & Refund Details
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="space-y-3">
+                                    <div>
+                                      <p className="text-sm font-medium text-red-800">Refund ID</p>
+                                      <p className="text-red-700 font-mono text-sm">{(selectedOrder as any).refundDetails.refund_id}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-medium text-red-800">Refund Amount</p>
+                                      <p className="text-red-700 font-semibold">₹{(selectedOrder as any).refundDetails.amount}</p>
+                                    </div>
+                                  </div>
+                                  <div className="space-y-3">
+                                    <div>
+                                      <p className="text-sm font-medium text-red-800">Refund Status</p>
+                                      <Badge className="bg-red-200 text-red-800">
+                                        {(selectedOrder as any).refundDetails.status}
+                                      </Badge>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-medium text-red-800">Cancelled Date</p>
+                                      <p className="text-red-700">
+                                        {(selectedOrder as any).cancelledAt ? 
+                                          new Date((selectedOrder as any).cancelledAt).toLocaleDateString('en-IN', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                          }) : 'N/A'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                                {(selectedOrder as any).cancellationReason && (
+                                  <div className="mt-4 p-3 bg-red-100 rounded-lg border border-red-300">
+                                    <p className="text-sm font-medium text-red-800 mb-1">Cancellation Reason:</p>
+                                    <p className="text-red-700 text-sm">{(selectedOrder as any).cancellationReason}</p>
+                                  </div>
+                                )}
+                                <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-300">
+                                  <p className="text-sm text-yellow-800">
+                                    <strong>Note:</strong> Refund has been processed through Razorpay and will appear in the customer's account within 5-7 business days.
+                                  </p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
 
                           {/* Order Status & Customer Info */}
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
