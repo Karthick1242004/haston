@@ -364,7 +364,7 @@ Products
             return (
               <motion.div
                 key={product.id}
-                className="group mx-auto w-full sm:w-[300px] cursor-pointer bg-white rounded-md shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden relative"
+                className="group mx-auto w-full sm:w-[300px] cursor-pointer bg-white rounded-md shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden relative touch-manipulation"
                 initial={{ opacity: 0, y: 50, scale: 0.9 }}
                 animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
                 transition={{
@@ -379,27 +379,52 @@ Products
                   rotateY: 2,
                   rotateX: 2,
                 }}
+                whileTap={{
+                  scale: 0.98,
+                  transition: { duration: 0.1 }
+                }}
                 style={{
                   boxShadow:
                     "0 4px 20px rgba(0,0,0,0.08), 0 8px 40px rgba(0,0,0,0.04)",
                   transformStyle: "preserve-3d",
+                  touchAction: "manipulation",
+                }}
+                onTouchStart={(e) => {
+                  // Prevent hover states on touch devices
+                  e.currentTarget.style.pointerEvents = 'auto';
                 }}
                 onClick={(e) => {
-                  // Only navigate if not clicking on interactive elements
+                  // Check if click is on interactive elements
                   const target = e.target as HTMLElement;
                   if (
-                    !target.closest("button") &&
-                    !target.closest('[role="button"]') &&
-                    !target.closest("input") &&
-                    !target.closest("select") &&
-                    target.tagName !== "BUTTON"
+                    target.closest("button") ||
+                    target.closest('[role="button"]') ||
+                    target.closest("input") ||
+                    target.closest("select") ||
+                    target.tagName === "BUTTON"
                   ) {
-                    console.log(
-                      "Card clicked - navigating to product:",
-                      product.id
-                    );
-                    handleProductClick(product.id);
+                    e.stopPropagation();
+                    return;
                   }
+                  console.log("Card clicked - navigating to product:", product.id);
+                  handleProductClick(product.id);
+                }}
+                onTouchEnd={(e) => {
+                  // Check if touch is on interactive elements
+                  const target = e.target as HTMLElement;
+                  if (
+                    target.closest("button") ||
+                    target.closest('[role="button"]') ||
+                    target.closest("input") ||
+                    target.closest("select") ||
+                    target.tagName === "BUTTON"
+                  ) {
+                    return;
+                  }
+                  e.preventDefault();
+                  e.stopPropagation();
+                  // Directly navigate on touch end for mobile devices
+                  handleProductClick(product.id);
                 }}
               >
                 <motion.div
@@ -427,11 +452,19 @@ Products
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute top-3 left-3 w-9 h-9 bg-white/95 hover:bg-white transition-all backdrop-blur-sm rounded-full p-0 shadow-lg transform -translate-y-1 opacity-0 group-hover:translate-y-0 group-hover:opacity-100"
-                    style={{ transitionDelay: "50ms" }}
+                    className="absolute top-3 left-3 w-9 h-9 bg-white/95 hover:bg-white transition-all backdrop-blur-sm rounded-full p-0 shadow-lg transform -translate-y-1 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 touch-manipulation"
+                    style={{ 
+                      transitionDelay: "50ms",
+                      touchAction: "manipulation"
+                    }}
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       handleToggleWishlist(product.id, e);
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                     }}
                     disabled={wishlistLoading}
                   >
@@ -488,15 +521,23 @@ Products
                           .map((color: ProductColor, colorIndex: number) => (
                             <button
                               key={colorIndex}
-                              className={`w-5 h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
+                              className={`w-5 h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 touch-manipulation ${
                                 selectedColorIndex === colorIndex
                                   ? "border-orange-500 scale-110 shadow-lg"
                                   : "border-gray-300 hover:border-gray-400 shadow-sm"
                               }`}
-                              style={{ backgroundColor: color.value }}
+                              style={{ 
+                                backgroundColor: color.value,
+                                touchAction: "manipulation"
+                              }}
                               onClick={(e) => {
+                                e.preventDefault();
                                 e.stopPropagation();
                                 handleColorSelect(product.id, colorIndex, e);
+                              }}
+                              onTouchEnd={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                               }}
                               title={color.name}
                             />
@@ -586,10 +627,16 @@ Products
                   <div className="pt-2 border-t border-gray-100">
                     <Button
                       size="sm"
-                      className="w-full text-xs bg-gray-900 hover:bg-gray-800 text-white transition-all duration-200 hover:scale-105"
+                      className="w-full text-xs bg-gray-900 hover:bg-gray-800 text-white transition-all duration-200 hover:scale-105 touch-manipulation"
+                      style={{ touchAction: "manipulation" }}
                       onClick={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         handleAddToCart(product, pricingInfo.actualPrice);
+                      }}
+                      onTouchEnd={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                       }}
                     >
                       <ShoppingBag className="w-4 h-4 mr-2" />
