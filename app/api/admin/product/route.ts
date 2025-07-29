@@ -43,6 +43,61 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Maximum 5 images allowed' }, { status: 400 })
     }
 
+    // Parse optional form data
+    let colors = ['Default']
+    let badges = []
+    let specifications = null
+    let hasDiscount = false
+    let discountPercentage = null
+    let originalPrice = null
+
+    // Parse colors
+    if (form.has('colors')) {
+      try {
+        const parsedColors = JSON.parse(form.get('colors') as string)
+        if (Array.isArray(parsedColors) && parsedColors.length > 0) {
+          colors = parsedColors
+        }
+      } catch (e) {
+        console.warn('Failed to parse colors, using default')
+      }
+    }
+
+    // Parse badges
+    if (form.has('badges')) {
+      try {
+        const parsedBadges = JSON.parse(form.get('badges') as string)
+        if (Array.isArray(parsedBadges)) {
+          badges = parsedBadges
+        }
+      } catch (e) {
+        console.warn('Failed to parse badges, using empty array')
+      }
+    }
+
+    // Parse specifications
+    if (form.has('specifications')) {
+      try {
+        const parsedSpecs = JSON.parse(form.get('specifications') as string)
+        if (parsedSpecs && typeof parsedSpecs === 'object') {
+          specifications = parsedSpecs
+        }
+      } catch (e) {
+        console.warn('Failed to parse specifications, using null')
+      }
+    }
+
+    // Parse discount data
+    if (form.has('hasDiscount') && form.get('hasDiscount') === 'true') {
+      hasDiscount = true
+      if (form.has('discountPercentage')) {
+        discountPercentage = parseFloat(form.get('discountPercentage') as string)
+      }
+      if (form.has('originalPrice')) {
+        originalPrice = parseFloat(form.get('originalPrice') as string)
+      }
+    }
+
     // Upload images sequentially (could parallelize)
     const imageUrls: string[] = []
     for (const file of imageFiles) {
@@ -72,7 +127,7 @@ export async function POST(request: NextRequest) {
       deliveryDays: deliveryDays || '2-3 days',
       image: imageUrls[0],
       images: imageUrls,
-      colors: ['Default'],
+      colors: colors,
       rating: 0,
       stock: 100,
       createdAt: now,
@@ -82,6 +137,20 @@ export async function POST(request: NextRequest) {
     if (isLookFlag) {
       productDoc.isLook = true
       productDoc.lookImages = imageUrls
+    }
+
+    if (hasDiscount) {
+      productDoc.hasDiscount = true
+      productDoc.discountPercentage = discountPercentage
+      productDoc.originalPrice = originalPrice
+    }
+
+    if (specifications) {
+      productDoc.specifications = specifications
+    }
+
+    if (badges.length > 0) {
+      productDoc.badges = badges
     }
 
     const insertRes = await products.insertOne(productDoc)

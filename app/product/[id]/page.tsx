@@ -236,6 +236,141 @@ export default function ProductDetailPage() {
                 </p>
               </div>
 
+              {/* Product Specifications */}
+              {product.specifications && (
+                <div className="space-y-6 p-6 bg-gray-50 rounded-lg border">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Product Details</h3>
+                  
+                  {/* Basic Specifications */}
+                  <div className="mb-6">
+                    <div className="space-y-3">
+                      {product.specifications.fit && (
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="font-medium text-gray-700">Fit</span>
+                          <span className="text-gray-900">{product.specifications.fit}</span>
+                        </div>
+                      )}
+                      {product.specifications.waistRise && (
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="font-medium text-gray-700">Waist Rise</span>
+                          <span className="text-gray-900">{product.specifications.waistRise}</span>
+                        </div>
+                      )}
+                      {product.specifications.features && (
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="font-medium text-gray-700">Features</span>
+                          <span className="text-gray-900">{product.specifications.features}</span>
+                        </div>
+                      )}
+                      {product.specifications.length && (
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="font-medium text-gray-700">Length</span>
+                          <span className="text-gray-900">{product.specifications.length}</span>
+                        </div>
+                      )}
+                      {product.specifications.closure && (
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="font-medium text-gray-700">Closure</span>
+                          <span className="text-gray-900">{product.specifications.closure}</span>
+                        </div>
+                      )}
+                      {product.specifications.flyType && (
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="font-medium text-gray-700">Fly Type</span>
+                          <span className="text-gray-900">{product.specifications.flyType}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Product Details List */}
+                  {product.specifications.productDetails && product.specifications.productDetails.length > 0 && product.specifications.productDetails.some(detail => detail.trim()) && (
+                    <div className="mb-6">
+                      <h4 className="font-semibold text-gray-900 mb-3">Product Details</h4>
+                      <ul className="space-y-2">
+                        {product.specifications.productDetails
+                          .filter(detail => detail.trim())
+                          .map((detail, index) => (
+                            <li key={index} className="flex items-start">
+                              <span className="text-gray-600 mr-2">•</span>
+                              <span className="text-gray-700">{detail}</span>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Size & Fit */}
+                  {(product.specifications.sizeAndFit?.fitType || product.specifications.sizeAndFit?.modelInfo || product.specifications.sizeAndFit?.additionalInfo) && (
+                    <div className="mb-6">
+                      <h4 className="font-semibold text-gray-900 mb-3">Size & Fit</h4>
+                      <div className="space-y-2">
+                        {product.specifications.sizeAndFit.fitType && (
+                          <p className="text-gray-700">
+                            <span className="font-medium">Fit:</span> {product.specifications.sizeAndFit.fitType}
+                          </p>
+                        )}
+                        {product.specifications.sizeAndFit.modelInfo && (
+                          <p className="text-gray-700">{product.specifications.sizeAndFit.modelInfo}</p>
+                        )}
+                        {product.specifications.sizeAndFit.additionalInfo && (
+                          <p className="text-gray-700">{product.specifications.sizeAndFit.additionalInfo}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Material & Care */}
+                  {(product.specifications.materialAndCare?.material || (product.specifications.materialAndCare?.careInstructions && product.specifications.materialAndCare.careInstructions.length > 0)) && (
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">Material & Care</h4>
+                      <div className="space-y-2">
+                        {product.specifications.materialAndCare.material && (
+                          <p className="text-gray-700">
+                            <span className="font-medium">Material:</span> {product.specifications.materialAndCare.material}
+                          </p>
+                        )}
+                        {product.specifications.materialAndCare.careInstructions && product.specifications.materialAndCare.careInstructions.length > 0 && product.specifications.materialAndCare.careInstructions.some(instruction => instruction.trim()) && (
+                          <div>
+                            <p className="font-medium text-gray-700 mb-2">Care Instructions:</p>
+                            <ul className="space-y-1">
+                              {product.specifications.materialAndCare.careInstructions
+                                .filter(instruction => instruction.trim())
+                                .map((instruction, index) => (
+                                  <li key={index} className="flex items-start">
+                                    <span className="text-gray-600 mr-2">•</span>
+                                    <span className="text-gray-700">{instruction}</span>
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* No details message if no specifications */}
+                  {(!product.specifications.fit && !product.specifications.waistRise && !product.specifications.features && !product.specifications.length && !product.specifications.closure && !product.specifications.flyType && 
+                    (!product.specifications.productDetails || product.specifications.productDetails.length === 0 || !product.specifications.productDetails.some(detail => detail.trim())) &&
+                    (!product.specifications.sizeAndFit?.fitType && !product.specifications.sizeAndFit?.modelInfo && !product.specifications.sizeAndFit?.additionalInfo) &&
+                    (!product.specifications.materialAndCare?.material && (!product.specifications.materialAndCare?.careInstructions || product.specifications.materialAndCare.careInstructions.length === 0 || !product.specifications.materialAndCare.careInstructions.some(instruction => instruction.trim())))) && (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500 italic">No detailed specifications provided for this product</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Fallback for products without any specifications */}
+              {!product.specifications && (
+                <div className="space-y-6 p-6 bg-gray-50 rounded-lg border">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Product Details</h3>
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 italic">No detailed specifications provided for this product</p>
+                  </div>
+                </div>
+              )}
+
               {/* Color Selection */}
               {/* <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -534,6 +669,143 @@ export default function ProductDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Mobile Specifications Section */}
+          {product.specifications && (
+            <div className="px-4 mb-6">
+              <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Product Details</h3>
+                
+                {/* Basic Specifications */}
+                <div className="space-y-3">
+                  {product.specifications.fit && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">Fit</span>
+                      <span className="text-gray-900 text-sm font-medium">{product.specifications.fit}</span>
+                    </div>
+                  )}
+                  {product.specifications.waistRise && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">Waist Rise</span>
+                      <span className="text-gray-900 text-sm font-medium">{product.specifications.waistRise}</span>
+                    </div>
+                  )}
+                  {product.specifications.features && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">Features</span>
+                      <span className="text-gray-900 text-sm font-medium">{product.specifications.features}</span>
+                    </div>
+                  )}
+                  {product.specifications.length && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">Length</span>
+                      <span className="text-gray-900 text-sm font-medium">{product.specifications.length}</span>
+                    </div>
+                  )}
+                  {product.specifications.closure && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">Closure</span>
+                      <span className="text-gray-900 text-sm font-medium">{product.specifications.closure}</span>
+                    </div>
+                  )}
+                  {product.specifications.flyType && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">Fly Type</span>
+                      <span className="text-gray-900 text-sm font-medium">{product.specifications.flyType}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Product Details List */}
+                {product.specifications.productDetails && product.specifications.productDetails.length > 0 && product.specifications.productDetails.some(detail => detail.trim()) && (
+                  <div className="mt-4">
+                    <h4 className="font-semibold text-gray-900 mb-2 text-sm">Product Details</h4>
+                    <ul className="space-y-1">
+                      {product.specifications.productDetails
+                        .filter(detail => detail.trim())
+                        .map((detail, index) => (
+                          <li key={index} className="flex items-start text-sm">
+                            <span className="text-gray-600 mr-2">•</span>
+                            <span className="text-gray-700">{detail}</span>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Size & Fit */}
+                {(product.specifications.sizeAndFit?.fitType || product.specifications.sizeAndFit?.modelInfo || product.specifications.sizeAndFit?.additionalInfo) && (
+                  <div className="mt-4">
+                    <h4 className="font-semibold text-gray-900 mb-2 text-sm">Size & Fit</h4>
+                    <div className="space-y-1">
+                      {product.specifications.sizeAndFit.fitType && (
+                        <p className="text-gray-700 text-sm">
+                          <span className="font-medium">Fit:</span> {product.specifications.sizeAndFit.fitType}
+                        </p>
+                      )}
+                      {product.specifications.sizeAndFit.modelInfo && (
+                        <p className="text-gray-700 text-sm">{product.specifications.sizeAndFit.modelInfo}</p>
+                      )}
+                      {product.specifications.sizeAndFit.additionalInfo && (
+                        <p className="text-gray-700 text-sm">{product.specifications.sizeAndFit.additionalInfo}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Material & Care */}
+                {(product.specifications.materialAndCare?.material || (product.specifications.materialAndCare?.careInstructions && product.specifications.materialAndCare.careInstructions.length > 0)) && (
+                  <div className="mt-4">
+                    <h4 className="font-semibold text-gray-900 mb-2 text-sm">Material & Care</h4>
+                    <div className="space-y-1">
+                      {product.specifications.materialAndCare.material && (
+                        <p className="text-gray-700 text-sm">
+                          <span className="font-medium">Material:</span> {product.specifications.materialAndCare.material}
+                        </p>
+                      )}
+                      {product.specifications.materialAndCare.careInstructions && product.specifications.materialAndCare.careInstructions.length > 0 && product.specifications.materialAndCare.careInstructions.some(instruction => instruction.trim()) && (
+                        <div>
+                          <p className="font-medium text-gray-700 mb-1 text-sm">Care Instructions:</p>
+                          <ul className="space-y-1">
+                            {product.specifications.materialAndCare.careInstructions
+                              .filter(instruction => instruction.trim())
+                              .map((instruction, index) => (
+                                <li key={index} className="flex items-start text-sm">
+                                  <span className="text-gray-600 mr-2">•</span>
+                                  <span className="text-gray-700">{instruction}</span>
+                                </li>
+                              ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* No details message if no specifications */}
+                {(!product.specifications.fit && !product.specifications.waistRise && !product.specifications.features && !product.specifications.length && !product.specifications.closure && !product.specifications.flyType && 
+                  (!product.specifications.productDetails || product.specifications.productDetails.length === 0 || !product.specifications.productDetails.some(detail => detail.trim())) &&
+                  (!product.specifications.sizeAndFit?.fitType && !product.specifications.sizeAndFit?.modelInfo && !product.specifications.sizeAndFit?.additionalInfo) &&
+                  (!product.specifications.materialAndCare?.material && (!product.specifications.materialAndCare?.careInstructions || product.specifications.materialAndCare.careInstructions.length === 0 || !product.specifications.materialAndCare.careInstructions.some(instruction => instruction.trim())))) && (
+                  <div className="text-center py-6">
+                    <p className="text-gray-500 italic text-sm">No detailed specifications provided for this product</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Mobile Fallback for products without any specifications */}
+          {!product.specifications && (
+            <div className="px-4 mb-6">
+              <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Product Details</h3>
+                <div className="text-center py-6">
+                  <p className="text-gray-500 italic text-sm">No detailed specifications provided for this product</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Delivery Information */}
           <div className="p-3 bg-green-50 border border-green-200 rounded-lg">

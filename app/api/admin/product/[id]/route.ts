@@ -67,10 +67,72 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     for (const [key,value] of form.entries()) {
       if (key === 'images') continue
       if (key === 'isLook') { isLookFlag = value==='true'; continue }
+      if (key === 'existingImages') continue
+      if (key === 'colors') continue
+      if (key === 'badges') continue
+      if (key === 'specifications') continue
+      if (key === 'hasDiscount') continue
+      if (key === 'discountPercentage') continue
+      if (key === 'originalPrice') continue
       updateDoc[key] = key === 'price' ? parseFloat(value as string) : value
     }
     if (form.has('sizes')) {
       updateDoc.sizes = (form.get('sizes') as string).split(',').map(s=>s.trim()).filter(Boolean)
+    }
+
+    // Parse and update colors
+    if (form.has('colors')) {
+      try {
+        const parsedColors = JSON.parse(form.get('colors') as string)
+        if (Array.isArray(parsedColors) && parsedColors.length > 0) {
+          updateDoc.colors = parsedColors
+        }
+      } catch (e) {
+        console.warn('Failed to parse colors during update')
+      }
+    }
+
+    // Parse and update badges
+    if (form.has('badges')) {
+      try {
+        const parsedBadges = JSON.parse(form.get('badges') as string)
+        if (Array.isArray(parsedBadges)) {
+          updateDoc.badges = parsedBadges
+        }
+      } catch (e) {
+        console.warn('Failed to parse badges during update')
+      }
+    }
+
+    // Parse and update specifications
+    if (form.has('specifications')) {
+      try {
+        const parsedSpecs = JSON.parse(form.get('specifications') as string)
+        if (parsedSpecs && typeof parsedSpecs === 'object') {
+          updateDoc.specifications = parsedSpecs
+        }
+      } catch (e) {
+        console.warn('Failed to parse specifications during update')
+      }
+    }
+
+    // Parse and update discount data
+    if (form.has('hasDiscount')) {
+      const hasDiscount = form.get('hasDiscount') === 'true'
+      updateDoc.hasDiscount = hasDiscount
+      
+      if (hasDiscount) {
+        if (form.has('discountPercentage')) {
+          updateDoc.discountPercentage = parseFloat(form.get('discountPercentage') as string)
+        }
+        if (form.has('originalPrice')) {
+          updateDoc.originalPrice = parseFloat(form.get('originalPrice') as string)
+        }
+      } else {
+        // Remove discount fields if discount is disabled
+        updateDoc.discountPercentage = null
+        updateDoc.originalPrice = null
+      }
     }
     
     // Handle images and cleanup

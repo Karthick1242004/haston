@@ -48,6 +48,27 @@ export default function AdminPage() {
   // Discount states
   const [hasDiscount, setHasDiscount] = useState(false)
   const [discountPercentage, setDiscountPercentage] = useState('')
+  
+  // Product specifications states
+  const [specifications, setSpecifications] = useState({
+    fit: '',
+    waistRise: '',
+    features: '',
+    length: '',
+    closure: '',
+    flyType: '',
+    productDetails: [''],
+    sizeAndFit: {
+      fitType: '',
+      modelInfo: '',
+      additionalInfo: ''
+    },
+    materialAndCare: {
+      material: '',
+      careInstructions: ['']
+    }
+  })
+  
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Order management state
@@ -183,6 +204,24 @@ export default function AdminPage() {
       setColorMode('single')
       setHasDiscount(false)
       setDiscountPercentage('')
+      setSpecifications({
+        fit: '',
+        waistRise: '',
+        features: '',
+        length: '',
+        closure: '',
+        flyType: '',
+        productDetails: [''],
+        sizeAndFit: {
+          fitType: '',
+          modelInfo: '',
+          additionalInfo: ''
+        },
+        materialAndCare: {
+          material: '',
+          careInstructions: ['']
+        }
+      })
     } catch (error) {
       console.error('Error resetting form:', error)
       // Ensure at least basic state is reset
@@ -191,7 +230,98 @@ export default function AdminPage() {
       setColorMode('single')
       setHasDiscount(false)
       setDiscountPercentage('')
+      setSpecifications({
+        fit: '',
+        waistRise: '',
+        features: '',
+        length: '',
+        closure: '',
+        flyType: '',
+        productDetails: [''],
+        sizeAndFit: {
+          fitType: '',
+          modelInfo: '',
+          additionalInfo: ''
+        },
+        materialAndCare: {
+          material: '',
+          careInstructions: ['']
+        }
+      })
     }
+  }
+
+  // Specification helper functions
+  const updateSpecification = (field: string, value: string) => {
+    setSpecifications(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const updateNestedSpecification = (section: 'sizeAndFit' | 'materialAndCare', field: string, value: string) => {
+    setSpecifications(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value
+      }
+    }))
+  }
+
+  const addProductDetail = () => {
+    setSpecifications(prev => ({
+      ...prev,
+      productDetails: [...prev.productDetails, '']
+    }))
+  }
+
+  const removeProductDetail = (index: number) => {
+    if (specifications.productDetails.length > 1) {
+      setSpecifications(prev => ({
+        ...prev,
+        productDetails: prev.productDetails.filter((_, i) => i !== index)
+      }))
+    }
+  }
+
+  const updateProductDetail = (index: number, value: string) => {
+    setSpecifications(prev => ({
+      ...prev,
+      productDetails: prev.productDetails.map((item, i) => i === index ? value : item)
+    }))
+  }
+
+  const addCareInstruction = () => {
+    setSpecifications(prev => ({
+      ...prev,
+      materialAndCare: {
+        ...prev.materialAndCare,
+        careInstructions: [...prev.materialAndCare.careInstructions, '']
+      }
+    }))
+  }
+
+  const removeCareInstruction = (index: number) => {
+    if (specifications.materialAndCare.careInstructions.length > 1) {
+      setSpecifications(prev => ({
+        ...prev,
+        materialAndCare: {
+          ...prev.materialAndCare,
+          careInstructions: prev.materialAndCare.careInstructions.filter((_, i) => i !== index)
+        }
+      }))
+    }
+  }
+
+  const updateCareInstruction = (index: number, value: string) => {
+    setSpecifications(prev => ({
+      ...prev,
+      materialAndCare: {
+        ...prev.materialAndCare,
+        careInstructions: prev.materialAndCare.careInstructions.map((item, i) => i === index ? value : item)
+      }
+    }))
   }
 
   const addColor = () => {
@@ -297,6 +427,16 @@ export default function AdminPage() {
         formData.append('originalPrice', discountPreview.originalPrice.toString())
       }
       
+      // Add specifications data
+      const cleanedSpecs = {
+        ...specifications,
+        productDetails: specifications.productDetails.filter(detail => detail.trim() !== ''),
+        materialAndCare: {
+          ...specifications.materialAndCare,
+          careInstructions: specifications.materialAndCare.careInstructions.filter(instruction => instruction.trim() !== '')
+        }
+      }
+      formData.append('specifications', JSON.stringify(cleanedSpecs))
     
       images.forEach((file) => formData.append('images', file))
 
@@ -638,6 +778,52 @@ export default function AdminPage() {
                                     // Handle discount data
                                     setHasDiscount(!!p.hasDiscount)
                                     setDiscountPercentage(p.discountPercentage?.toString() || '')
+                                    
+                                    // Handle specifications data
+                                    if (p.specifications) {
+                                      setSpecifications({
+                                        fit: p.specifications.fit || '',
+                                        waistRise: p.specifications.waistRise || '',
+                                        features: p.specifications.features || '',
+                                        length: p.specifications.length || '',
+                                        closure: p.specifications.closure || '',
+                                        flyType: p.specifications.flyType || '',
+                                        productDetails: p.specifications.productDetails && p.specifications.productDetails.length > 0 
+                                          ? p.specifications.productDetails 
+                                          : [''],
+                                        sizeAndFit: {
+                                          fitType: p.specifications.sizeAndFit?.fitType || '',
+                                          modelInfo: p.specifications.sizeAndFit?.modelInfo || '',
+                                          additionalInfo: p.specifications.sizeAndFit?.additionalInfo || ''
+                                        },
+                                        materialAndCare: {
+                                          material: p.specifications.materialAndCare?.material || '',
+                                          careInstructions: p.specifications.materialAndCare?.careInstructions && p.specifications.materialAndCare.careInstructions.length > 0
+                                            ? p.specifications.materialAndCare.careInstructions
+                                            : ['']
+                                        }
+                                      })
+                                    } else {
+                                      // Reset to default if no specifications
+                                      setSpecifications({
+                                        fit: '',
+                                        waistRise: '',
+                                        features: '',
+                                        length: '',
+                                        closure: '',
+                                        flyType: '',
+                                        productDetails: [''],
+                                        sizeAndFit: {
+                                          fitType: '',
+                                          modelInfo: '',
+                                          additionalInfo: ''
+                                        },
+                                        materialAndCare: {
+                                          material: '',
+                                          careInstructions: ['']
+                                        }
+                                      })
+                                    }
                                   }}
                                 >
                                   <Edit3 className="w-4 h-4 mr-2" />
@@ -963,6 +1149,227 @@ export default function AdminPage() {
                           ))}
                         </div>
                       )}
+                    </div>
+
+                    {/* Product Specifications Section */}
+                    <div className="space-y-6 p-6 bg-gray-50 rounded-lg border">
+                      <div className="flex items-center gap-2">
+                        <Package className="w-5 h-5 text-blue-600" />
+                        <h3 className="text-lg font-semibold text-blue-950">Product Specifications</h3>
+                        <span className="text-xs text-gray-500">(Optional - leave empty if not applicable)</span>
+                      </div>
+
+                      {/* Basic Specifications */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                          <Label className="text-sm font-medium text-gray-700">Fit</Label>
+                          <Select value={specifications.fit || 'none'} onValueChange={(value) => updateSpecification('fit', value === 'none' ? '' : value)}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select fit type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">No specification</SelectItem>
+                              <SelectItem value="Bootcut">Bootcut</SelectItem>
+                              <SelectItem value="Skinny">Skinny</SelectItem>
+                              <SelectItem value="Regular">Regular</SelectItem>
+                              <SelectItem value="Straight">Straight</SelectItem>
+                              <SelectItem value="Wide Leg">Wide Leg</SelectItem>
+                              <SelectItem value="Slim">Slim</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-sm font-medium text-gray-700">Waist Rise</Label>
+                          <Select value={specifications.waistRise || 'none'} onValueChange={(value) => updateSpecification('waistRise', value === 'none' ? '' : value)}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select waist rise" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">No specification</SelectItem>
+                              <SelectItem value="High-Rise">High-Rise</SelectItem>
+                              <SelectItem value="Mid-Rise">Mid-Rise</SelectItem>
+                              <SelectItem value="Low-Rise">Low-Rise</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-sm font-medium text-gray-700">Features</Label>
+                          <Input
+                            value={specifications.features}
+                            onChange={(e) => updateSpecification('features', e.target.value)}
+                            placeholder="e.g., Plain, Embroidered, Printed"
+                            className="mt-1"
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="text-sm font-medium text-gray-700">Length</Label>
+                          <Select value={specifications.length || 'none'} onValueChange={(value) => updateSpecification('length', value === 'none' ? '' : value)}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select length" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">No specification</SelectItem>
+                              <SelectItem value="Regular">Regular</SelectItem>
+                              <SelectItem value="Long">Long</SelectItem>
+                              <SelectItem value="Short">Short</SelectItem>
+                              <SelectItem value="Ankle">Ankle</SelectItem>
+                              <SelectItem value="Cropped">Cropped</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-sm font-medium text-gray-700">Closure</Label>
+                          <Input
+                            value={specifications.closure}
+                            onChange={(e) => updateSpecification('closure', e.target.value)}
+                            placeholder="e.g., Slip-On, Button, Zipper"
+                            className="mt-1"
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="text-sm font-medium text-gray-700">Fly Type</Label>
+                          <Select value={specifications.flyType || 'none'} onValueChange={(value) => updateSpecification('flyType', value === 'none' ? '' : value)}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select fly type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">No specification</SelectItem>
+                              <SelectItem value="No Fly">No Fly</SelectItem>
+                              <SelectItem value="Zipper Fly">Zipper Fly</SelectItem>
+                              <SelectItem value="Button Fly">Button Fly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      {/* Product Details */}
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">Product Details</Label>
+                        <p className="text-xs text-gray-500 mb-3">Add bullet point descriptions for the product</p>
+                        <div className="space-y-2">
+                          {specifications.productDetails.map((detail, index) => (
+                            <div key={index} className="flex gap-2">
+                              <Input
+                                value={detail}
+                                onChange={(e) => updateProductDetail(index, e.target.value)}
+                                placeholder="e.g., Brown knitted bootcut"
+                                className="flex-1"
+                              />
+                              {specifications.productDetails.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => removeProductDetail(index)}
+                                  className="text-red-600 hover:bg-red-50"
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={addProductDetail}
+                            className="w-full"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Product Detail
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Size & Fit */}
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700 mb-3 block">Size & Fit Information</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-xs text-gray-600">Fit Type</Label>
+                            <Input
+                              value={specifications.sizeAndFit.fitType}
+                              onChange={(e) => updateNestedSpecification('sizeAndFit', 'fitType', e.target.value)}
+                              placeholder="e.g., Regular Fit, Slim Fit"
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-gray-600">Model Information</Label>
+                            <Input
+                              value={specifications.sizeAndFit.modelInfo}
+                              onChange={(e) => updateNestedSpecification('sizeAndFit', 'modelInfo', e.target.value)}
+                              placeholder="e.g., The model (height 5'8) is wearing a size 28"
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-3">
+                          <Label className="text-xs text-gray-600">Additional Fit Information</Label>
+                          <Textarea
+                            value={specifications.sizeAndFit.additionalInfo}
+                            onChange={(e) => updateNestedSpecification('sizeAndFit', 'additionalInfo', e.target.value)}
+                            placeholder="Any additional size or fit information"
+                            rows={2}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Material & Care */}
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700 mb-3 block">Material & Care</Label>
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-xs text-gray-600">Material</Label>
+                            <Input
+                              value={specifications.materialAndCare.material}
+                              onChange={(e) => updateNestedSpecification('materialAndCare', 'material', e.target.value)}
+                              placeholder="e.g., Nylon, Cotton, Polyester"
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-gray-600 mb-2 block">Care Instructions</Label>
+                            <div className="space-y-2">
+                              {specifications.materialAndCare.careInstructions.map((instruction, index) => (
+                                <div key={index} className="flex gap-2">
+                                  <Input
+                                    value={instruction}
+                                    onChange={(e) => updateCareInstruction(index, e.target.value)}
+                                    placeholder="e.g., Machine wash cold"
+                                    className="flex-1"
+                                  />
+                                  {specifications.materialAndCare.careInstructions.length > 1 && (
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => removeCareInstruction(index)}
+                                      className="text-red-600 hover:bg-red-50"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                </div>
+                              ))}
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={addCareInstruction}
+                                className="w-full"
+                              >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Add Care Instruction
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     <div>

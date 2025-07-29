@@ -15,6 +15,33 @@ export interface Review {
   updatedAt?: Date | string
 }
 
+// Product Specifications Interface
+export interface ProductSpecifications {
+  // Basic specifications
+  fit?: string // e.g., "Bootcut", "Skinny", "Regular"
+  waistRise?: string // e.g., "High-Rise", "Mid-Rise", "Low-Rise"
+  features?: string // e.g., "Plain", "Embroidered", "Printed"
+  length?: string // e.g., "Regular", "Long", "Short"
+  closure?: string // e.g., "Slip-On", "Button", "Zipper"
+  flyType?: string // e.g., "No Fly", "Zipper Fly", "Button Fly"
+  
+  // Detailed product information
+  productDetails?: string[] // Array of bullet point descriptions
+  
+  // Size and fit information
+  sizeAndFit?: {
+    fitType?: string // e.g., "Regular Fit", "Slim Fit"
+    modelInfo?: string // e.g., "The model (height 5'8) is wearing a size 28"
+    additionalInfo?: string // Any additional size/fit information
+  }
+  
+  // Material and care
+  materialAndCare?: {
+    material?: string // e.g., "Nylon", "Cotton", "Polyester"
+    careInstructions?: string[] // Array of care instructions
+  }
+}
+
 export interface Product {
   id: string | number
   name: string
@@ -37,6 +64,9 @@ export interface Product {
   reviewCount?: number // Total number of reviews
   deliveryDays?: string // Delivery time (e.g., "2-3 days", "1 week", "Same day")
   createdAt?: string | Date
+  
+  // Product specifications
+  specifications?: ProductSpecifications
 }
 
 export interface CartItem extends Product {
