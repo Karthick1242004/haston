@@ -1521,8 +1521,7 @@ export default function AdminPage() {
                             </Card>
                           </div>
 
-                          {/* Order Timeline */}
-                          <Card>
+                          {/* <Card>
                             <CardHeader>
                               <CardTitle className="flex items-center gap-2">
                                 <Clock className="w-5 h-5" />
@@ -1531,7 +1530,6 @@ export default function AdminPage() {
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-4">
-                                {/* Order Placed */}
                                 <div className="flex items-center">
                                   <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-4">
                                     <CheckCircle className="w-5 h-5 text-white" />
@@ -1553,7 +1551,6 @@ export default function AdminPage() {
                                   </div>
                                 </div>
 
-                                {/* Processing */}
                                 <div className="flex items-center">
                                   <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
                                     ['processing', 'shipped', 'delivered'].includes(selectedOrder.status) 
@@ -1573,7 +1570,6 @@ export default function AdminPage() {
                                   </div>
                                 </div>
 
-                                {/* Shipped */}
                                 <div className="flex items-center">
                                   <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
                                     ['shipped', 'delivered'].includes(selectedOrder.status) 
@@ -1593,7 +1589,6 @@ export default function AdminPage() {
                                   </div>
                                 </div>
 
-                                {/* Delivered */}
                                 <div className="flex items-center">
                                   <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
                                     selectedOrder.status === 'delivered' 
@@ -1614,7 +1609,7 @@ export default function AdminPage() {
                                 </div>
                               </div>
                             </CardContent>
-                          </Card>
+                          </Card> */}
 
                           {/* Admin Actions */}
                           <div className="flex justify-end gap-3 pt-6 border-t">
