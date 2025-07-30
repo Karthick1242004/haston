@@ -1,81 +1,106 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import Image from "next/image"
-import { ChevronLeft, Star, Heart, ShoppingCart, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { useProductStore } from "@/stores/product-store"
-import { useUIStore } from "@/stores/ui-store"
-import { useAuthCart } from "@/hooks/use-auth-cart"
-import Header from "@/components/header"
-import ReviewSection from "@/components/review-section"
-import type { Product } from "@/types/product"
-
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import { ChevronLeft, Star, Heart, ShoppingCart, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useProductStore } from "@/stores/product-store";
+import { useUIStore } from "@/stores/ui-store";
+import { useAuthCart } from "@/hooks/use-auth-cart";
+import { useWishlist } from "@/hooks/use-wishlist";
+import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/header";
+import ReviewSection from "@/components/review-section";
+import type { Product } from "@/types/product";
+import Footer from "@/components/footer";
 
 export default function ProductDetailPage() {
-  const params = useParams()
-  const router = useRouter()
-  const productId = parseInt(params.id as string)
-  
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  const [selectedColor, setSelectedColor] = useState("")
-  const [selectedSize, setSelectedSize] = useState("")
-  const [quantity, setQuantity] = useState(1)
-  const [isWishlisted, setIsWishlisted] = useState(false)
-  
-  const { addProductToCart, buyProductNow } = useAuthCart()
-  const { cartCount } = useUIStore()
-  
-  const [product, setProduct] = useState<Product | null>(null)
-  
+  const params = useParams();
+  const router = useRouter();
+  const productId = parseInt(params.id as string);
+
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
+  const [quantity, setQuantity] = useState(1);
+
+  const { addProductToCart, buyProductNow } = useAuthCart();
+  const { cartCount } = useUIStore();
+  const { toggleWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist();
+  const { toast } = useToast();
+
+  const [product, setProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const res = await fetch(`/api/products?id=${params.id}`)
-        const json = await res.json()
-        if (!json.error) setProduct(json)
+        const res = await fetch(`/api/products?id=${params.id}`);
+        const json = await res.json();
+        if (!json.error) setProduct(json);
       } catch (err) {
-        console.error(err)
+        console.error(err);
       }
     }
-    fetchProduct()
-  }, [params.id])
+    fetchProduct();
+  }, [params.id]);
 
   useEffect(() => {
     if (product) {
-      setSelectedColor(product.colors?.[0] || "")
-      setSelectedSize(product.sizes?.[0] || "")
+      setSelectedColor(product.colors?.[0] || "");
+      setSelectedSize(product.sizes?.[0] || "");
     }
-  }, [product])
+  }, [product]);
 
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-10 h-10 animate-spin" />
       </div>
-    )
+    );
   }
 
   const handleAddToCart = () => {
     if (selectedSize && selectedColor) {
-      addProductToCart(product, selectedSize, selectedColor, quantity)
+      addProductToCart(product, selectedSize, selectedColor, quantity);
     }
-  }
+  };
+
+  const handleToggleWishlist = async () => {
+    if (!product) return;
+    
+    const wasInWishlist = isInWishlist(product.id);
+    const result = await toggleWishlist(product.id);
+    
+    if (result) {
+      toast({
+        title: "Success",
+        description: wasInWishlist 
+          ? "Removed from wishlist" 
+          : "Added to wishlist",
+        variant: "default"
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to update wishlist",
+        variant: "destructive"
+      });
+    }
+  };
 
   const colorOptions = [
     { name: "Portage", color: "bg-blue-400" },
     { name: "Forest Green", color: "bg-green-600" },
     { name: "Black", color: "bg-black" },
     { name: "Pink", color: "bg-pink-400" },
-  ]
+  ];
 
   return (
-    <motion.div 
-      className="min-h-screen pb-8 bg-[#F1EEE6]"
+    <motion.div
+      className="min-h-screen  bg-[#F1EEE6]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -96,7 +121,9 @@ export default function ProductDetailPage() {
                 <motion.div
                   key={index}
                   className={`relative aspect-[3/4] cursor-pointer rounded-lg overflow-hidden border-2 ${
-                    selectedImageIndex === index ? "border-black" : "border-transparent"
+                    selectedImageIndex === index
+                      ? "border-black"
+                      : "border-transparent"
                   }`}
                   whileHover={{ scale: 1.05 }}
                   onClick={() => setSelectedImageIndex(index)}
@@ -116,28 +143,43 @@ export default function ProductDetailPage() {
             <div className="flex-1 relative bg-gradient-to-br h-[80vh] max-h-[800px]">
               <div className="absolute w-full h-full inset-6">
                 <Image
-                  src={product.images?.[selectedImageIndex] || product.image || '/placeholder.jpg'}
+                  src={
+                    product.images?.[selectedImageIndex] ||
+                    product.image ||
+                    "/placeholder.jpg"
+                  }
                   alt={product.name}
                   fill
                   className="object-contain rounded-lg"
                   unoptimized
                 />
               </div>
-              
+
               {/* Navigation arrows */}
-              <button 
+              <button
                 className="absolute left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors"
-                onClick={() => setSelectedImageIndex(Math.max(0, selectedImageIndex - 1))}
+                onClick={() =>
+                  setSelectedImageIndex(Math.max(0, selectedImageIndex - 1))
+                }
                 disabled={selectedImageIndex === 0}
                 aria-label="Previous image"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
-              
-              <button 
+
+              <button
                 className="absolute right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors rotate-180"
-                onClick={() => setSelectedImageIndex(Math.min((product.images?.length || 1) - 1, selectedImageIndex + 1))}
-                disabled={selectedImageIndex === (product.images?.length || 1) - 1}
+                onClick={() =>
+                  setSelectedImageIndex(
+                    Math.min(
+                      (product.images?.length || 1) - 1,
+                      selectedImageIndex + 1
+                    )
+                  )
+                }
+                disabled={
+                  selectedImageIndex === (product.images?.length || 1) - 1
+                }
                 aria-label="Next image"
               >
                 <ChevronLeft className="w-6 h-6" />
@@ -160,10 +202,11 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Right side - Product Details */}
-          <div className="w-[500px] shadow-xl bg-gray-50 rounded-md px-12 overflow-y-auto scrollbar-hide pb-6"
-          style={{
-            scrollbarWidth: "none",
-          }}
+          <div
+            className="w-[500px] shadow-xl bg-gray-50 rounded-md px-12 overflow-y-auto scrollbar-hide pb-6"
+            style={{
+              scrollbarWidth: "none",
+            }}
           >
             <motion.div
               initial={{ x: 50, opacity: 0 }}
@@ -181,14 +224,19 @@ export default function ProductDetailPage() {
                   <ChevronLeft className="w-4 h-4" />
                   Back
                 </Button>
-                
+
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setIsWishlisted(!isWishlisted)}
+                  onClick={handleToggleWishlist}
+                  disabled={wishlistLoading}
                   className="rounded-full"
                 >
-                  <Heart className={`w-5 h-5 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+                  <Heart
+                    className={`w-5 h-5 ${
+                      product && isInWishlist(product.id) ? "fill-red-500 text-red-500" : ""
+                    }`}
+                  />
                 </Button>
               </div>
 
@@ -197,17 +245,23 @@ export default function ProductDetailPage() {
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
                   {product.name}
                 </h1>
-                
+
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex items-center">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="ml-1 text-sm font-medium">{product.rating}</span>
+                    <span className="ml-1 text-sm font-medium">
+                      {product.rating}
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-500">({product.stock})</span>
+                  <span className="text-sm text-gray-500">
+                    ({product.stock})
+                  </span>
                 </div>
 
                 <div className="mb-3">
-                  {product.hasDiscount && product.originalPrice && product.discountPercentage ? (
+                  {product.hasDiscount &&
+                  product.originalPrice &&
+                  product.discountPercentage ? (
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
                         <p className="text-4xl font-bold text-gray-900">
@@ -221,7 +275,10 @@ export default function ProductDetailPage() {
                         </span>
                       </div>
                       <p className="text-lg text-green-600 font-medium">
-                        You save ₹{(Number(product.originalPrice) - Number(product.price)).toFixed(2)}
+                        You save ₹
+                        {(
+                          Number(product.originalPrice) - Number(product.price)
+                        ).toFixed(2)}
                       </p>
                     </div>
                   ) : (
@@ -239,134 +296,218 @@ export default function ProductDetailPage() {
               {/* Product Specifications */}
               {product.specifications && (
                 <div className="space-y-6 p-6 bg-gray-50 rounded-lg border">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Product Details</h3>
-                  
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    Product Details
+                  </h3>
+
                   {/* Basic Specifications */}
                   <div className="mb-6">
                     <div className="space-y-3">
                       {product.specifications.fit && (
                         <div className="flex justify-between items-center py-3 border-b border-gray-200">
                           <span className="font-medium text-gray-700">Fit</span>
-                          <span className="text-gray-900">{product.specifications.fit}</span>
+                          <span className="text-gray-900">
+                            {product.specifications.fit}
+                          </span>
                         </div>
                       )}
                       {product.specifications.waistRise && (
                         <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                          <span className="font-medium text-gray-700">Waist Rise</span>
-                          <span className="text-gray-900">{product.specifications.waistRise}</span>
+                          <span className="font-medium text-gray-700">
+                            Waist Rise
+                          </span>
+                          <span className="text-gray-900">
+                            {product.specifications.waistRise}
+                          </span>
                         </div>
                       )}
                       {product.specifications.features && (
                         <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                          <span className="font-medium text-gray-700">Features</span>
-                          <span className="text-gray-900">{product.specifications.features}</span>
+                          <span className="font-medium text-gray-700">
+                            Features
+                          </span>
+                          <span className="text-gray-900">
+                            {product.specifications.features}
+                          </span>
                         </div>
                       )}
                       {product.specifications.length && (
                         <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                          <span className="font-medium text-gray-700">Length</span>
-                          <span className="text-gray-900">{product.specifications.length}</span>
+                          <span className="font-medium text-gray-700">
+                            Length
+                          </span>
+                          <span className="text-gray-900">
+                            {product.specifications.length}
+                          </span>
                         </div>
                       )}
                       {product.specifications.closure && (
                         <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                          <span className="font-medium text-gray-700">Closure</span>
-                          <span className="text-gray-900">{product.specifications.closure}</span>
+                          <span className="font-medium text-gray-700">
+                            Closure
+                          </span>
+                          <span className="text-gray-900">
+                            {product.specifications.closure}
+                          </span>
                         </div>
                       )}
                       {product.specifications.flyType && (
                         <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                          <span className="font-medium text-gray-700">Fly Type</span>
-                          <span className="text-gray-900">{product.specifications.flyType}</span>
+                          <span className="font-medium text-gray-700">
+                            Fly Type
+                          </span>
+                          <span className="text-gray-900">
+                            {product.specifications.flyType}
+                          </span>
                         </div>
                       )}
                     </div>
                   </div>
 
                   {/* Product Details List */}
-                  {product.specifications.productDetails && product.specifications.productDetails.length > 0 && product.specifications.productDetails.some(detail => detail.trim()) && (
-                    <div className="mb-6">
-                      <h4 className="font-semibold text-gray-900 mb-3">Product Details</h4>
-                      <ul className="space-y-2">
-                        {product.specifications.productDetails
-                          .filter(detail => detail.trim())
-                          .map((detail, index) => (
-                            <li key={index} className="flex items-start">
-                              <span className="text-gray-600 mr-2">•</span>
-                              <span className="text-gray-700">{detail}</span>
-                            </li>
-                          ))}
-                      </ul>
-                    </div>
-                  )}
+                  {product.specifications.productDetails &&
+                    product.specifications.productDetails.length > 0 &&
+                    product.specifications.productDetails.some((detail) =>
+                      detail.trim()
+                    ) && (
+                      <div className="mb-6">
+                        <h4 className="font-semibold text-gray-900 mb-3">
+                          Product Details
+                        </h4>
+                        <ul className="space-y-2">
+                          {product.specifications.productDetails
+                            .filter((detail) => detail.trim())
+                            .map((detail, index) => (
+                              <li key={index} className="flex items-start">
+                                <span className="text-gray-600 mr-2">•</span>
+                                <span className="text-gray-700">{detail}</span>
+                              </li>
+                            ))}
+                        </ul>
+                      </div>
+                    )}
 
                   {/* Size & Fit */}
-                  {(product.specifications.sizeAndFit?.fitType || product.specifications.sizeAndFit?.modelInfo || product.specifications.sizeAndFit?.additionalInfo) && (
+                  {(product.specifications.sizeAndFit?.fitType ||
+                    product.specifications.sizeAndFit?.modelInfo ||
+                    product.specifications.sizeAndFit?.additionalInfo) && (
                     <div className="mb-6">
-                      <h4 className="font-semibold text-gray-900 mb-3">Size & Fit</h4>
+                      <h4 className="font-semibold text-gray-900 mb-3">
+                        Size & Fit
+                      </h4>
                       <div className="space-y-2">
                         {product.specifications.sizeAndFit.fitType && (
                           <p className="text-gray-700">
-                            <span className="font-medium">Fit:</span> {product.specifications.sizeAndFit.fitType}
+                            <span className="font-medium">Fit:</span>{" "}
+                            {product.specifications.sizeAndFit.fitType}
                           </p>
                         )}
                         {product.specifications.sizeAndFit.modelInfo && (
-                          <p className="text-gray-700">{product.specifications.sizeAndFit.modelInfo}</p>
+                          <p className="text-gray-700">
+                            {product.specifications.sizeAndFit.modelInfo}
+                          </p>
                         )}
                         {product.specifications.sizeAndFit.additionalInfo && (
-                          <p className="text-gray-700">{product.specifications.sizeAndFit.additionalInfo}</p>
+                          <p className="text-gray-700">
+                            {product.specifications.sizeAndFit.additionalInfo}
+                          </p>
                         )}
                       </div>
                     </div>
                   )}
 
                   {/* Material & Care */}
-                  {(product.specifications.materialAndCare?.material || (product.specifications.materialAndCare?.careInstructions && product.specifications.materialAndCare.careInstructions.length > 0)) && (
+                  {(product.specifications.materialAndCare?.material ||
+                    (product.specifications.materialAndCare?.careInstructions &&
+                      product.specifications.materialAndCare.careInstructions
+                        .length > 0)) && (
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-3">Material & Care</h4>
+                      <h4 className="font-semibold text-gray-900 mb-3">
+                        Material & Care
+                      </h4>
                       <div className="space-y-2">
                         {product.specifications.materialAndCare.material && (
                           <p className="text-gray-700">
-                            <span className="font-medium">Material:</span> {product.specifications.materialAndCare.material}
+                            <span className="font-medium">Material:</span>{" "}
+                            {product.specifications.materialAndCare.material}
                           </p>
                         )}
-                        {product.specifications.materialAndCare.careInstructions && product.specifications.materialAndCare.careInstructions.length > 0 && product.specifications.materialAndCare.careInstructions.some(instruction => instruction.trim()) && (
-                          <div>
-                            <p className="font-medium text-gray-700 mb-2">Care Instructions:</p>
-                            <ul className="space-y-1">
-                              {product.specifications.materialAndCare.careInstructions
-                                .filter(instruction => instruction.trim())
-                                .map((instruction, index) => (
-                                  <li key={index} className="flex items-start">
-                                    <span className="text-gray-600 mr-2">•</span>
-                                    <span className="text-gray-700">{instruction}</span>
-                                  </li>
-                                ))}
-                            </ul>
-                          </div>
-                        )}
+                        {product.specifications.materialAndCare
+                          .careInstructions &&
+                          product.specifications.materialAndCare
+                            .careInstructions.length > 0 &&
+                          product.specifications.materialAndCare.careInstructions.some(
+                            (instruction) => instruction.trim()
+                          ) && (
+                            <div>
+                              <p className="font-medium text-gray-700 mb-2">
+                                Care Instructions:
+                              </p>
+                              <ul className="space-y-1">
+                                {product.specifications.materialAndCare.careInstructions
+                                  .filter((instruction) => instruction.trim())
+                                  .map((instruction, index) => (
+                                    <li
+                                      key={index}
+                                      className="flex items-start"
+                                    >
+                                      <span className="text-gray-600 mr-2">
+                                        •
+                                      </span>
+                                      <span className="text-gray-700">
+                                        {instruction}
+                                      </span>
+                                    </li>
+                                  ))}
+                              </ul>
+                            </div>
+                          )}
                       </div>
                     </div>
                   )}
 
                   {/* No details message if no specifications */}
-                  {(!product.specifications.fit && !product.specifications.waistRise && !product.specifications.features && !product.specifications.length && !product.specifications.closure && !product.specifications.flyType && 
-                    (!product.specifications.productDetails || product.specifications.productDetails.length === 0 || !product.specifications.productDetails.some(detail => detail.trim())) &&
-                    (!product.specifications.sizeAndFit?.fitType && !product.specifications.sizeAndFit?.modelInfo && !product.specifications.sizeAndFit?.additionalInfo) &&
-                    (!product.specifications.materialAndCare?.material && (!product.specifications.materialAndCare?.careInstructions || product.specifications.materialAndCare.careInstructions.length === 0 || !product.specifications.materialAndCare.careInstructions.some(instruction => instruction.trim())))) && (
-                    <div className="text-center py-8">
-                      <p className="text-gray-500 italic">No detailed specifications provided for this product</p>
-                    </div>
-                  )}
+                  {!product.specifications.fit &&
+                    !product.specifications.waistRise &&
+                    !product.specifications.features &&
+                    !product.specifications.length &&
+                    !product.specifications.closure &&
+                    !product.specifications.flyType &&
+                    (!product.specifications.productDetails ||
+                      product.specifications.productDetails.length === 0 ||
+                      !product.specifications.productDetails.some((detail) =>
+                        detail.trim()
+                      )) &&
+                    !product.specifications.sizeAndFit?.fitType &&
+                    !product.specifications.sizeAndFit?.modelInfo &&
+                    !product.specifications.sizeAndFit?.additionalInfo &&
+                    !product.specifications.materialAndCare?.material &&
+                    (!product.specifications.materialAndCare
+                      ?.careInstructions ||
+                      product.specifications.materialAndCare.careInstructions
+                        .length === 0 ||
+                      !product.specifications.materialAndCare.careInstructions.some(
+                        (instruction) => instruction.trim()
+                      )) && (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500 italic">
+                          No detailed specifications provided for this product
+                        </p>
+                      </div>
+                    )}
                 </div>
               )}
-              
+
               {/* Fallback for products without any specifications */}
               {!product.specifications && (
                 <div className="space-y-6 p-6 bg-gray-50 rounded-lg border">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Product Details</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    Product Details
+                  </h3>
                   <div className="text-center py-8">
-                    <p className="text-gray-500 italic">No detailed specifications provided for this product</p>
+                    <p className="text-gray-500 italic">
+                      No detailed specifications provided for this product
+                    </p>
                   </div>
                 </div>
               )}
@@ -377,8 +518,8 @@ export default function ProductDetailPage() {
                   <h3 className="text-lg font-medium">Select Color</h3>
                   <span className="text-gray-500 capitalize">{selectedColor}</span>
                 </div> */}
-                
-                {/* <div className="flex gap-3">
+
+              {/* <div className="flex gap-3">
                   {colorOptions.map((option) => (
                     <button
                       key={option.name}
@@ -398,9 +539,11 @@ export default function ProductDetailPage() {
               <div className="space-y-2 !-mt-1">
                 <div className="flex items-center mt-4 justify-between">
                   <h3 className="text-lg font-medium">Select Size</h3>
-                  <span className="text-gray-500">{selectedSize}</span>
+                  <a href="/size-guide" className="text-blue-500 text-sm">
+                    Click to size chart
+                  </a>
                 </div>
-                
+
                 <div className="grid grid-cols-6 gap-2">
                   {product.sizes?.map((size) => (
                     <button
@@ -431,7 +574,7 @@ export default function ProductDetailPage() {
                       −
                     </button>
                     <span className="px-3 py-1 font-medium min-w-[1rem] text-center">
-                      {quantity.toString().padStart(2, '0')}
+                      {quantity.toString().padStart(2, "0")}
                     </span>
                     <button
                       onClick={() => setQuantity(quantity + 1)}
@@ -446,14 +589,18 @@ export default function ProductDetailPage() {
               {/* Delivery Information */}
               <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-center gap-3 text-green-700">
-                  <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
-                    <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1V8a1 1 0 00-.293-.707L15 4.586A1 1 0 0014.414 4H14v3z"/>
+                  <svg
+                    className="w-5 h-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                    <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1V8a1 1 0 00-.293-.707L15 4.586A1 1 0 0014.414 4H14v3z" />
                   </svg>
                   <div>
                     <h4 className="font-medium">Fast Delivery</h4>
                     <p className="text-sm text-green-600">
-                      Estimated delivery: {product.deliveryDays || '2-3 days'}
+                      Estimated delivery: {product.deliveryDays || "2-3 days"}
                     </p>
                   </div>
                 </div>
@@ -468,13 +615,18 @@ export default function ProductDetailPage() {
                 >
                   Add to cart
                 </Button>
-                
+
                 <Button
                   className="w-full bg-black text-white hover:bg-gray-800 py-6 text-lg font-medium rounded-lg"
                   disabled={!selectedSize || !selectedColor}
                   onClick={() => {
                     if (selectedSize && selectedColor) {
-                      buyProductNow(product, selectedSize, selectedColor, quantity)
+                      buyProductNow(
+                        product,
+                        selectedSize,
+                        selectedColor,
+                        quantity
+                      );
                     }
                   }}
                 >
@@ -503,27 +655,36 @@ export default function ProductDetailPage() {
             <ChevronLeft className="w-4 h-4" />
             Back
           </Button>
-          
+
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsWishlisted(!isWishlisted)}
+            onClick={handleToggleWishlist}
+            disabled={wishlistLoading}
             className="rounded-full"
           >
-            <Heart className={`w-5 h-5 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+            <Heart
+              className={`w-5 h-5 ${
+                product && isInWishlist(product.id) ? "fill-red-500 text-red-500" : ""
+              }`}
+            />
           </Button>
         </div>
 
         {/* Product Image */}
         <div className="relative aspect-[3/4] bg-gradient-to-br from-blue-50 to-purple-50">
           <Image
-            src={product.images?.[selectedImageIndex] || product.image || '/placeholder.jpg'}
+            src={
+              product.images?.[selectedImageIndex] ||
+              product.image ||
+              "/placeholder.jpg"
+            }
             alt={product.name}
             fill
             className="object-contain p-4"
             unoptimized
           />
-          
+
           {/* Image indicators */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-1">
             {product.images?.map((_, index) => (
@@ -545,7 +706,9 @@ export default function ProductDetailPage() {
               key={index}
               onClick={() => setSelectedImageIndex(index)}
               className={`flex-shrink-0 w-16 h-20 rounded-lg overflow-hidden border-2 ${
-                selectedImageIndex === index ? "border-black" : "border-gray-200"
+                selectedImageIndex === index
+                  ? "border-black"
+                  : "border-gray-200"
               }`}
             >
               <Image
@@ -566,17 +729,21 @@ export default function ProductDetailPage() {
             <div className="flex items-center gap-2 mb-2">
               <div className="flex items-center">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="ml-1 text-sm font-medium">{product.rating}</span>
+                <span className="ml-1 text-sm font-medium">
+                  {product.rating}
+                </span>
               </div>
               <span className="text-sm text-gray-500">({product.stock})</span>
             </div>
-            
+
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
               {product.name}
             </h1>
-            
+
             <div>
-              {product.hasDiscount && product.originalPrice && product.discountPercentage ? (
+              {product.hasDiscount &&
+              product.originalPrice &&
+              product.discountPercentage ? (
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <p className="text-2xl font-bold text-gray-900">
@@ -590,7 +757,10 @@ export default function ProductDetailPage() {
                     </span>
                   </div>
                   <p className="text-sm text-green-600 font-medium">
-                    You save ₹{(Number(product.originalPrice) - Number(product.price)).toFixed(2)}
+                    You save ₹
+                    {(
+                      Number(product.originalPrice) - Number(product.price)
+                    ).toFixed(2)}
                   </p>
                 </div>
               ) : (
@@ -626,7 +796,9 @@ export default function ProductDetailPage() {
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="font-medium">Size</span>
-              <span className="text-gray-500">{selectedSize}</span>
+              <a href="/size-guide" className="text-blue-500 text-sm">
+                Click to size chart
+              </a>
             </div>
             <div className="grid grid-cols-6 gap-2">
               {product.sizes?.map((size) => (
@@ -658,7 +830,7 @@ export default function ProductDetailPage() {
                   −
                 </button>
                 <span className="px-4 py-2 font-medium min-w-[3rem] text-center">
-                  {quantity.toString().padStart(2, '0')}
+                  {quantity.toString().padStart(2, "0")}
                 </span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
@@ -674,123 +846,207 @@ export default function ProductDetailPage() {
           {product.specifications && (
             <div className="px-4 mb-6">
               <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
-                <h3 className="text-lg font-bold text-gray-900 mb-3">Product Details</h3>
-                
+                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                  Product Details
+                </h3>
+
                 {/* Basic Specifications */}
                 <div className="space-y-3">
                   {product.specifications.fit && (
                     <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">Fit</span>
-                      <span className="text-gray-900 text-sm font-medium">{product.specifications.fit}</span>
+                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">
+                        Fit
+                      </span>
+                      <span className="text-gray-900 text-sm font-medium">
+                        {product.specifications.fit}
+                      </span>
                     </div>
                   )}
                   {product.specifications.waistRise && (
                     <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">Waist Rise</span>
-                      <span className="text-gray-900 text-sm font-medium">{product.specifications.waistRise}</span>
+                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">
+                        Waist Rise
+                      </span>
+                      <span className="text-gray-900 text-sm font-medium">
+                        {product.specifications.waistRise}
+                      </span>
                     </div>
                   )}
                   {product.specifications.features && (
                     <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">Features</span>
-                      <span className="text-gray-900 text-sm font-medium">{product.specifications.features}</span>
+                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">
+                        Features
+                      </span>
+                      <span className="text-gray-900 text-sm font-medium">
+                        {product.specifications.features}
+                      </span>
                     </div>
                   )}
                   {product.specifications.length && (
                     <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">Length</span>
-                      <span className="text-gray-900 text-sm font-medium">{product.specifications.length}</span>
+                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">
+                        Length
+                      </span>
+                      <span className="text-gray-900 text-sm font-medium">
+                        {product.specifications.length}
+                      </span>
                     </div>
                   )}
                   {product.specifications.closure && (
                     <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">Closure</span>
-                      <span className="text-gray-900 text-sm font-medium">{product.specifications.closure}</span>
+                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">
+                        Closure
+                      </span>
+                      <span className="text-gray-900 text-sm font-medium">
+                        {product.specifications.closure}
+                      </span>
                     </div>
                   )}
                   {product.specifications.flyType && (
                     <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">Fly Type</span>
-                      <span className="text-gray-900 text-sm font-medium">{product.specifications.flyType}</span>
+                      <span className="font-medium text-gray-700 text-sm min-w-0 pr-3">
+                        Fly Type
+                      </span>
+                      <span className="text-gray-900 text-sm font-medium">
+                        {product.specifications.flyType}
+                      </span>
                     </div>
                   )}
                 </div>
 
                 {/* Product Details List */}
-                {product.specifications.productDetails && product.specifications.productDetails.length > 0 && product.specifications.productDetails.some(detail => detail.trim()) && (
-                  <div className="mt-4">
-                    <h4 className="font-semibold text-gray-900 mb-2 text-sm">Product Details</h4>
-                    <ul className="space-y-1">
-                      {product.specifications.productDetails
-                        .filter(detail => detail.trim())
-                        .map((detail, index) => (
-                          <li key={index} className="flex items-start text-sm">
-                            <span className="text-gray-600 mr-2">•</span>
-                            <span className="text-gray-700">{detail}</span>
-                          </li>
-                        ))}
-                    </ul>
-                  </div>
-                )}
+                {product.specifications.productDetails &&
+                  product.specifications.productDetails.length > 0 &&
+                  product.specifications.productDetails.some((detail) =>
+                    detail.trim()
+                  ) && (
+                    <div className="mt-4">
+                      <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                        Product Details
+                      </h4>
+                      <ul className="space-y-1">
+                        {product.specifications.productDetails
+                          .filter((detail) => detail.trim())
+                          .map((detail, index) => (
+                            <li
+                              key={index}
+                              className="flex items-start text-sm"
+                            >
+                              <span className="text-gray-600 mr-2">•</span>
+                              <span className="text-gray-700">{detail}</span>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  )}
 
                 {/* Size & Fit */}
-                {(product.specifications.sizeAndFit?.fitType || product.specifications.sizeAndFit?.modelInfo || product.specifications.sizeAndFit?.additionalInfo) && (
+                {(product.specifications.sizeAndFit?.fitType ||
+                  product.specifications.sizeAndFit?.modelInfo ||
+                  product.specifications.sizeAndFit?.additionalInfo) && (
                   <div className="mt-4">
-                    <h4 className="font-semibold text-gray-900 mb-2 text-sm">Size & Fit</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                      Size & Fit
+                    </h4>
                     <div className="space-y-1">
                       {product.specifications.sizeAndFit.fitType && (
                         <p className="text-gray-700 text-sm">
-                          <span className="font-medium">Fit:</span> {product.specifications.sizeAndFit.fitType}
+                          <span className="font-medium">Fit:</span>{" "}
+                          {product.specifications.sizeAndFit.fitType}
                         </p>
                       )}
                       {product.specifications.sizeAndFit.modelInfo && (
-                        <p className="text-gray-700 text-sm">{product.specifications.sizeAndFit.modelInfo}</p>
+                        <p className="text-gray-700 text-sm">
+                          {product.specifications.sizeAndFit.modelInfo}
+                        </p>
                       )}
                       {product.specifications.sizeAndFit.additionalInfo && (
-                        <p className="text-gray-700 text-sm">{product.specifications.sizeAndFit.additionalInfo}</p>
+                        <p className="text-gray-700 text-sm">
+                          {product.specifications.sizeAndFit.additionalInfo}
+                        </p>
                       )}
                     </div>
                   </div>
                 )}
 
                 {/* Material & Care */}
-                {(product.specifications.materialAndCare?.material || (product.specifications.materialAndCare?.careInstructions && product.specifications.materialAndCare.careInstructions.length > 0)) && (
+                {(product.specifications.materialAndCare?.material ||
+                  (product.specifications.materialAndCare?.careInstructions &&
+                    product.specifications.materialAndCare.careInstructions
+                      .length > 0)) && (
                   <div className="mt-4">
-                    <h4 className="font-semibold text-gray-900 mb-2 text-sm">Material & Care</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2 text-sm">
+                      Material & Care
+                    </h4>
                     <div className="space-y-1">
                       {product.specifications.materialAndCare.material && (
                         <p className="text-gray-700 text-sm">
-                          <span className="font-medium">Material:</span> {product.specifications.materialAndCare.material}
+                          <span className="font-medium">Material:</span>{" "}
+                          {product.specifications.materialAndCare.material}
                         </p>
                       )}
-                      {product.specifications.materialAndCare.careInstructions && product.specifications.materialAndCare.careInstructions.length > 0 && product.specifications.materialAndCare.careInstructions.some(instruction => instruction.trim()) && (
-                        <div>
-                          <p className="font-medium text-gray-700 mb-1 text-sm">Care Instructions:</p>
-                          <ul className="space-y-1">
-                            {product.specifications.materialAndCare.careInstructions
-                              .filter(instruction => instruction.trim())
-                              .map((instruction, index) => (
-                                <li key={index} className="flex items-start text-sm">
-                                  <span className="text-gray-600 mr-2">•</span>
-                                  <span className="text-gray-700">{instruction}</span>
-                                </li>
-                              ))}
-                          </ul>
-                        </div>
-                      )}
+                      {product.specifications.materialAndCare
+                        .careInstructions &&
+                        product.specifications.materialAndCare.careInstructions
+                          .length > 0 &&
+                        product.specifications.materialAndCare.careInstructions.some(
+                          (instruction) => instruction.trim()
+                        ) && (
+                          <div>
+                            <p className="font-medium text-gray-700 mb-1 text-sm">
+                              Care Instructions:
+                            </p>
+                            <ul className="space-y-1">
+                              {product.specifications.materialAndCare.careInstructions
+                                .filter((instruction) => instruction.trim())
+                                .map((instruction, index) => (
+                                  <li
+                                    key={index}
+                                    className="flex items-start text-sm"
+                                  >
+                                    <span className="text-gray-600 mr-2">
+                                      •
+                                    </span>
+                                    <span className="text-gray-700">
+                                      {instruction}
+                                    </span>
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
+                        )}
                     </div>
                   </div>
                 )}
 
                 {/* No details message if no specifications */}
-                {(!product.specifications.fit && !product.specifications.waistRise && !product.specifications.features && !product.specifications.length && !product.specifications.closure && !product.specifications.flyType && 
-                  (!product.specifications.productDetails || product.specifications.productDetails.length === 0 || !product.specifications.productDetails.some(detail => detail.trim())) &&
-                  (!product.specifications.sizeAndFit?.fitType && !product.specifications.sizeAndFit?.modelInfo && !product.specifications.sizeAndFit?.additionalInfo) &&
-                  (!product.specifications.materialAndCare?.material && (!product.specifications.materialAndCare?.careInstructions || product.specifications.materialAndCare.careInstructions.length === 0 || !product.specifications.materialAndCare.careInstructions.some(instruction => instruction.trim())))) && (
-                  <div className="text-center py-6">
-                    <p className="text-gray-500 italic text-sm">No detailed specifications provided for this product</p>
-                  </div>
-                )}
+                {!product.specifications.fit &&
+                  !product.specifications.waistRise &&
+                  !product.specifications.features &&
+                  !product.specifications.length &&
+                  !product.specifications.closure &&
+                  !product.specifications.flyType &&
+                  (!product.specifications.productDetails ||
+                    product.specifications.productDetails.length === 0 ||
+                    !product.specifications.productDetails.some((detail) =>
+                      detail.trim()
+                    )) &&
+                  !product.specifications.sizeAndFit?.fitType &&
+                  !product.specifications.sizeAndFit?.modelInfo &&
+                  !product.specifications.sizeAndFit?.additionalInfo &&
+                  !product.specifications.materialAndCare?.material &&
+                  (!product.specifications.materialAndCare?.careInstructions ||
+                    product.specifications.materialAndCare.careInstructions
+                      .length === 0 ||
+                    !product.specifications.materialAndCare.careInstructions.some(
+                      (instruction) => instruction.trim()
+                    )) && (
+                    <div className="text-center py-6">
+                      <p className="text-gray-500 italic text-sm">
+                        No detailed specifications provided for this product
+                      </p>
+                    </div>
+                  )}
               </div>
             </div>
           )}
@@ -799,9 +1055,13 @@ export default function ProductDetailPage() {
           {!product.specifications && (
             <div className="px-4 mb-6">
               <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
-                <h3 className="text-lg font-bold text-gray-900 mb-3">Product Details</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                  Product Details
+                </h3>
                 <div className="text-center py-6">
-                  <p className="text-gray-500 italic text-sm">No detailed specifications provided for this product</p>
+                  <p className="text-gray-500 italic text-sm">
+                    No detailed specifications provided for this product
+                  </p>
                 </div>
               </div>
             </div>
@@ -811,13 +1071,13 @@ export default function ProductDetailPage() {
           <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
             <div className="flex items-center gap-2 text-green-700">
               <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
-                <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1V8a1 1 0 00-.293-.707L15 4.586A1 1 0 0014.414 4H14v3z"/>
+                <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1V8a1 1 0 00-.293-.707L15 4.586A1 1 0 0014.414 4H14v3z" />
               </svg>
               <span className="font-medium text-sm">Fast Delivery</span>
             </div>
             <p className="text-sm text-green-600 mt-1">
-              Estimated delivery: {product.deliveryDays || '2-3 days'}
+              Estimated delivery: {product.deliveryDays || "2-3 days"}
             </p>
           </div>
         </div>
@@ -832,12 +1092,27 @@ export default function ProductDetailPage() {
             Add to cart
           </Button>
         </div>
-
+        <div className=" bg-white border-t border-gray-100 p-4">
+        <Button
+          className="w-full bg-black text-white hover:bg-gray-800 py-4 text-lg font-medium rounded-lg"
+          disabled={!selectedSize || !selectedColor}
+          onClick={() => {
+            if (selectedSize && selectedColor) {
+              buyProductNow(product, selectedSize, selectedColor, quantity);
+            }
+          }}
+        >
+          Buy it now
+        </Button>
+        </div>
         {/* Mobile Reviews Section */}
         <div className="p-4">
           <ReviewSection productId={product.id} />
         </div>
       </div>
+      <div className="mt-10">
+        <Footer />
+      </div>
     </motion.div>
-  )
-} 
+  );
+}
