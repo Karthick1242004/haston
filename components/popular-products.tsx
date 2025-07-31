@@ -327,7 +327,7 @@ export default function PopularProducts() {
     >
       {/* Background decoration */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmNmY2ZjYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')]"></div>
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-2 sm:px-4 relative z-10">
         <motion.div
           className="mb-16"
           initial={{ opacity: 0, x: -100 }}
@@ -348,7 +348,7 @@ Products
           </h2>
         </motion.div>
 
-        <div className="flex flex-row flex-wrap gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-3">
           {products.map((product, index) => {
             const productColors = getProductColors(product);
             const productBadges = getProductBadges(product);
@@ -487,33 +487,33 @@ Products
                   {/* Pricing */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xl font-bold text-gray-900 group-hover:text-orange-700 transition-colors duration-200">
+                      <span className="text-md font-bold text-gray-900 group-hover:text-orange-700 transition-colors duration-200">
                         ₹{pricingInfo.actualPrice}
                       </span>
                       {pricingInfo.discountPercent > 0 && (
                         <>
-                          <span className="text-sm text-gray-500 line-through">
+                          <span className="hidden sm:inline text-sm text-gray-500 line-through">
                             ₹{pricingInfo.originalPrice}
                           </span>
-                          <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
+                          <span className="hidden sm:inline text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
                             {pricingInfo.discountPercent}% OFF
                           </span>
                         </>
                       )}
                     </div>
                     {pricingInfo.discountPercent > 0 ? (
-                      <p className="text-sm text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full inline-block">
+                      <p className="hidden sm:block text-sm text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full">
                         Get it for ₹{pricingInfo.actualPrice}
                       </p>
                     ) : (
-                      <p className="text-sm text-gray-600 font-medium">
+                      <p className="hidden sm:block text-sm text-gray-600 font-medium">
                         Regular Price
                       </p>
                     )}
                   </div>
 
-                  {/* Color Options */}
-                  <div className="flex items-center justify-between">
+                  {/* Color Options - Hidden on mobile */}
+                  <div className="hidden sm:flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {productColors.length > 0 ? (
                         productColors
@@ -557,8 +557,8 @@ Products
                     </div>
                   </div>
 
-                  {/* Badges */}
-                  <div className="flex items-center gap-2 flex-wrap min-h-[24px]">
+                  {/* Badges - Hidden on mobile */}
+                  <div className="hidden sm:flex items-center gap-2 flex-wrap min-h-[24px]">
                     {productBadges.length > 0
                       ? productBadges.map((badge: string) => (
                           <span
@@ -640,7 +640,10 @@ Products
                       }}
                     >
                       <ShoppingBag className="w-4 h-4 mr-2" />
-                      Add to Cart - ₹{pricingInfo.actualPrice}
+                      {/* Mobile: Just "Add to Cart" */}
+                      <span className="sm:hidden">Add to Cart</span>
+                      {/* Desktop: "Add to Cart - ₹price" */}
+                      <span className="hidden sm:inline">Add to Cart - ₹{pricingInfo.actualPrice}</span>
                     </Button>
                   </div>
                 </div>
