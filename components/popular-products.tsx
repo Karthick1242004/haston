@@ -492,10 +492,10 @@ Products
                       </span>
                       {pricingInfo.discountPercent > 0 && (
                         <>
-                          <span className="hidden sm:inline text-sm text-gray-500 line-through">
+                          <span className="text-sm text-gray-500 line-through">
                             ₹{pricingInfo.originalPrice}
                           </span>
-                          <span className="hidden sm:inline text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
+                          <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
                             {pricingInfo.discountPercent}% OFF
                           </span>
                         </>
@@ -557,8 +557,8 @@ Products
                     </div>
                   </div>
 
-                  {/* Badges - Hidden on mobile */}
-                  <div className="hidden sm:flex items-center gap-2 flex-wrap min-h-[24px]">
+                  {/* Badges - Show on mobile and desktop */}
+                  <div className="flex items-center gap-2 flex-wrap min-h-[24px]">
                     {productBadges.length > 0
                       ? productBadges.map((badge: string) => (
                           <span
@@ -581,9 +581,9 @@ Products
                       : ""}
                   </div>
 
-                  {/* Size Options Preview */}
+                  {/* Size Options Preview - Hidden on mobile */}
                   {product.sizes && product.sizes.length > 0 && (
-                    <div className="space-y-1">
+                    <div className="hidden sm:block space-y-1">
                       <p className="text-xs text-gray-600 font-medium">
                         Available Sizes:
                       </p>
@@ -607,8 +607,8 @@ Products
                     </div>
                   )}
 
-                  {/* Delivery Info */}
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  {/* Delivery Info - Hidden on mobile */}
+                  <div className="hidden sm:flex items-center justify-between text-xs text-gray-500">
                     <div className="flex items-center gap-1">
                       <svg
                         className="w-3 h-3"
