@@ -348,7 +348,7 @@ Products
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-3 auto-rows-fr">
           {products.map((product, index) => {
             const productColors = getProductColors(product);
             const productBadges = getProductBadges(product);
@@ -364,7 +364,7 @@ Products
             return (
               <motion.div
                 key={product.id}
-                className="group mx-auto w-full sm:w-[300px] cursor-pointer bg-white rounded-md shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden relative touch-manipulation"
+                className="group mx-auto w-full sm:w-[300px] cursor-pointer bg-white rounded-md shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden relative touch-manipulation flex flex-col h-full"
                 initial={{ opacity: 0, y: 50, scale: 0.9 }}
                 animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
                 transition={{
@@ -428,7 +428,7 @@ Products
                 }}
               >
                 <motion.div
-                  className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100"
+                  className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex-shrink-0"
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.4 }}
                 >
@@ -478,24 +478,24 @@ Products
                   </Button>
                 </motion.div>
 
-                <div className="p-4 space-y-3">
+                <div className="p-3 sm:p-4 space-y-2 sm:space-y-3 flex flex-col flex-1">
                   {/* Product Name */}
                   <h3 className="font-semibold text-gray-900 text-sm md:text-base leading-tight line-clamp-1 group-hover:text-orange-700 transition-colors duration-200">
                     {product.name}
                   </h3>
 
                   {/* Pricing */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-md font-bold text-gray-900 group-hover:text-orange-700 transition-colors duration-200">
+                  <div className="space-y-1 sm:space-y-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm sm:text-md font-bold text-gray-900 group-hover:text-orange-700 transition-colors duration-200">
                         ₹{pricingInfo.actualPrice}
                       </span>
                       {pricingInfo.discountPercent > 0 && (
                         <>
-                          <span className="text-sm text-gray-500 line-through">
+                          <span className="text-xs sm:text-sm text-gray-500 line-through">
                             ₹{pricingInfo.originalPrice}
                           </span>
-                          <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
+                          <span className="text-xs bg-red-100 text-red-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium">
                             {pricingInfo.discountPercent}% OFF
                           </span>
                         </>
@@ -558,12 +558,12 @@ Products
                   </div>
 
                   {/* Badges - Show on mobile and desktop */}
-                  <div className="flex items-center gap-2 flex-wrap min-h-[24px]">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-wrap min-h-[20px] sm:min-h-[24px] max-h-[32px] sm:max-h-[40px] overflow-hidden">
                     {productBadges.length > 0
-                      ? productBadges.map((badge: string) => (
+                      ? productBadges.slice(0, 3).map((badge: string) => (
                           <span
                             key={badge}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-full shadow-sm ${
+                            className={`px-1.5 sm:px-3 py-0.5 sm:py-1.5 text-xs font-medium rounded-full shadow-sm whitespace-nowrap flex-shrink-0 ${
                               badge === "new-arrival"
                                 ? "bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700"
                                 : badge === "trendy"
@@ -579,6 +579,11 @@ Products
                           </span>
                         ))
                       : ""}
+                    {productBadges.length > 3 && (
+                      <span className="text-xs text-gray-500 flex-shrink-0">
+                        +{productBadges.length - 3}
+                      </span>
+                    )}
                   </div>
 
                   {/* Size Options Preview - Hidden on mobile */}
@@ -623,8 +628,11 @@ Products
                     <span>{product.deliveryDays || "2-3 days"}</span>
                   </div>
 
+                  {/* Spacer to push button to bottom */}
+                  <div className="flex-1"></div>
+
                   {/* Action Buttons */}
-                  <div className="pt-2 border-t border-gray-100">
+                  <div className="pt-2 border-t border-gray-100 mt-auto">
                     <Button
                       size="sm"
                       className="w-full text-xs bg-gray-900 hover:bg-gray-800 text-white transition-all duration-200 hover:scale-105 touch-manipulation"

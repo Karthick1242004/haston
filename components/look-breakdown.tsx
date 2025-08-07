@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
@@ -26,6 +27,7 @@ export default function LookBreakdown() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isDataLoaded, setIsDataLoaded] = useState(false) // Add loading state
   const prevCurrentIndex = useRef(0)
+  const router = useRouter()
   const { addProductToCart } = useAuthCart()
   const { toggleWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist()
 
@@ -180,6 +182,12 @@ export default function LookBreakdown() {
     }
   }
 
+  const handleProductClick = (productId: string | number) => {
+    console.log("handleProductClick called with productId:", productId);
+    console.log("Navigating to:", `/product/${productId}`);
+    router.push(`/product/${productId}`);
+  }
+
   return (
     <section ref={ref} className="py-20 bg-[#F1EFEE]">
       <div className="w-full px-6 md:px-12">
@@ -269,7 +277,17 @@ export default function LookBreakdown() {
                       opacity: { duration: 0.8 },
                       scale: { duration: 1.0 }
                     }}
-                    onClick={() => isVisible && goToSlide(actualIndex)}
+                    onClick={(e) => {
+                      if (!isVisible) return;
+                      // If clicking on center item, navigate to product
+                      if (isCenter) {
+                        console.log("Center item clicked - navigating to product:", item.id);
+                        handleProductClick(item.id);
+                      } else {
+                        // If clicking on side item, bring it to center
+                        goToSlide(actualIndex);
+                      }
+                    }}
                     whileHover={isVisible ? { 
                       scale: isCenter ? 1.4 : scale * 1.05,
                       transition: { duration: 0.3 }
@@ -295,6 +313,17 @@ export default function LookBreakdown() {
                         unoptimized
                         priority={isCenter}
                       />
+                      {/* Visual indicator for center item being clickable */}
+                      {isCenter && (
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                          <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
+                            <svg className="w-6 h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
                   </motion.div>
                 )
@@ -354,7 +383,11 @@ export default function LookBreakdown() {
             >
               {carouselItems?.length>0 && (
                 <>
-                  <h3 className="text-4xl font-bold text-blue-950 mb-4" style={{ fontFamily: "var(--font-anton)" }}>
+                  <h3 
+                    className="text-4xl font-bold text-blue-950 mb-4 cursor-pointer hover:text-blue-800 transition-colors duration-200" 
+                    style={{ fontFamily: "var(--font-anton)" }}
+                    onClick={() => handleProductClick(carouselItems[safeIndex]?.id)}
+                  >
                     {carouselItems[safeIndex]?.title}
                   </h3>
                   <p className="text-lg text-gray-600 mb-6 leading-relaxed">
