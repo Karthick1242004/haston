@@ -5,13 +5,16 @@ import { useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart, ShoppingBag, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { useToast } from "@/hooks/use-toast";
 import { useProductStore } from "@/stores/product-store";
 import { useSession } from "next-auth/react";
-import type { Product, ProductColor } from "@/types/product";
+import type { Product, ProductColor, ProductCategory } from "@/types/product";
+import { CATEGORIES, getCategoryDisplayName } from "@/lib/categories";
 
 // Default color fallback for products without colors
 const getDefaultColors = (): ProductColor[] => [
@@ -20,9 +23,12 @@ const getDefaultColors = (): ProductColor[] => [
 
 export default function PopularProducts() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [selectedColors, setSelectedColors] = useState<{
     [key: string]: number;
   }>({});
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("all");
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const router = useRouter();
@@ -38,15 +44,49 @@ export default function PopularProducts() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const res = await fetch("/api/products?limit=8");
+        const res = await fetch("/api/products?limit=24"); // Increased limit to show more products for filtering
         const json = await res.json();
-        setProducts(json.products || []);
+        const allProductsData = json.products || [];
+        setAllProducts(allProductsData);
+        setProducts(allProductsData.slice(0, 8)); // Show first 8 initially
       } catch (err) {
         console.error(err);
       }
     }
     fetchProducts();
   }, []);
+
+  // Filter products based on selected category and subcategory
+  useEffect(() => {
+    let filtered = allProducts;
+
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(product => 
+        product.productCategory?.main === selectedCategory
+      );
+    }
+
+    if (selectedSubcategory !== "all") {
+      filtered = filtered.filter(product => 
+        product.productCategory?.sub === selectedSubcategory
+      );
+    }
+
+    setProducts(filtered.slice(0, 8)); // Always show max 8 products
+  }, [selectedCategory, selectedSubcategory, allProducts]);
+
+  // Get available subcategories for the selected main category
+  const getAvailableSubcategories = () => {
+    if (selectedCategory === "all") return [];
+    
+    const category = CATEGORIES.find(cat => cat.value === selectedCategory);
+    return category?.subcategories || [];
+  };
+
+  // Reset subcategory when main category changes
+  useEffect(() => {
+    setSelectedSubcategory("all");
+  }, [selectedCategory]);
 
   const handleProductClick = (productId: string | number) => {
     console.log("handleProductClick called with productId:", productId);
@@ -346,6 +386,88 @@ export default function PopularProducts() {
 Products
             </span>
           </h2>
+        </motion.div>
+
+        {/* Category Filters */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
+            <div className="flex items-center gap-2 text-blue-950">
+              <Filter className="w-5 h-5" />
+              <span className="font-medium">Filter by Category</span>
+            </div>
+            {(selectedCategory !== "all" || selectedSubcategory !== "all") && (
+              <Badge
+                variant="secondary"
+                className="text-xs cursor-pointer hover:bg-gray-200"
+                onClick={() => {
+                  setSelectedCategory("all");
+                  setSelectedSubcategory("all");
+                }}
+              >
+                Clear Filters ✕
+              </Badge>
+            )}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Main Category Filter */}
+            <div className="flex-1 min-w-[200px]">
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {CATEGORIES.map((category) => (
+                    <SelectItem key={category.id} value={category.value}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Subcategory Filter */}
+            <div className="flex-1 min-w-[200px]">
+              <Select
+                value={selectedSubcategory}
+                onValueChange={setSelectedSubcategory}
+                disabled={selectedCategory === "all"}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Subcategory" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Subcategories</SelectItem>
+                  {getAvailableSubcategories().map((subcategory) => (
+                    <SelectItem key={subcategory.id} value={subcategory.value}>
+                      {subcategory.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Active Filter Display */}
+            {selectedCategory !== "all" && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="outline" className="text-sm">
+                  {getCategoryDisplayName(selectedCategory, selectedSubcategory !== "all" ? selectedSubcategory : undefined)}
+                </Badge>
+                <span className="text-sm text-gray-600">
+                  ({products.length} products)
+                </span>
+              </div>
+            )}
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-3 auto-rows-fr">

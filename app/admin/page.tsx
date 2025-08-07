@@ -20,7 +20,8 @@ import Header from '@/components/header'
 import AdminsManager from '@/components/admins-manager'
 import HeroSlidesManager from '@/components/hero-slides-manager'
 import { Order } from '@/types/order'
-import { ProductColor, Product } from '@/types/product'
+import { ProductColor, Product, ProductCategory } from '@/types/product'
+import { CATEGORIES, isValidCategoryCombo, getCategoryDisplayName } from "@/lib/categories"
 import { useToast } from '@/hooks/use-toast'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Package, ShoppingBag, Users, User, DollarSign, TrendingUp, Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, Filter, ExternalLink, Edit3, Search, Eye, Trash2, Image as ImageIcon, Plus, X } from 'lucide-react'
@@ -63,6 +64,10 @@ export default function AdminPage() {
   const [hasDiscount, setHasDiscount] = useState(false)
   const [discountPercentage, setDiscountPercentage] = useState('')
   
+  // Category states
+  const [mainCategory, setMainCategory] = useState('none')
+  const [subCategory, setSubCategory] = useState('none')
+  
   // Product specifications states
   const [specifications, setSpecifications] = useState({
     fit: '',
@@ -84,6 +89,13 @@ export default function AdminPage() {
   })
   
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Reset subcategory when main category changes
+  useEffect(() => {
+    if (mainCategory === 'none') {
+      setSubCategory('none')
+    }
+  }, [mainCategory])
 
   // Order management state
   const [currentView, setCurrentView] = useState<'products' | 'orders' | 'hero' | 'admins'>('products')
@@ -216,6 +228,8 @@ export default function AdminPage() {
       setColorMode('single')
       setHasDiscount(false)
       setDiscountPercentage('')
+      setMainCategory('none')
+      setSubCategory('none')
       setSpecifications({
         fit: '',
         waistRise: '',
@@ -242,6 +256,8 @@ export default function AdminPage() {
       setColorMode('single')
       setHasDiscount(false)
       setDiscountPercentage('')
+      setMainCategory('none')
+      setSubCategory('none')
       setSpecifications({
         fit: '',
         waistRise: '',
@@ -449,6 +465,14 @@ export default function AdminPage() {
         }
       }
       formData.append('specifications', JSON.stringify(cleanedSpecs))
+      
+      // Add category data
+      if (mainCategory && mainCategory !== 'none') {
+        formData.append('mainCategory', mainCategory)
+      }
+      if (subCategory && subCategory !== 'none') {
+        formData.append('subCategory', subCategory)
+      }
     
       images.forEach((file) => formData.append('images', file))
 
@@ -836,6 +860,15 @@ export default function AdminPage() {
                                         }
                                       })
                                     }
+                                    
+                                    // Handle category data
+                                    if (p.productCategory) {
+                                      setMainCategory(p.productCategory.main || 'none')
+                                      setSubCategory(p.productCategory.sub || 'none')
+                                    } else {
+                                      setMainCategory('none')
+                                      setSubCategory('none')
+                                    }
                                   }}
                                 >
                                   <Edit3 className="w-4 h-4 mr-2" />
@@ -1022,6 +1055,67 @@ export default function AdminPage() {
                         />
                       )}
                     </div>
+
+                    {/* Category Selection */}
+                    <div className="space-y-4">
+                      <label className="block text-sm font-medium text-blue-950">Product Category</label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Main Category */}
+                        <div>
+                          <label className="block mb-1 text-xs font-medium text-gray-600">Main Category</label>
+                          <Select value={mainCategory} onValueChange={setMainCategory}>
+                            <SelectTrigger className="rounded-none">
+                              <SelectValue placeholder="Select main category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">No Category</SelectItem>
+                              {CATEGORIES.map((category) => (
+                                <SelectItem key={category.id} value={category.value}>
+                                  {category.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Sub Category */}
+                        <div>
+                          <label className="block mb-1 text-xs font-medium text-gray-600">Sub Category</label>
+                          <Select 
+                            value={subCategory} 
+                            onValueChange={setSubCategory}
+                            disabled={mainCategory === 'none'}
+                          >
+                            <SelectTrigger className="rounded-none">
+                              <SelectValue placeholder="Select subcategory" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">No Subcategory</SelectItem>
+                              {CATEGORIES.find(cat => cat.value === mainCategory)?.subcategories?.map((subcategory) => (
+                                <SelectItem key={subcategory.id} value={subcategory.value}>
+                                  {subcategory.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      {/* Category Preview */}
+                      {mainCategory !== 'none' && subCategory !== 'none' && (
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <p className="text-sm text-blue-900">
+                            <span className="font-medium">Category:</span> {getCategoryDisplayName(mainCategory, subCategory)}
+                          </p>
+                          {!isValidCategoryCombo(mainCategory, subCategory) && (
+                            <p className="text-xs text-red-600 mt-1">
+                              ⚠️ Invalid category combination
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex items-center gap-3">
                       <input id="isLook" type="checkbox" checked={isLook} onChange={e => setIsLook(e.target.checked)} />
                       <label htmlFor="isLook" className="text-sm">Use in Look Breakdown slider</label>

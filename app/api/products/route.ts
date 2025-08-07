@@ -11,6 +11,8 @@ export async function GET(request: NextRequest) {
     const id = searchParams.get('id')
     const limit = parseInt(searchParams.get('limit') || '0')
     const isLookParam = searchParams.get('isLook')
+    const mainCategory = searchParams.get('mainCategory')
+    const subCategory = searchParams.get('subCategory')
 
     if (id) {
       const doc = await collection.findOne({ _id: new ObjectId(id) })
@@ -19,9 +21,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ ...rest, id: _id.toString() })
     }
 
-    const filter:any = {}
-    if (isLookParam==='true') filter.isLook = true
-    if (isLookParam==='false') filter.isLook = { $ne: true }
+    const filter: any = {}
+    if (isLookParam === 'true') filter.isLook = true
+    if (isLookParam === 'false') filter.isLook = { $ne: true }
+    
+    // Category filtering
+    if (mainCategory) {
+      filter['productCategory.main'] = mainCategory
+    }
+    if (subCategory) {
+      filter['productCategory.sub'] = subCategory
+    }
 
     const cursor = collection.find(filter).sort({ createdAt: -1 })
     if (limit) cursor.limit(limit)

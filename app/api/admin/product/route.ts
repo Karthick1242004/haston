@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
     const sizes = form.get('sizes') as string | null // comma-separated
     const deliveryDays = form.get('deliveryDays') as string | null
     const isLookFlag = form.get('isLook') === 'true'
+    const mainCategory = form.get('mainCategory') as string | null
+    const subCategory = form.get('subCategory') as string | null
 
     if (!name || !price || !description || !sizes) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -119,6 +121,15 @@ export async function POST(request: NextRequest) {
     const db = await getDatabase()
     const products = db.collection('products')
     const now = new Date()
+    // Build product category object
+    let productCategory = null
+    if (mainCategory && subCategory) {
+      productCategory = {
+        main: mainCategory,
+        sub: subCategory
+      }
+    }
+
     const productDoc:any = {
       name,
       price: parseFloat(price),
@@ -130,6 +141,8 @@ export async function POST(request: NextRequest) {
       colors: colors,
       rating: 0,
       stock: 100,
+      category: "Fashion", // Keep legacy field for backward compatibility
+      productCategory, // New structured category
       createdAt: now,
       updatedAt: now,
     }

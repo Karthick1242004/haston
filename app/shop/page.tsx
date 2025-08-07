@@ -17,13 +17,16 @@ import { useProductStore } from "@/stores/product-store"
 import { useAuthCart } from "@/hooks/use-auth-cart"
 import { useWishlist } from "@/hooks/use-wishlist"
 import { useRouter } from "next/navigation"
-import type { Product } from "@/types/product"
+import type { Product, ProductCategory } from "@/types/product"
+import { CATEGORIES, getCategoryDisplayName } from "@/lib/categories"
 
 // Products will be fetched from backend
 import { useEffect, useState } from "react"
 
 interface FilterState {
   categories: string[]
+  mainCategories: string[]
+  subCategories: string[]
   colors: string[]
   sizes: string[]
   priceRange: [number, number]
@@ -89,6 +92,8 @@ export default function ShopPage() {
   
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
+    mainCategories: [],
+    subCategories: [],
     colors: [],
     sizes: [],
     priceRange: [0, 10000], // Increased max price to 10,000
@@ -109,9 +114,25 @@ export default function ShopPage() {
     }
     
     let filtered = products.filter((product, index) => {
-      // Category filter
+      // Legacy category filter (for backward compatibility)
       if (filters.categories.length > 0 && !filters.categories.includes(product.category || "")) {
         return false
+      }
+      
+      // New main category filter
+      if (filters.mainCategories.length > 0) {
+        const productMainCategory = product.productCategory?.main
+        if (!productMainCategory || !filters.mainCategories.includes(productMainCategory)) {
+          return false
+        }
+      }
+      
+      // New subcategory filter
+      if (filters.subCategories.length > 0) {
+        const productSubCategory = product.productCategory?.sub
+        if (!productSubCategory || !filters.subCategories.includes(productSubCategory)) {
+          return false
+        }
       }
       
       // Color filter
@@ -187,6 +208,8 @@ export default function ShopPage() {
   const clearAllFilters = () => {
     setFilters({
       categories: [],
+      mainCategories: [],
+      subCategories: [],
       colors: [],
       sizes: [],
       priceRange: [0, 10000], 
@@ -221,9 +244,46 @@ export default function ShopPage() {
             </Button>
           </div>
 
-          {/* Categories */}
+          {/* Main Categories */}
           <div className="space-y-3">
-            <h4 className="font-medium text-gray-900">Category</h4>
+            <h4 className="font-medium text-gray-900">Main Category</h4>
+            <div className="space-y-2">
+              {CATEGORIES.map((category) => (
+                <label key={category.id} className="flex items-center space-x-2 cursor-pointer">
+                  <Checkbox
+                    checked={filters.mainCategories.includes(category.value)}
+                    onCheckedChange={() => toggleFilter("mainCategories", category.value)}
+                  />
+                  <span className="text-sm text-gray-600">{category.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Subcategories (only show if main category is selected) */}
+          {filters.mainCategories.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="font-medium text-gray-900">Subcategory</h4>
+              <div className="space-y-2">
+                {CATEGORIES
+                  .filter(cat => filters.mainCategories.includes(cat.value))
+                  .flatMap(cat => cat.subcategories || [])
+                  .map((subcategory) => (
+                    <label key={subcategory.id} className="flex items-center space-x-2 cursor-pointer">
+                      <Checkbox
+                        checked={filters.subCategories.includes(subcategory.value)}
+                        onCheckedChange={() => toggleFilter("subCategories", subcategory.value)}
+                      />
+                      <span className="text-sm text-gray-600">{subcategory.name}</span>
+                    </label>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Legacy Categories (for backward compatibility) */}
+          <div className="space-y-3">
+            <h4 className="font-medium text-gray-900">Legacy Category</h4>
             <div className="space-y-2">
               {categories.map((category) => (
                 <label key={category} className="flex items-center space-x-2 cursor-pointer">

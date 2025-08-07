@@ -64,6 +64,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const form = await request.formData()
     const updateDoc: any = {}
     let isLookFlag = false
+    let mainCategory = null
+    let subCategory = null
+    
     for (const [key,value] of form.entries()) {
       if (key === 'images') continue
       if (key === 'isLook') { isLookFlag = value==='true'; continue }
@@ -74,6 +77,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       if (key === 'hasDiscount') continue
       if (key === 'discountPercentage') continue
       if (key === 'originalPrice') continue
+      if (key === 'mainCategory') { mainCategory = value as string; continue }
+      if (key === 'subCategory') { subCategory = value as string; continue }
       updateDoc[key] = key === 'price' ? parseFloat(value as string) : value
     }
     if (form.has('sizes')) {
@@ -133,6 +138,17 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         updateDoc.discountPercentage = null
         updateDoc.originalPrice = null
       }
+    }
+
+    // Handle product category update
+    if (mainCategory && subCategory && mainCategory !== 'none' && subCategory !== 'none') {
+      updateDoc.productCategory = {
+        main: mainCategory,
+        sub: subCategory
+      }
+    } else if (mainCategory === 'none' || subCategory === 'none' || mainCategory === '' || subCategory === '') {
+      // Remove category if either is 'none' or empty
+      updateDoc.productCategory = null
     }
     
     // Handle images and cleanup

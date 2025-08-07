@@ -3,6 +3,24 @@ export interface ProductColor {
   value: string // hex code
 }
 
+export interface ProductCategory {
+  main: string // Main category: "Men" | "Women"
+  sub: string  // Sub category: "regular" | "oversized-tees" | "tank-tops"
+}
+
+export interface CategoryFilter {
+  id: string
+  name: string
+  value: string
+  subcategories?: SubcategoryFilter[]
+}
+
+export interface SubcategoryFilter {
+  id: string
+  name: string
+  value: string
+}
+
 export interface Review {
   id: string
   userId: string
@@ -58,7 +76,8 @@ export interface Product {
   description?: string
   rating?: number
   stock?: number
-  category?: string
+  category?: string // Legacy field - will be replaced by productCategory
+  productCategory?: ProductCategory // New structured category system
   badges?: string[] | any // Support array of strings and handle database inconsistencies
   reviews?: Review[] // Product reviews
   reviewCount?: number // Total number of reviews
