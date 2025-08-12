@@ -106,7 +106,7 @@ export default function ProductDetailPage() {
       transition={{ duration: 0.5 }}
     >
       {/* Header */}
-      <div className="relative">
+      <div className="relative pt-10">
         <div className="absolute mt-2 inset-0 bg-[#F1EFEE] backdrop-blur-sm"></div>
         <Header />
       </div>

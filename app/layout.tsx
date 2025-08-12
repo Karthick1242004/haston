@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import AuthProvider from "@/components/auth-provider"
 import CartSidebar from "@/components/cart-sidebar"
 import CartSyncProvider from "@/components/cart-sync-provider"
+import AnimatedBanner from "@/components/animated-banner"
 import { Toaster } from "@/components/ui/sonner"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -42,6 +43,7 @@ export default function RootLayout({
         >
           <AuthProvider>
             <CartSyncProvider>
+            <AnimatedBanner />
             {children}
             <CartSidebar />
             <Toaster />

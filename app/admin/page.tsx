@@ -19,6 +19,7 @@ import Image from 'next/image'
 import Header from '@/components/header'
 import AdminsManager from '@/components/admins-manager'
 import HeroSlidesManager from '@/components/hero-slides-manager'
+import BannerManager from '@/components/banner-manager'
 import { Order } from '@/types/order'
 import { ProductColor, Product, ProductCategory } from '@/types/product'
 import { CATEGORIES, isValidCategoryCombo, getCategoryDisplayName } from "@/lib/categories"
@@ -98,7 +99,7 @@ export default function AdminPage() {
   }, [mainCategory])
 
   // Order management state
-  const [currentView, setCurrentView] = useState<'products' | 'orders' | 'hero' | 'admins'>('products')
+  const [currentView, setCurrentView] = useState<'products' | 'orders' | 'hero' | 'admins' | 'banners'>('products')
   const [orders, setOrders] = useState<Order[]>([])
   const [orderStats, setOrderStats] = useState<any>({})
   const [orderFilters, setOrderFilters] = useState({
@@ -619,8 +620,8 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto bg-white lg:p-10 p-4 shadow-xl border border-gray-200">
           <h1 className="text-3xl font-bold text-blue-950 mb-8" style={{fontFamily:'var(--font-anton)'}}>Admin Dashboard</h1>
           
-          <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as 'products' | 'orders' | 'hero' | 'admins')} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
+          <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as 'products' | 'orders' | 'hero' | 'admins' | 'banners')} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-5 lg:w-[750px]">
               <TabsTrigger value="products" className="flex items-center gap-2">
                 <Package className="w-4 h-4" />
                 Products
@@ -636,6 +637,10 @@ export default function AdminPage() {
               <TabsTrigger value="admins" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 Admins
+              </TabsTrigger>
+              <TabsTrigger value="banners" className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Banners
               </TabsTrigger>
             </TabsList>
 
@@ -2262,6 +2267,10 @@ export default function AdminPage() {
 
             <TabsContent value="admins" className="space-y-6">
               <AdminsManager />
+            </TabsContent>
+
+            <TabsContent value="banners" className="space-y-6">
+              <BannerManager />
             </TabsContent>
             
           </Tabs>

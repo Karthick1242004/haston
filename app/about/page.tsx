@@ -53,7 +53,7 @@ export default function AboutPage() {
         <Header />
         
         {/* Hero Section */}
-        <section ref={heroRef} className="pt-32 pb-20 relative overflow-hidden">
+        <section ref={heroRef} className="pt-42 pb-20 relative overflow-hidden">
           <div className="absolute inset-0">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-200/30 via-transparent to-purple-200/30" />
           </div>

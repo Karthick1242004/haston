@@ -378,7 +378,7 @@ export default function ShopPage() {
       transition={{ duration: 0.5 }}
     >
       {/* Header */}
-      <div className="relative">
+      <div className="relative pt-10">
         <div className="absolute inset-0 bg-white/95 backdrop-blur-sm"></div>
         <Header />
       </div>
