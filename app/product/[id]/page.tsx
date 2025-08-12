@@ -100,14 +100,14 @@ export default function ProductDetailPage() {
 
   return (
     <motion.div
-      className="min-h-screen  bg-[#F1EEE6]"
+      className="min-h-screen  bg-white"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
       {/* Header */}
       <div className="relative pt-10">
-        <div className="absolute mt-2 inset-0 bg-[#F1EFEE] backdrop-blur-sm"></div>
+        {/* <div className="absolute mt-2 inset-0 bg-[#F1EFEE] backdrop-blur-sm"></div> */}
         <Header />
       </div>
       {/* Desktop Layout */}
@@ -672,7 +672,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Product Image */}
-        <div className="relative aspect-[3/4] bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="relative aspect-[3/4] bg-white">
           <Image
             src={
               product.images?.[selectedImageIndex] ||
