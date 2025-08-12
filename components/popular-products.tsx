@@ -29,6 +29,15 @@ export default function PopularProducts() {
   }>({});
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("all");
+  // Touch handling states for proper tap vs scroll detection
+  const [touchState, setTouchState] = useState<{
+    [key: string]: {
+      startX: number;
+      startY: number;
+      startTime: number;
+      moved: boolean;
+    };
+  }>({});
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const router = useRouter();
@@ -88,10 +97,93 @@ export default function PopularProducts() {
     setSelectedSubcategory("all");
   }, [selectedCategory]);
 
+  // Cleanup touch state when component unmounts or products change
+  useEffect(() => {
+    return () => {
+      setTouchState({});
+    };
+  }, [products]);
+
   const handleProductClick = (productId: string | number) => {
     console.log("handleProductClick called with productId:", productId);
     console.log("Navigating to:", `/product/${productId}`);
     router.push(`/product/${productId}`);
+  };
+
+  // Touch handling functions for proper tap vs scroll detection
+  const handleTouchStart = (productId: string | number, e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const productIdStr = productId.toString();
+    
+    setTouchState(prev => ({
+      ...prev,
+      [productIdStr]: {
+        startX: touch.clientX,
+        startY: touch.clientY,
+        startTime: Date.now(),
+        moved: false
+      }
+    }));
+  };
+
+  const handleTouchMove = (productId: string | number, e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const productIdStr = productId.toString();
+    const currentState = touchState[productIdStr];
+    
+    if (!currentState) return;
+
+    const deltaX = Math.abs(touch.clientX - currentState.startX);
+    const deltaY = Math.abs(touch.clientY - currentState.startY);
+    
+    // If movement is more than 15px in any direction, consider it a scroll/drag
+    // Increased threshold for better scroll vs tap detection
+    if (deltaX > 15 || deltaY > 15) {
+      setTouchState(prev => ({
+        ...prev,
+        [productIdStr]: {
+          ...currentState,
+          moved: true
+        }
+      }));
+    }
+  };
+
+  const handleTouchEnd = (productId: string | number, e: React.TouchEvent) => {
+    const productIdStr = productId.toString();
+    const currentState = touchState[productIdStr];
+    
+    if (!currentState) return;
+
+    const touchDuration = Date.now() - currentState.startTime;
+    
+    // Check if this was a tap (not moved, duration between 50ms and 600ms)
+    // Added minimum duration to avoid accidental taps, increased max for accessibility
+    const isTap = !currentState.moved && touchDuration >= 50 && touchDuration < 600;
+    
+    // Clean up touch state
+    setTouchState(prev => {
+      const newState = { ...prev };
+      delete newState[productIdStr];
+      return newState;
+    });
+
+    // Only navigate if it was a proper tap and not on interactive elements
+    if (isTap) {
+      const target = e.target as HTMLElement;
+      if (
+        !target.closest("button") &&
+        !target.closest('[role="button"]') &&
+        !target.closest("input") &&
+        !target.closest("select") &&
+        target.tagName !== "BUTTON"
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Touch tap detected - navigating to product:", productId);
+        handleProductClick(productId);
+      }
+    }
   };
 
   const handleToggleWishlist = async (
@@ -509,11 +601,16 @@ Products
                   boxShadow:
                     "0 4px 20px rgba(0,0,0,0.08), 0 8px 40px rgba(0,0,0,0.04)",
                   transformStyle: "preserve-3d",
-                  touchAction: "manipulation",
+                  touchAction: "pan-y", // Allow vertical scrolling but detect taps
                 }}
                 onTouchStart={(e) => {
-                  // Prevent hover states on touch devices
-                  e.currentTarget.style.pointerEvents = 'auto';
+                  handleTouchStart(product.id, e);
+                }}
+                onTouchMove={(e) => {
+                  handleTouchMove(product.id, e);
+                }}
+                onTouchEnd={(e) => {
+                  handleTouchEnd(product.id, e);
                 }}
                 onClick={(e) => {
                   // Check if click is on interactive elements
@@ -529,23 +626,6 @@ Products
                     return;
                   }
                   console.log("Card clicked - navigating to product:", product.id);
-                  handleProductClick(product.id);
-                }}
-                onTouchEnd={(e) => {
-                  // Check if touch is on interactive elements
-                  const target = e.target as HTMLElement;
-                  if (
-                    target.closest("button") ||
-                    target.closest('[role="button"]') ||
-                    target.closest("input") ||
-                    target.closest("select") ||
-                    target.tagName === "BUTTON"
-                  ) {
-                    return;
-                  }
-                  e.preventDefault();
-                  e.stopPropagation();
-                  // Directly navigate on touch end for mobile devices
                   handleProductClick(product.id);
                 }}
               >

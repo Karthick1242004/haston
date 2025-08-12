@@ -20,7 +20,7 @@ export default function HeroSection() {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"])
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.3])
 
-  // Auto-slide functionality
+
   useEffect(() => {
     if (!isAutoPlay) return
     
@@ -34,7 +34,7 @@ export default function HeroSection() {
   const goToSlide = (index: number) => {
     setCurrentSlide(index)
     setIsAutoPlay(false)
-    // Resume auto-play after manual interaction
+
     setTimeout(() => setIsAutoPlay(true), 10000)
   }
 
