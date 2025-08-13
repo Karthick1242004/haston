@@ -86,7 +86,7 @@ export default function AnimatedBanner() {
           {tripleItems.map((item, index) => (
             <motion.div
               key={`item-${index}`}
-              className="flex items-center justify-center text-sm font-medium tracking-wide px-8 hover:bg-white/10 transition-colors duration-300 cursor-pointer flex-shrink-0"
+              className="flex items-center justify-center text-xs font-medium tracking-wide px-8 hover:bg-white/10 transition-colors duration-300 cursor-pointer flex-shrink-0"
               style={{ width: `${100 / tripleItems.length}%`, minWidth: "250px" }}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
