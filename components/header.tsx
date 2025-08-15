@@ -42,12 +42,12 @@ export default function Header() {
   return (
     <>
       <motion.header
-        className="absolute top-7 left-0 right-0 z-50 bg-transparent"
+        className="absolute top-7 left-0 right-0 z-50 bg-white"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <div className="w-full px-6 py-0">
+        <div className="w-full px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Left Section - Desktop Navigation / Mobile Menu */}
             <div className="flex-1 flex justify-start">
@@ -96,7 +96,7 @@ export default function Header() {
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
                 <Image
-                  src="/logomain.png"
+                  src="/logomain11.png"
                   alt="HEX & HUE"
                   width={100}
                   height={100}
