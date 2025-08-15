@@ -1,18 +1,21 @@
+import { ObjectId } from 'mongodb'
+
 export interface Order {
-  _id?: string
+  _id?: ObjectId
   orderId: string
+  userId: string
   userEmail: string
   items: OrderItem[]
   shippingAddress: ShippingAddress
   paymentDetails: PaymentDetails
   orderSummary: OrderSummary
   status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
-  estimatedDelivery?: string
-  createdAt: string
-  updatedAt?: string
+  estimatedDelivery?: Date
+  createdAt: Date
+  updatedAt?: Date
   
   // Cancellation fields
-  cancelledAt?: string
+  cancelledAt?: Date
   cancellationReason?: string
   refundDetails?: RefundDetails
 }
@@ -21,7 +24,7 @@ export interface RefundDetails {
   refund_id: string
   amount: number
   status: string
-  created_at: number
+  created_at: Date
   speed_processed?: string
 }
 
@@ -55,6 +58,7 @@ export interface PaymentDetails {
   amount: number
   currency: string
   status: 'success' | 'failed'
+  created_at?: Date
 }
 
 export interface OrderSummary {

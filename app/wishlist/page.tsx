@@ -154,10 +154,10 @@ export default function WishlistPage() {
                     className="group cursor-pointer"
                   >
                     <Card className="overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300">
-                      <div className="relative" onClick={() => handleProductClick(product.id)}>
+                      <div className="relative" onClick={() => handleProductClick(typeof product.id === 'string' ? parseInt(product.id) : product.id)}>
                         <div className="aspect-[3/4] overflow-hidden">
                           <Image
-                            src={product.image}
+                            src={product.image || '/placeholder.jpg'}
                             alt={product.name}
                             fill
                             className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -172,7 +172,7 @@ export default function WishlistPage() {
                           className="absolute top-3 right-3 bg-white/80 hover:bg-white transition-colors"
                           onClick={(e) => {
                             e.stopPropagation()
-                            handleRemoveFromWishlist(product.id)
+                            handleRemoveFromWishlist(typeof product.id === 'string' ? parseInt(product.id) : product.id)
                           }}
                         >
                           <Heart className="w-4 h-4 fill-red-500 text-red-500" />
@@ -210,7 +210,7 @@ export default function WishlistPage() {
                           <Button
                             variant="outline"
                             className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
-                            onClick={() => handleRemoveFromWishlist(product.id)}
+                            onClick={() => handleRemoveFromWishlist(typeof product.id === 'string' ? parseInt(product.id) : product.id)}
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Remove

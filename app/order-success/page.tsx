@@ -480,13 +480,16 @@ function OrderSuccessContent() {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Payment Date</span>
                       <span className="text-sm">
-                        {new Date(order.paymentDetails.created_at).toLocaleDateString('en-IN', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {order.paymentDetails.created_at 
+                          ? new Date(order.paymentDetails.created_at).toLocaleDateString('en-IN', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          : 'N/A'
+                        }
                       </span>
                     </div>
                   </CardContent>

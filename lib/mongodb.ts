@@ -10,9 +10,6 @@ const options = {
   maxPoolSize: 10,
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
-  bufferMaxEntries: 0,
-  // Add logging for debugging
-  loggerLevel: process.env.NODE_ENV === 'development' ? 'debug' : 'error'
 }
 
 let client: MongoClient
@@ -154,6 +151,7 @@ export interface CartItem {
   selectedSize: string
   selectedColor: string
   quantity: number
+  addedAt?: Date
 }
 
 // Helper functions for user operations

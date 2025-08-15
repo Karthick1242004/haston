@@ -195,7 +195,7 @@ export default function ShopPage() {
     setCurrentPage(1) // Reset to first page when filters change
   }
 
-  const toggleFilter = (type: "categories" | "colors" | "sizes", value: string) => {
+  const toggleFilter = (type: "categories" | "colors" | "sizes" | "mainCategories" | "subCategories", value: string) => {
     setFilters(prev => ({
       ...prev,
       [type]: prev[type].includes(value)
