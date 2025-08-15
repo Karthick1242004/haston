@@ -5,7 +5,15 @@ if (!process.env.MONGODB_URI) {
 }
 
 const uri = process.env.MONGODB_URI
-const options = {}
+const options = {
+  // Add connection options for better reliability
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  bufferMaxEntries: 0,
+  // Add logging for debugging
+  loggerLevel: process.env.NODE_ENV === 'development' ? 'debug' : 'error'
+}
 
 let client: MongoClient
 let clientPromise: Promise<MongoClient>
@@ -31,8 +39,24 @@ if (process.env.NODE_ENV === "development") {
 export default clientPromise
 
 export async function getDatabase(): Promise<Db> {
-  const client = await clientPromise
-  return client.db("hex")
+  try {
+    const client = await clientPromise
+    
+    // Test the connection
+    await client.db("admin").command({ ping: 1 })
+    
+    const db = client.db("hex")
+    
+    // Log successful connection (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ MongoDB connected successfully to database:', db.databaseName)
+    }
+    
+    return db
+  } catch (error) {
+    console.error('❌ MongoDB connection error:', error)
+    throw error
+  }
 }
 
 export async function getUsersCollection(): Promise<Collection> {
@@ -118,8 +142,8 @@ export interface Address {
   state: string
   zipCode: string
   country: string
-  phone?: string
-  isDefault?: boolean
+  phone: string
+  isDefault: boolean
 }
 
 export interface CartItem {
@@ -130,7 +154,6 @@ export interface CartItem {
   selectedSize: string
   selectedColor: string
   quantity: number
-  addedAt: Date
 }
 
 // Helper functions for user operations

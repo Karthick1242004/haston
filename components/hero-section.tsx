@@ -91,8 +91,8 @@ export default function HeroSection() {
             transition={{ duration: 1, ease: "easeInOut" }}
           >
             <Image
-              src={slides[currentSlide].image}
-              alt={`${slides[currentSlide].mainText} ${slides[currentSlide].subText}`}
+              src={slides[currentSlide]?.image}
+              alt={`${slides[currentSlide]?.mainText} ${slides[currentSlide]?.subText}`}
               fill
               className="object-cover"
               priority

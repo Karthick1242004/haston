@@ -13,34 +13,70 @@ interface BannerItem {
 // Fallback banner items if API fails
 const fallbackBannerItems: BannerItem[] = [
   { id: "1", text: "FREE SHIPPING ON ORDERS OVER ₹999", icon: "🚚" },
- 
+  { id: "2", text: "SUMMER SALE - UP TO 50% OFF", icon: "🔥" },
+  { id: "3", text: "NEW ARRIVALS EVERY WEEK", icon: "✨" },
 ]
 
 export default function AnimatedBanner() {
   const [bannerItems, setBannerItems] = useState<BannerItem[]>(fallbackBannerItems)
   const [isLoading, setIsLoading] = useState(true)
+  const [lastFetch, setLastFetch] = useState<number>(0)
+
+  const fetchBannerMessages = async (forceRefresh = false) => {
+    try {
+      // Add cache busting parameter
+      const timestamp = Date.now()
+      const url = forceRefresh 
+        ? `/api/banner-messages?t=${timestamp}&refresh=true`
+        : `/api/banner-messages?t=${timestamp}`
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      if (data.success && data.bannerMessages && data.bannerMessages.length > 0) {
+        console.log('Banner messages fetched successfully:', data.bannerMessages)
+        setBannerItems(data.bannerMessages)
+        setLastFetch(timestamp)
+      } else {
+        console.log('No banner messages found, using fallback')
+        setBannerItems(fallbackBannerItems)
+      }
+    } catch (error) {
+      console.error('Error fetching banner messages:', error)
+      setBannerItems(fallbackBannerItems)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchBannerMessages = async () => {
-      try {
-        const response = await fetch('/api/banner-messages')
-        const data = await response.json()
-        
-        if (data.success && data.bannerMessages && data.bannerMessages.length > 0) {
-          setBannerItems(data.bannerMessages)
-        } else {
-          setBannerItems(fallbackBannerItems)
-        }
-      } catch (error) {
-        console.error('Error fetching banner messages:', error)
-        setBannerItems(fallbackBannerItems)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     fetchBannerMessages()
   }, [])
+
+  // Refresh banner messages every 5 minutes to ensure fresh data
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const timeSinceLastFetch = Date.now() - lastFetch
+      if (timeSinceLastFetch > 5 * 60 * 1000) { // 5 minutes
+        console.log('Refreshing banner messages...')
+        fetchBannerMessages(true)
+      }
+    }, 60 * 1000) // Check every minute
+
+    return () => clearInterval(interval)
+  }, [lastFetch])
 
   // Create triple set for truly seamless scrolling
   const tripleItems = [...bannerItems, ...bannerItems, ...bannerItems]
@@ -48,7 +84,7 @@ export default function AnimatedBanner() {
   // Show loading state briefly
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-r from-yellow-300 via-yellow-200 to-yellow-300 text-black overflow-hidden relative z-50">
+      <div className="bg-yellow-400 text-black overflow-hidden relative z-50">
         <div className="relative h-10 flex items-center justify-center">
           <span className="text-sm font-medium">Loading...</span>
         </div>
@@ -62,7 +98,7 @@ export default function AnimatedBanner() {
   }
 
   return (
-    <div className="bg-gradient-to-r from-yellow-300 via-yellow-200 to-yellow-300 text-black overflow-hidden relative z-50">
+    <div className="bg-yellow-300 text-black overflow-hidden relative z-50">
       <div className="relative h-10 flex items-center">
         {/* Animated banner content */}
         <motion.div

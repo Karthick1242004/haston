@@ -5,6 +5,10 @@ import { getDatabase } from '@/lib/mongodb'
 import { ObjectId } from 'mongodb'
 import type { BannerMessage, CreateBannerMessageRequest } from '@/types/banner'
 
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // GET - Fetch all banner messages
 export async function GET() {
   try {
@@ -16,10 +20,17 @@ export async function GET() {
       .sort({ order: 1, createdAt: 1 })
       .toArray()
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       bannerMessages: bannerMessages || []
     })
+
+    // Add cache control headers
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+
+    return response
   } catch (error) {
     console.error('Error fetching banner messages:', error)
     console.error('Error details:', {
@@ -27,7 +38,7 @@ export async function GET() {
       stack: error instanceof Error ? error.stack : undefined
     })
     
-    return NextResponse.json(
+    const response = NextResponse.json(
       { 
         success: false, 
         error: 'Failed to fetch banner messages',
@@ -35,6 +46,13 @@ export async function GET() {
       },
       { status: 500 }
     )
+
+    // Add cache control headers to error response
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+
+    return response
   }
 }
 
@@ -85,18 +103,32 @@ export async function POST(request: NextRequest) {
 
     const result = await db.collection('bannerMessages').insertOne(bannerMessage)
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       bannerMessage: {
         ...bannerMessage,
         _id: result.insertedId
       }
     })
+
+    // Add cache control headers
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+
+    return response
   } catch (error) {
     console.error('Error creating banner message:', error)
-    return NextResponse.json(
+    const response = NextResponse.json(
       { success: false, error: 'Failed to create banner message' },
       { status: 500 }
     )
+
+    // Add cache control headers to error response
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+
+    return response
   }
 }
