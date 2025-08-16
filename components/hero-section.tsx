@@ -120,7 +120,7 @@ export default function HeroSection() {
               exit={{ scale: 1.1, opacity: 0, y: -50 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              {slides[currentSlide].mainText}
+              {slides[currentSlide]?.mainText}
             </motion.h1>
           </AnimatePresence>
           
