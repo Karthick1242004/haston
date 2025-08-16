@@ -702,10 +702,10 @@ export default function ShopPage() {
                                       return (
                                         <div
                                           key={colorIndex}
-                                          className={`w-3 h-3 rounded-full border border-gray-300 ${
+                                          className={`w-3.5 h-3.5 p-0.5 rounded-sm border border-gray-300 ${
                                             colorValue 
                                               ? '' 
-                                              : (colorMap[colorName] || "bg-gray-400")
+                                              : (colorMap[colorName] || "bg-green-600")
                                           }`}
                                           style={colorValue ? { backgroundColor: colorValue } : {}}
                                           title={colorName}
