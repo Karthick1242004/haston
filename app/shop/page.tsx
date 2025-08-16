@@ -22,6 +22,7 @@ import { CATEGORIES, getCategoryDisplayName } from "@/lib/categories"
 
 // Products will be fetched from backend
 import { useEffect, useState } from "react"
+import { CardMain } from "@/components/ui/cardmain"
 
 interface FilterState {
   categories: string[]
@@ -54,21 +55,56 @@ const colorMap: Record<string, string> = {
   "Black": "bg-black",
   "White": "bg-white border-2 border-gray-300",
   "Gray": "bg-gray-500",
+  "Grey": "bg-gray-500",
   "Navy": "bg-blue-900",
   "Blue": "bg-blue-500",
   "Light Blue": "bg-blue-300",
+  "Dark Blue": "bg-blue-800",
   "Green": "bg-green-600",
   "Forest Green": "bg-green-700",
+  "Light Green": "bg-green-400",
+  "Dark Green": "bg-green-800",
   "Beige": "bg-amber-100",
   "Light Beige": "bg-amber-50",
-  "Brown": "bg-blue-700",
+  "Brown": "bg-amber-700",
+  "Dark Brown": "bg-amber-900",
+  "Light Brown": "bg-amber-300",
   "Pink": "bg-pink-400",
+  "Light Pink": "bg-pink-200",
+  "Hot Pink": "bg-pink-500",
   "Red": "bg-red-500",
+  "Dark Red": "bg-red-700",
+  "Maroon": "bg-red-800",
+  "Orange": "bg-orange-500",
+  "Yellow": "bg-yellow-400",
+  "Purple": "bg-purple-500",
+  "Violet": "bg-violet-500",
+  "Indigo": "bg-indigo-500",
+  "Teal": "bg-teal-500",
+  "Cyan": "bg-cyan-500",
+  "Lime": "bg-lime-500",
+  "Emerald": "bg-emerald-500",
+  "Rose": "bg-rose-500",
+  "Fuchsia": "bg-fuchsia-500",
+  "Sky": "bg-sky-500",
+  "Amber": "bg-amber-500",
+  "Slate": "bg-slate-500",
+  "Zinc": "bg-zinc-500",
+  "Neutral": "bg-neutral-500",
+  "Stone": "bg-stone-500",
   "Portage": "bg-blue-400",
   "Charcoal": "bg-gray-700",
   "Khaki": "bg-yellow-600",
   "Cream": "bg-yellow-50",
-  "Ivory": "bg-yellow-100"
+  "Ivory": "bg-yellow-100",
+  "Coral": "bg-coral-400",
+  "Mint": "bg-green-200",
+  "Lavender": "bg-purple-200",
+  "Peach": "bg-orange-200",
+  "Turquoise": "bg-teal-400",
+  "Gold": "bg-yellow-500",
+  "Silver": "bg-gray-300",
+  "Bronze": "bg-amber-600"
 }
 
 export default function ShopPage() {
@@ -536,7 +572,7 @@ export default function ShopPage() {
               </div>
             ) : (
               <>
-                <div className={`grid gap-3 ${
+                <div className={`grid gap-2 ${
                   viewMode === "grid" 
                     ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" 
                     : "grid-cols-1"
@@ -550,8 +586,8 @@ export default function ShopPage() {
                       className="group cursor-pointer"
                       onClick={() => handleProductClick(product.id)}
                     >
-                      <Card className="overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white rounded-lg">
-                                                  <div className="relative overflow-hidden rounded-t-lg">
+                      <CardMain className="overflow-hidden bg-white ">
+                        <div className="relative overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                             <div className={`${
                               viewMode === "grid" ? "aspect-[3/4]" : "aspect-square w-48"
                             } overflow-hidden`}>
@@ -584,22 +620,7 @@ export default function ShopPage() {
                             </div>
                           )}
                           
-                          {/* Color Options */}
-                          {product.colors && Array.isArray(product.colors) && product.colors.length > 1 && (
-                            <div className="absolute top-2 left-2 flex gap-1 bg-white/90 backdrop-blur-sm rounded px-1 py-0.5">
-                              {product.colors.slice(0, 2).map((color, colorIndex) => (
-                                <div
-                                  key={colorIndex}
-                                  className={`w-3 h-3 rounded-full border border-white ${
-                                    colorMap[color] || "bg-gray-400"
-                                  }`}
-                                />
-                              ))}
-                              {Array.isArray(product.colors) && product.colors.length > 2 && (
-                                <span className="text-[8px] text-gray-600 font-medium">+{product.colors.length - 2}</span>
-                              )}
-                            </div>
-                          )}
+                          
 
                           {/* Wishlist Button */}
                           <Button
@@ -622,7 +643,7 @@ export default function ShopPage() {
                           <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
                             <Button
                               size="sm"
-                              className="bg-black text-white hover:bg-gray-800 transition-all duration-200 rounded px-2 py-1 text-xs"
+                              className="bg-white text-black hover:bg-gray-200 transition-all duration-200 rounded-full px-2.5 py-1 text-xs"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 const defaultSize = product.sizes?.[0] || "M"
@@ -631,13 +652,13 @@ export default function ShopPage() {
                               }}
                               disabled={(product.stock || 0) === 0}
                             >
-                              <ShoppingBag className="w-3 h-3 mr-1" />
-                              Add
+                              <ShoppingBag className="w-3 h-3" />
+                              
                             </Button>
                           </div>
                         </div>
 
-                        <CardContent className="p-3">
+                        <CardContent className="py-3 px-0 bg-[#fbfbfb]">
                           <div className={`${viewMode === "list" ? "flex justify-between items-start" : ""}`}>
                             <div className={viewMode === "list" ? "flex-1" : ""}>
                               {/* Product Name */}
@@ -646,7 +667,7 @@ export default function ShopPage() {
                               </h3>
                               
                               {/* Rating and Reviews */}
-                              <div className="flex items-center gap-2 mb-2">
+                              {/* <div className="flex items-center gap-2 mb-2">
                                 <div className="flex items-center">
                                   <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                                   <span className="text-xs font-medium text-yellow-700 ml-1">{product.rating}</span>
@@ -654,7 +675,7 @@ export default function ShopPage() {
                                 <span className="text-xs text-gray-500">
                                   ({product.stock})
                                 </span>
-                              </div>
+                              </div> */}
 
                               {/* Price Display */}
                               <div className="flex items-center gap-2 mb-2">
@@ -667,9 +688,38 @@ export default function ShopPage() {
                                   </p>
                                 )}
                               </div>
-
+                              
+                              {/* Color Options - moved to content section */}
+                              {product.colors && Array.isArray(product.colors) && product.colors.length > 0 && (
+                                <div className="flex items-center gap-1 mb-1">
+                                  <span className="text-xs text-gray-500">Colors:</span>
+                                  <div className="flex gap-1">
+                                    {product.colors.slice(0, 4).map((color, colorIndex) => {
+                                      // Handle both old format (string) and new format (object with name/value)
+                                      const colorName = typeof color === 'object' && color.name ? color.name : color
+                                      const colorValue = typeof color === 'object' && color.value ? color.value : null
+                                      
+                                      return (
+                                        <div
+                                          key={colorIndex}
+                                          className={`w-3 h-3 rounded-full border border-gray-300 ${
+                                            colorValue 
+                                              ? '' 
+                                              : (colorMap[colorName] || "bg-gray-400")
+                                          }`}
+                                          style={colorValue ? { backgroundColor: colorValue } : {}}
+                                          title={colorName}
+                                        />
+                                      )
+                                    })}
+                                    {Array.isArray(product.colors) && product.colors.length > 4 && (
+                                      <span className="text-xs text-gray-500 font-medium">+{product.colors.length - 4}</span>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
                               {/* Sizes */}
-                              {product.sizes && product.sizes.length > 0 && (
+                              {/* {product.sizes && product.sizes.length > 0 && (
                                 <div className="flex items-center gap-1">
                                   <span className="text-xs text-gray-500">Sizes:</span>
                                   <div className="flex gap-1">
@@ -683,11 +733,11 @@ export default function ShopPage() {
                                     )}
                                   </div>
                                 </div>
-                              )}
+                              )} */}
                             </div>
                           </div>
                         </CardContent>
-                      </Card>
+                      </CardMain>
                     </motion.div>
                   ))}
                 </div>

@@ -16,6 +16,15 @@
         "label": "off"
       }
     ],
-    "axe/parsing": "off"
+    "axe/parsing": "off",
+    "compat-api/css": [
+      "default",
+      {
+        "ignore": [
+          "user-select",
+          "mask-image"
+        ]
+      }
+    ]
   }
 }
