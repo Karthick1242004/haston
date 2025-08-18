@@ -23,7 +23,13 @@ export function useHeroSlides() {
   const fetchSlides = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/hero-slides')
+      // Add cache busting parameter to ensure fresh data
+      const response = await fetch(`/api/hero-slides?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        }
+      })
       const data = await response.json()
       
       if (data.success) {
@@ -63,7 +69,13 @@ export function useAdminHeroSlides() {
   const fetchAllSlides = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/admin/hero-slides')
+      // Add cache busting parameter to ensure fresh data
+      const response = await fetch(`/api/admin/hero-slides?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        }
+      })
       const data = await response.json()
       
       if (data.success) {
