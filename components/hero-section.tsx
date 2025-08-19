@@ -196,7 +196,7 @@ export default function HeroSection() {
       </div>
 
       {/* Progress Bar */}
-      <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 w-64 h-1 bg-white/20 rounded-full overflow-hidden z-20">
+      {/* <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 w-64 h-1 bg-white/20 rounded-full overflow-hidden z-20">
         <motion.div
           className="h-full bg-white rounded-full"
           initial={{ width: "0%" }}
@@ -208,7 +208,7 @@ export default function HeroSection() {
           }}
           key={currentSlide}
         />
-      </div>
+      </div> */}
 
       {/* Scroll indicator */}
       {/* <motion.div
