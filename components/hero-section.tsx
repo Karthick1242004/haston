@@ -176,7 +176,7 @@ export default function HeroSection() {
       </div>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 flex space-x-3 z-20">
+      {/* <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 flex space-x-3 z-20">
         {slides.map((_, index) => (
           <motion.button
             key={index}
@@ -193,7 +193,7 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 1.2 + index * 0.1 }}
           />
         ))}
-      </div>
+      </div> */}
 
       {/* Progress Bar */}
       {/* <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 w-64 h-1 bg-white/20 rounded-full overflow-hidden z-20">
