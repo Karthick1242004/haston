@@ -32,7 +32,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Checkbox } from "@/components/ui/checkbox"
 import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
-import { ExtendedUser, Address } from "@/lib/mongodb"
+import { ExtendedUser, Address } from "@/types/database"
 import Loader from "@/components/loader"
 
 export default function ProfilePage() {

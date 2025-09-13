@@ -1,4 +1,5 @@
-import { ObjectId } from 'mongodb'
+// Client-safe ObjectId type (string representation)
+export type ObjectId = string
 
 export interface Order {
   _id?: ObjectId

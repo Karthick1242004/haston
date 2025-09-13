@@ -19,7 +19,7 @@ import "react-country-state-city/dist/react-country-state-city.css"
 import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import { useProductStore } from "@/stores/product-store"
-import { ExtendedUser } from "@/lib/mongodb"
+import { ExtendedUser } from "@/types/database"
 import { useToast } from "@/hooks/use-toast"
 
 interface UserDetails {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
-import { CartItem } from '@/lib/mongodb'
+import { CartItem } from '@/types/database'
 
 export interface CartSyncHook {
   isLoading: boolean
