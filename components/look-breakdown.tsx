@@ -310,8 +310,9 @@ export default function LookBreakdown() {
                         width={380}
                         height={500}
                         className="object-contain w-full h-full filter drop-shadow-2xl transition-all duration-300"
-                        unoptimized
                         priority={isCenter}
+                        quality={85}
+                        sizes="(max-width: 768px) 80vw, 380px"
                       />
                       {/* Visual indicator for center item being clickable */}
                       {isCenter && (

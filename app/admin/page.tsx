@@ -888,7 +888,8 @@ export default function AdminPage() {
                               width={400}
                               height={300}
                               className="object-cover w-full h-56 group-hover:scale-105 transition-transform duration-300"
-                              unoptimized
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                              quality={80}
                             />
                             <div className="absolute top-3 right-3 flex gap-2">
                               {p.isLook && (
@@ -2919,7 +2920,8 @@ export default function AdminPage() {
                                         alt={item.name}
                                         fill
                                         className="object-cover"
-                                        unoptimized
+                                        sizes="80px"
+                                        quality={75}
                                       />
                                     </div>
                                     <div className="flex-1">

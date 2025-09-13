@@ -596,7 +596,8 @@ export default function ShopPage() {
                                 alt={product.name}
                                 fill
                                 className="object-cover transition-all duration-500 group-hover:scale-105"
-                                unoptimized
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                quality={80}
                               />
                               {/* Gradient overlay on hover */}
                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

@@ -368,7 +368,8 @@ function OrderSuccessContent() {
                                   alt={item.name}
                                   fill
                                   className="object-cover"
-                                  unoptimized
+                                  sizes="80px"
+                                  quality={75}
                                 />
                               </div>
                               <div className="flex-1">

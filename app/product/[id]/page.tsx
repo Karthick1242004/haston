@@ -133,7 +133,8 @@ export default function ProductDetailPage() {
                     alt={`${product.name} ${index + 1}`}
                     fill
                     className="object-fit"
-                    unoptimized
+                    sizes="128px"
+                    quality={75}
                   />
                 </motion.div>
               ))}
@@ -151,7 +152,9 @@ export default function ProductDetailPage() {
                   alt={product.name}
                   fill
                   className="object-contain rounded-lg"
-                  unoptimized
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  quality={90}
                 />
               </div>
 

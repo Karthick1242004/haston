@@ -99,7 +99,8 @@ export default function SizeGuidePage() {
                           fill
                           className="object-contain"
                           priority
-                          unoptimized
+                          sizes="(max-width: 768px) 100vw, 80vw"
+                          quality={90}
                         />
                       </div>
                     </div>

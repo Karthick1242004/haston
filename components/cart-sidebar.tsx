@@ -107,7 +107,8 @@ export default function CartSidebar() {
                             alt={item.name}
                             fill
                             className="object-cover"
-                            unoptimized
+                            sizes="80px"
+                            quality={75}
                           />
                         </div>
                       </div>

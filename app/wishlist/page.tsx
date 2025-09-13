@@ -161,7 +161,8 @@ export default function WishlistPage() {
                             alt={product.name}
                             fill
                             className="object-cover transition-transform duration-300 group-hover:scale-105"
-                            unoptimized
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+                            quality={80}
                           />
                         </div>
 
