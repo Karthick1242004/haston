@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { getOrdersCollection } from '@/lib/mongodb'
-import { Order, OrderItem, PaymentDetails, ShippingAddress, OrderSummary } from '@/types/order'
+import { Order, ServerOrder, OrderItem, PaymentDetails, ShippingAddress, OrderSummary } from '@/types/order'
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
     const estimatedDelivery = new Date()
     estimatedDelivery.setDate(estimatedDelivery.getDate() + Math.floor(Math.random() * 4) + 7)
 
-    // Create order object
-    const order: Order = {
+    // Create order object for database (ServerOrder type)
+    const serverOrder: ServerOrder = {
       orderId,
       userId: session.user.email,
       userEmail: session.user.email,
@@ -59,19 +59,22 @@ export async function POST(request: NextRequest) {
 
     // Save to database
     const collection = await getOrdersCollection()
-    const result = await collection.insertOne(order)
+    const result = await collection.insertOne(serverOrder)
 
     if (!result.insertedId) {
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
     }
 
+    // Convert server order to client order for response
+    const clientOrder: Order = {
+      ...serverOrder,
+      _id: result.insertedId.toString()
+    }
+
     return NextResponse.json({
       success: true,
-      orderId: order.orderId,
-      order: {
-        ...order,
-        _id: result.insertedId
-      }
+      orderId: serverOrder.orderId,
+      order: clientOrder
     })
 
   } catch (error) {

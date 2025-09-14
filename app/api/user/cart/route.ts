@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ 
       cartItems: user.cartItems || [],
-      cartCount: (user.cartItems || []).reduce((count, item) => count + item.quantity, 0)
+      cartCount: (user.cartItems || []).reduce((count: number, item: CartItem) => count + item.quantity, 0)
     })
   } catch (error) {
     console.error('Cart fetch error:', error)
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     // Find existing item with same product, size, and color
     const existingItemIndex = updatedCartItems.findIndex(
-      item => 
+      (item: CartItem) => 
         item.productId === productId.toString() && 
         item.selectedSize === selectedSize && 
         item.selectedColor === selectedColor
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to update cart' }, { status: 400 })
     }
 
-    const cartCount = updatedCartItems.reduce((count, item) => count + item.quantity, 0)
+    const cartCount = updatedCartItems.reduce((count: number, item: CartItem) => count + item.quantity, 0)
 
     return NextResponse.json({ 
       message: `Cart ${action} successful`,

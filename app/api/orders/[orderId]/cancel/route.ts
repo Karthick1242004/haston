@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { getOrdersCollection } from '@/lib/mongodb'
-import { Order } from '@/types/order'
+import { Order, ServerOrder } from '@/types/order'
 import Razorpay from 'razorpay'
 
 const razorpay = new Razorpay({
@@ -32,7 +32,7 @@ export async function POST(
     const order = await collection.findOne({ 
       orderId,
       userEmail: session.user.email 
-    }) as Order | null
+    }) as ServerOrder | null
 
     if (!order) {
       return NextResponse.json(

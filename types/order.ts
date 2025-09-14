@@ -1,8 +1,30 @@
 // Client-safe ObjectId type (string representation)
 export type ObjectId = string
 
+// Client-side Order interface (for frontend use)
 export interface Order {
   _id?: ObjectId
+  orderId: string
+  userId: string
+  userEmail: string
+  items: OrderItem[]
+  shippingAddress: ShippingAddress
+  paymentDetails: PaymentDetails
+  orderSummary: OrderSummary
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  estimatedDelivery?: Date
+  createdAt: Date
+  updatedAt?: Date
+  
+  // Cancellation fields
+  cancelledAt?: Date
+  cancellationReason?: string
+  refundDetails?: RefundDetails
+}
+
+// Server-side Order interface (for MongoDB operations)
+export interface ServerOrder {
+  _id?: import('mongodb').ObjectId
   orderId: string
   userId: string
   userEmail: string

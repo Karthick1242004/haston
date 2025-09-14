@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       }
     } else if (action === 'remove') {
       // Remove from wishlist
-      updatedWishlist = updatedWishlist.filter(id => id !== productId.toString())
+      updatedWishlist = updatedWishlist.filter((id: string) => id !== productId.toString())
     } else {
       return NextResponse.json({ error: 'Invalid action. Use "add" or "remove"' }, { status: 400 })
     }

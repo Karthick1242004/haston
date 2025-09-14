@@ -1,4 +1,5 @@
 import { MongoClient, Db, Collection, ObjectId } from "mongodb"
+import { ExtendedUser, Address, CartItem } from '@/types/database'
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
