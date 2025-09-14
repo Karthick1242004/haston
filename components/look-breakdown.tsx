@@ -112,7 +112,8 @@ export default function LookBreakdown() {
     }
     
     const allItems = []
-    const visibleRadius = Math.min(3, Math.floor((carouselItems.length - 1) / 2))
+    // Fix: Ensure minimum radius of 1 for small item counts
+    const visibleRadius = Math.max(1, Math.min(3, Math.floor((carouselItems.length - 1) / 2)))
 
     // Generate items in the range -visibleRadius … +visibleRadius
     for (let i = -visibleRadius; i <= visibleRadius; i++) {
@@ -136,6 +137,9 @@ export default function LookBreakdown() {
 
   const allItems = getAllItemsWithPositions()
   const edgeDistance = (allItems.length - 1) / 2
+  
+  // Debug logging
+  console.log(`🎠 Carousel State: ${carouselItems.length} total items, ${allItems.length} rendered items, edgeDistance=${edgeDistance}, currentIndex=${currentIndex}`)
 
   // guard against out-of-range index
   const len = carouselItems?.length
@@ -251,6 +255,11 @@ export default function LookBreakdown() {
                       ? 1
                       : Math.max(0.7, 1 - Math.abs(position) * 0.15)
                   : 0
+                
+                // Temporary debug logging
+                if (isCenter) {
+                  console.log(`🎯 CENTER ITEM: "${item.title}" - position=${position}, isVisible=${isVisible}, opacity=${opacity}, edgeDistance=${edgeDistance}`)
+                }
                 
                 return (
                   <motion.div

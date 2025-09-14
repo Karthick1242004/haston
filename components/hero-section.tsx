@@ -143,7 +143,7 @@ export default function HeroSection() {
                   WebkitTextStroke: "2px #92400e",
                 }}
               >
-                {slides[currentSlide].subText}
+                {slides[currentSlide]?.subText}
               </div>
             </motion.div>
           </AnimatePresence>
