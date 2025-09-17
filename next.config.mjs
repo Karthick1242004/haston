@@ -42,23 +42,17 @@ const nextConfig = {
           },
         ],
       },
+      // Hero slides caching - allow caching for public endpoint
       {
         source: '/api/hero-slides',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate',
-          },
-          {
-            key: 'Pragma',
-            value: 'no-cache',
-          },
-          {
-            key: 'Expires',
-            value: '0',
+            value: 'public, s-maxage=300, stale-while-revalidate=600',
           },
         ],
       },
+      // Admin hero slides - keep no-cache for admin functionality
       {
         source: '/api/admin/hero-slides',
         headers: [

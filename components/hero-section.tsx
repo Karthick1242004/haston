@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, useCallback } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useHeroSlides } from "@/hooks/use-hero-slides"
@@ -10,6 +10,8 @@ export default function HeroSection() {
   const ref = useRef<HTMLDivElement>(null)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlay, setIsAutoPlay] = useState(true)
+  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set())
+  const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({})
   const { slides, isLoading, error } = useHeroSlides()
   
   const { scrollYProgress } = useScroll({
@@ -19,6 +21,89 @@ export default function HeroSection() {
 
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"])
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.3])
+
+  // Image preloading function
+  const preloadImage = useCallback((imageUrl: string) => {
+    if (preloadedImages.has(imageUrl)) return Promise.resolve()
+    
+    // Set loading state
+    setImageLoadingStates(prev => ({ ...prev, [imageUrl]: true }))
+    
+    return new Promise<void>((resolve, reject) => {
+      const img = new window.Image()
+      img.onload = () => {
+        setPreloadedImages(prev => new Set([...prev, imageUrl]))
+        setImageLoadingStates(prev => ({ ...prev, [imageUrl]: false }))
+        resolve()
+      }
+      img.onerror = () => {
+        setImageLoadingStates(prev => ({ ...prev, [imageUrl]: false }))
+        console.warn('Failed to preload image:', imageUrl)
+        reject(new Error(`Failed to preload image: ${imageUrl}`))
+      }
+      img.src = imageUrl
+    })
+  }, [preloadedImages])
+
+  // Preload current, next, and previous images
+  useEffect(() => {
+    if (slides.length === 0) return
+
+    const preloadImages = async () => {
+      const imagesToPreload = []
+      
+      // Current image (highest priority)
+      if (slides[currentSlide]?.image) {
+        imagesToPreload.push(slides[currentSlide].image)
+      }
+      
+      // Next image
+      const nextIndex = (currentSlide + 1) % slides.length
+      if (slides[nextIndex]?.image) {
+        imagesToPreload.push(slides[nextIndex].image)
+      }
+      
+      // Previous image
+      const prevIndex = (currentSlide - 1 + slides.length) % slides.length
+      if (slides[prevIndex]?.image) {
+        imagesToPreload.push(slides[prevIndex].image)
+      }
+      
+      // Preload all three images
+      try {
+        await Promise.allSettled(imagesToPreload.map(preloadImage))
+      } catch (error) {
+        console.warn('Some images failed to preload:', error)
+      }
+    }
+
+    preloadImages()
+  }, [currentSlide, slides, preloadImage])
+
+  // Preload all remaining images in background (low priority)
+  useEffect(() => {
+    if (slides.length === 0) return
+
+    const preloadRemainingImages = async () => {
+      const remainingImages = slides
+        .map(slide => slide.image)
+        .filter(imageUrl => imageUrl && !preloadedImages.has(imageUrl))
+      
+      // Preload remaining images with delay to not impact performance
+      for (const imageUrl of remainingImages) {
+        try {
+          await new Promise(resolve => setTimeout(resolve, 100)) // Small delay
+          await preloadImage(imageUrl)
+        } catch (error) {
+          // Silently fail for background preloading
+        }
+      }
+    }
+
+    // Start background preloading after a delay
+    const timeoutId = setTimeout(preloadRemainingImages, 2000)
+    return () => clearTimeout(timeoutId)
+  }, [slides, preloadedImages, preloadImage])
 
 
   useEffect(() => {
@@ -53,11 +138,27 @@ export default function HeroSection() {
   // Show loading or error states
   if (isLoading) {
     return (
-      <section className="h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-950 mx-auto mb-4"></div>
-          <p className="text-blue-950 text-lg">Loading...</p>
+      <section className="h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 animate-pulse"></div>
+        
+        {/* Loading content */}
+        <div className="text-center relative z-10">
+          <div className="mb-8">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-950/20 border-t-blue-950 mx-auto mb-4"></div>
+            <div className="flex space-x-1 justify-center">
+              <div className="w-2 h-2 bg-blue-950 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-blue-950 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-blue-950 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+          </div>
+          <p className="text-blue-950/80 text-lg font-medium">Loading amazing content...</p>
+          <p className="text-blue-950/60 text-sm mt-2">This won't take long</p>
         </div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-10 left-10 w-20 h-20 bg-blue-950/5 rounded-full animate-pulse"></div>
+        <div className="absolute bottom-10 right-10 w-32 h-32 bg-purple-950/5 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
       </section>
     )
   }
@@ -90,15 +191,37 @@ export default function HeroSection() {
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 1, ease: "easeInOut" }}
           >
-            <Image
-              src={slides[currentSlide]?.image}
-              alt={`${slides[currentSlide]?.mainText} ${slides[currentSlide]?.subText}`}
-              fill
-              className="object-cover"
-              priority
-              sizes="100vw"
-              quality={85}
-            />
+            <div className="relative w-full h-full">
+              {/* Blur placeholder while loading */}
+              {imageLoadingStates[slides[currentSlide]?.image] && (
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 animate-pulse">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+                </div>
+              )}
+              
+              <Image
+                src={slides[currentSlide]?.image}
+                alt={`${slides[currentSlide]?.mainText} ${slides[currentSlide]?.subText}`}
+                fill
+                className={`object-cover transition-opacity duration-700 ${
+                  preloadedImages.has(slides[currentSlide]?.image) 
+                    ? 'opacity-100' 
+                    : 'opacity-0'
+                }`}
+                priority
+                sizes="100vw"
+                quality={85}
+                onLoad={() => {
+                  // Mark as loaded when Next.js Image component loads
+                  if (slides[currentSlide]?.image) {
+                    setImageLoadingStates(prev => ({ 
+                      ...prev, 
+                      [slides[currentSlide].image]: false 
+                    }))
+                  }
+                }}
+              />
+            </div>
           </motion.div>
         </AnimatePresence>
       </motion.div>

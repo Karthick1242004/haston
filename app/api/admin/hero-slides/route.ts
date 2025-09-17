@@ -23,18 +23,47 @@ function extractPublicId(url: string): string | null {
 export async function GET() {
   try {
     const db = await getDatabase()
-    const slides = await db.collection('heroSlides').find({}).sort({ order: 1 }).toArray()
+    
+    // Optimized admin query with projection
+    const slides = await db.collection('heroSlides')
+      .find(
+        {},
+        {
+          projection: {
+            _id: 1,
+            mainText: 1,
+            subText: 1,
+            image: 1,
+            order: 1,
+            isActive: 1,
+            createdAt: 1,
+            updatedAt: 1
+            // Only fetch fields needed for admin interface
+          }
+        }
+      )
+      .sort({ order: 1, createdAt: -1 }) // Primary sort by order, secondary by creation date
+      .toArray()
     
     return NextResponse.json({ 
       success: true, 
       slides: slides.map((slide: any) => ({
         _id: slide._id.toString(),
-        mainText: slide.mainText,
-        subText: slide.subText,
+        mainText: slide.mainText || '',
+        subText: slide.subText || '',
         image: slide.image,
-        order: slide.order,
-        isActive: slide.isActive
-      }))
+        order: slide.order || 0,
+        isActive: slide.isActive ?? true,
+        createdAt: slide.createdAt,
+        updatedAt: slide.updatedAt
+      })),
+      // Add metadata for admin
+      meta: {
+        total: slides.length,
+        active: slides.filter((s: any) => s.isActive).length,
+        inactive: slides.filter((s: any) => !s.isActive).length,
+        timestamp: new Date().toISOString()
+      }
     })
   } catch (error) {
     console.error('Error fetching hero slides:', error)
