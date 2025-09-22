@@ -11,6 +11,7 @@ const config: Config = {
   theme: {
   	extend: {
   		fontFamily: {
+  			'anton': ['var(--font-anton)', 'sans-serif'],
   			'poppins': ['var(--font-poppins)', 'sans-serif'],
   			'allura': ['var(--font-allura)', 'cursive'],
   		},

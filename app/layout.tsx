@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Poppins, Allura } from "next/font/google"
+import { Inter, Poppins, Anton, Allura } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import AuthProvider from "@/components/auth-provider"
@@ -14,6 +14,11 @@ const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-poppins",
+})
+const anton = Anton({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-anton",
 })
 const allura = Allura({
   weight: "400",
@@ -34,7 +39,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} ${poppins.variable} ${allura.variable}`}>
+      <body className={`${inter.className} ${anton.variable} ${poppins.variable} ${allura.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
