@@ -154,19 +154,16 @@ export default function TermsPage() {
               </Button>
               
               <motion.h1
-                className="text-5xl md:text-7xl lg:text-8xl text-blue-950 leading-none tracking-tight mb-6 font-light"
-                style={{ fontFamily: "var(--font-anton)" }}
+                className="text-5xl md:text-7xl lg:text-8xl text-blue-950 leading-none tracking-tight mb-6 font-bold"
+                style={{ fontFamily: "var(--font-poppins)" }}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={heroInView ? { scale: 1, opacity: 1 } : {}}
                 transition={{ duration: 1, ease: "easeOut" }}
               >
                 TERMS{" "}
-                <span 
-                  style={{ fontFamily: "var(--font-allura)" }} 
-                  className="text-6xl md:text-8xl lg:text-9xl text-blue-950"
-                >
+                
                   & Conditions
-                </span>
+              
               </motion.h1>
               
               <motion.p
@@ -205,16 +202,10 @@ export default function TermsPage() {
               transition={{ duration: 0.8 }}
             >
               <h2 
-                className="text-4xl md:text-6xl text-blue-950 leading-tight mb-6"
-                style={{ fontFamily: "var(--font-anton)" }}
+                className="text-4xl md:text-6xl text-blue-950 leading-tight mb-6 font-bold"
+                style={{ fontFamily: "var(--font-poppins)" }}
               >
-                OUR{" "}
-                <span 
-                  style={{ fontFamily: "var(--font-allura)" }}
-                  className="text-5xl md:text-7xl text-blue-950"
-                >
-                  Promise
-                </span>
+                OUR{" "}Promise
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 We believe in fair and transparent terms that protect both our customers and our business.

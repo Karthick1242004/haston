@@ -202,12 +202,10 @@ export default function LookBreakdown() {
           transition={{ duration: 0.8 }}
         >
           <div className="flex flex-wrap items-center gap-8 mb-6">
-            <h2 className="text-6xl md:text-8xl mt-4 font-medium tracking-tight text-blue-950" style={{ fontFamily: "var(--font-anton)" }}>
-              THE{" "}
-              <span style={{ fontFamily: "var(--font-allura)" }} className="text-7xl md:text-9xl text-blue-950 font-medium">
-                Look
-              </span>{" "}
-              BREAKDOWN
+            <h2 className="text-6xl md:text-8xl mt-4 font-bold tracking-tight text-blue-950" style={{ fontFamily: "var(--font-poppins)" }}>
+              The{" "}
+              Look{" "}
+              Breakdown
             </h2>
             <p className="text-sm text-gray-600 max-w-md leading-relaxed">
               Effortless style, made simple. Shop the complete outfit with just one click—each piece carefully selected
@@ -395,7 +393,7 @@ export default function LookBreakdown() {
                 <>
                   <h3 
                     className="text-4xl font-bold text-blue-950 mb-4 cursor-pointer hover:text-blue-800 transition-colors duration-200" 
-                    style={{ fontFamily: "var(--font-anton)" }}
+                    style={{ fontFamily: "var(--font-poppins)" }}
                     onClick={() => handleProductClick(carouselItems[safeIndex]?.id)}
                   >
                     {carouselItems[safeIndex]?.title}

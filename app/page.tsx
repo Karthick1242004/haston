@@ -34,7 +34,7 @@ export default function HomePage() {
           <HeroSection />
           <PopularProducts />
           <LookBreakdown />
-          <Testimonials/>
+          {/* <Testimonials/> */}
         </main>
         <Footer />
       </div>

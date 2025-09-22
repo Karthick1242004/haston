@@ -62,7 +62,7 @@ export default function Header() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                     style={{
-                      fontFamily: "var(--font-anton)",
+                      fontFamily: "var(--font-poppins)",
                     }}
                   >
                     {item}
@@ -241,9 +241,9 @@ export default function Header() {
                 <div className="flex items-center justify-between mb-8">
                   <a
                     href="/"
-                    className="text-2xl font-light text-gray-800 tracking-normal hover:text-gray-600 transition-colors"
+                    className="text-2xl font-bold text-gray-800 tracking-normal hover:text-gray-600 transition-colors"
                     style={{
-                      fontFamily: "var(--font-anton)",
+                      fontFamily: "var(--font-poppins)",
                     }}
                     onClick={toggleMobileMenu}
                   >

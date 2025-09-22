@@ -76,19 +76,13 @@ export default function AboutPage() {
               </Button>
               
               <motion.h1
-                className="text-6xl md:text-8xl lg:text-9xl text-blue-950 leading-none tracking-tight mb-6"
-                style={{ fontFamily: "var(--font-anton)" }}
+                className="text-6xl md:text-8xl lg:text-9xl text-blue-950 leading-none tracking-tight mb-6 font-bold"
+                style={{ fontFamily: "var(--font-poppins)" }}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={heroInView ? { scale: 1, opacity: 1 } : {}}
                 transition={{ duration: 1, ease: "easeOut" }}
               >
-                ABOUT{" "}
-                <span 
-                  style={{ fontFamily: "var(--font-allura)" }} 
-                  className="text-7xl md:text-9xl lg:text-[10rem] text-blue-950"
-                >
-                  Us
-                </span>
+                ABOUT{" "}Us
               </motion.h1>
               
               <motion.p
@@ -117,19 +111,13 @@ export default function AboutPage() {
               >
                 <div>
                   <motion.h2
-                    className="text-5xl md:text-7xl text-blue-950 leading-tight mb-6"
-                    style={{ fontFamily: "var(--font-anton)" }}
+                    className="text-5xl md:text-7xl text-blue-950 leading-tight mb-6 font-bold"
+                    style={{ fontFamily: "var(--font-poppins)" }}
                     initial={{ opacity: 0, y: 30 }}
                     animate={contentInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.8, delay: 0.2 }}
                   >
-                    HEX{" "}
-                    <span 
-                      style={{ fontFamily: "var(--font-allura)" }}
-                      className="text-6xl md:text-8xl text-blue-950"
-                    >
-                      and
-                    </span>{" "}
+                    HEX{" "}and{" "}
                     HUE
                   </motion.h2>
                   
@@ -176,7 +164,7 @@ export default function AboutPage() {
                 className="relative"
               >
                 <div className="space-y-6">
-                  <h3 className="text-2xl font-light text-blue-950 mb-8 text-center" style={{ fontFamily: "var(--font-anton)" }}>
+                  <h3 className="text-2xl font-bold text-blue-950 mb-8 text-center" style={{ fontFamily: "var(--font-poppins)" }}>
                     What Our Customers Say
                   </h3>
                   
@@ -290,7 +278,7 @@ export default function AboutPage() {
                     </div>
                     <h3 
                       className="text-4xl md:text-5xl font-thin text-blue-950 mb-2"
-                      style={{ fontFamily: "var(--font-anton)" }}
+                      style={{ fontFamily: "var(--font-poppins)" }}
                     >
                       {stat.number}
                     </h3>
@@ -312,8 +300,8 @@ export default function AboutPage() {
               transition={{ duration: 0.8 }}
             >
               <h2 
-                className="text-5xl md:text-7xl text-blue-950 leading-tight mb-6"
-                style={{ fontFamily: "var(--font-anton)" }}
+                className="text-5xl md:text-7xl text-blue-950 leading-tight mb-6 font-bold"
+                style={{ fontFamily: "var(--font-poppins)" }}
               >
                 OUR{" "}
                 <span 
@@ -342,7 +330,7 @@ export default function AboutPage() {
                       className={`h-48 bg-gradient-to-br ${value.color} transition-transform duration-300 group-hover:scale-110`}
                     />
                   </div>
-                  <h3 className="text-2xl font-bold text-blue-950 mb-4" style={{ fontFamily: "var(--font-anton)" }}>
+                  <h3 className="text-2xl font-bold text-blue-950 mb-4" style={{ fontFamily: "var(--font-poppins)" }}>
                     {value.title}
                   </h3>
                   <p className="text-gray-600 leading-relaxed">

@@ -111,7 +111,7 @@ export default function Footer() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <h4 className="text-xl font-light font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>COMPANY</h4>
+            <h4 className="text-xl font-bold font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-poppins)" }}>COMPANY</h4>
             <ul className="space-y-3 text-xs text-gray-600">
               <li>
                 <a href="/about" className="hover:text-blue-950 transition-colors duration-200">
@@ -147,7 +147,7 @@ export default function Footer() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <h4 className="text-xl font-thin font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>SHOP</h4>
+            <h4 className="text-xl font-bold font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-poppins)" }}>SHOP</h4>
             <ul className="space-y-3 text-xs text-gray-600">
               <li>
                 <a href="/shop" className="hover:text-blue-950 transition-colors duration-200">
@@ -178,7 +178,7 @@ export default function Footer() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <h4 className="text-xl font-thin font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-anton)" }}>STAY CONNECTED</h4>
+            <h4 className="text-xl font-bold font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-poppins)" }}>STAY CONNECTED</h4>
             <p className="text-gray-600 mb-6 text-sm">
               Subscribe to Our Newsletter for the Latest Updates, Offers, and Exclusive Releases
             </p>

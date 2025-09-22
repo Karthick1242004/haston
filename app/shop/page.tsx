@@ -432,14 +432,14 @@ export default function ShopPage() {
               className="flex-1 text-center md:text-left mb-6 md:mb-0"
             >
               <h1
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-gray-800 tracking-tight leading-tight"
-                style={{ fontFamily: "var(--font-anton)" }}
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 tracking-tight leading-tight"
+                style={{ fontFamily: "var(--font-poppins)" }}
               >
                 Explore a World of Style,
               </h1>
               <p
-                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-600 font-light"
-                style={{ fontFamily: "var(--font-anton)" }}
+                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-600 font-bold"
+                style={{ fontFamily: "var(--font-poppins)" }}
               >
                 Crafted for You
               </p>

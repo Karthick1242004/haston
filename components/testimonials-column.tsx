@@ -56,7 +56,7 @@ export const TestimonialsColumn = (props: {
         <div className="flex flex-col">
           <div 
             className="font-medium tracking-normal leading-5 text-blue-950 text-sm" 
-            style={{ fontFamily: "var(--font-anton)" }}
+            style={{ fontFamily: "var(--font-poppins)" }}
           >
             {name}
           </div>

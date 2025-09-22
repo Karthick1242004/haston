@@ -794,7 +794,7 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto bg-white lg:p-10 p-4 shadow-xl border border-gray-200">
           <h1
             className="text-3xl font-bold text-blue-950 mb-8"
-            style={{ fontFamily: "var(--font-anton)" }}
+            style={{ fontFamily: "var(--font-poppins)" }}
           >
             Admin Dashboard
           </h1>

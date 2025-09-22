@@ -99,7 +99,7 @@ export default function WishlistPage() {
             >
               <div className="flex items-center gap-3 mb-4">
                 <Heart className="w-8 h-8 text-blue-950" />
-                <h1 className="text-3xl md:text-4xl font-bold text-blue-950" style={{ fontFamily: "var(--font-anton)" }}>
+                <h1 className="text-3xl md:text-4xl font-bold text-blue-950" style={{ fontFamily: "var(--font-poppins)" }}>
                   My Wishlist
                 </h1>
               </div>

@@ -10,6 +10,10 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			'poppins': ['var(--font-poppins)', 'sans-serif'],
+  			'allura': ['var(--font-allura)', 'cursive'],
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

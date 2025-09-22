@@ -467,16 +467,10 @@ export default function PopularProducts() {
           transition={{ duration: 0.8 }}
         >
           <h2
-            className="text-6xl md:text-8xl font-sans text-blue-950 tracking-tight"
-            style={{ fontFamily: "var(--font-anton)" }}
+            className="text-6xl md:text-8xl font-bold text-blue-950 tracking-tight"
+            style={{ fontFamily: "var(--font-poppins)" }}
           >
-            Popular
-            <span
-              style={{ fontFamily: "var(--font-allura)" }}
-              className="text-7xl md:text-9xl text-blue-950 font-medium"
-            >
-Products
-            </span>
+            Popular Products
           </h2>
         </motion.div>
 

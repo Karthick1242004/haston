@@ -95,7 +95,7 @@ const Testimonials = () => {
 
           <motion.h2 
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-normal text-center text-blue-950 mb-6 leading-none"
-            style={{ fontFamily: "var(--font-anton)" }}
+            style={{ fontFamily: "var(--font-poppins)" }}
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.3 }}

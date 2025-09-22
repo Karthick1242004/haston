@@ -109,19 +109,13 @@ export default function PrivacyPolicyPage() {
               </Button>
               
               <motion.h1
-                className="text-5xl md:text-7xl lg:text-8xl text-blue-950 leading-none tracking-tight mb-6 font-light"
-                style={{ fontFamily: "var(--font-anton)" }}
+                className="text-5xl md:text-7xl lg:text-8xl text-blue-950 leading-none tracking-tight mb-6 font-bold"
+                style={{ fontFamily: "var(--font-poppins)" }}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={heroInView ? { scale: 1, opacity: 1 } : {}}
                 transition={{ duration: 1, ease: "easeOut" }}
               >
-                PRIVACY{" "}
-                <span 
-                  style={{ fontFamily: "var(--font-allura)" }} 
-                  className="text-6xl md:text-8xl lg:text-9xl text-blue-950"
-                >
-                  Policy
-                </span>
+                PRIVACY{" "}Policy
               </motion.h1>
               
               <motion.p
@@ -160,16 +154,10 @@ export default function PrivacyPolicyPage() {
               transition={{ duration: 0.8 }}
             >
               <h2 
-                className="text-4xl md:text-6xl text-blue-950 leading-tight mb-6"
-                style={{ fontFamily: "var(--font-anton)" }}
+                className="text-4xl md:text-6xl text-blue-950 leading-tight mb-6 font-bold"
+                style={{ fontFamily: "var(--font-poppins)" }}
               >
-                OUR{" "}
-                <span 
-                  style={{ fontFamily: "var(--font-allura)" }}
-                  className="text-5xl md:text-7xl text-blue-950"
-                >
-                  Commitment
-                </span>
+                OUR{" "}Commitment
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 We are committed to protecting your privacy and being transparent about our data practices.
@@ -198,7 +186,7 @@ export default function PrivacyPolicyPage() {
                     </div>
                     <h3 
                       className="text-xl font-bold  text-blue-950 mb-3"
-                      // style={{ fontFamily: "var(--font-anton)" }}
+                      // style={{ fontFamily: "var(--font-poppins)" }}
                     >
                       {highlight.title}
                     </h3>
@@ -226,7 +214,7 @@ export default function PrivacyPolicyPage() {
                 >
                   <h3 
                     className="text-2xl md:text-3xl font-bold text-blue-950 mb-6 flex items-center gap-3"
-                    // style={{ fontFamily: "var(--font-anton)" }}
+                    // style={{ fontFamily: "var(--font-poppins)" }}
                   >
                     <div className="w-8 h-8 bg-blue-950 text-white rounded-full flex items-center justify-center text-sm">
                       {index + 1}
@@ -257,8 +245,8 @@ export default function PrivacyPolicyPage() {
               transition={{ duration: 0.8, delay: 0.5 }}
             >
               <h2 
-                className="text-4xl md:text-6xl text-blue-950 leading-tight mb-6"
-                style={{ fontFamily: "var(--font-anton)" }}
+                className="text-4xl md:text-6xl text-blue-950 leading-tight mb-6 font-bold"
+                style={{ fontFamily: "var(--font-poppins)" }}
               >
                 QUESTIONS{" "}
                 <span 
