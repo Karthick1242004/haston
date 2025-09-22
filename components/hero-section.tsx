@@ -237,7 +237,7 @@ export default function HeroSection() {
               key={`${currentSlide}-main`}
               className="text-[6rem] md:text-[12rem] lg:text-[16rem] xl:text-[20rem] text-white leading-none tracking-tighter drop-shadow-2xl"
               style={{
-                fontFamily: "var(--font-poppins)",
+                fontFamily: "var(--font-anton)",
                 textShadow: "0 4px 20px rgba(0,0,0,0.3)",
               }}
               initial={{ scale: 0.8, opacity: 0, y: 50 }}
