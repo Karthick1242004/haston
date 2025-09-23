@@ -191,7 +191,7 @@ export default function HeroSection() {
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 1, ease: "easeInOut" }}
           >
-            <div className="relative w-full h-full">
+            <div className="relative w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100">
               {/* Blur placeholder while loading */}
               {imageLoadingStates[slides[currentSlide]?.image] && (
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 animate-pulse">
@@ -203,13 +203,13 @@ export default function HeroSection() {
                 src={slides[currentSlide]?.image}
                 alt={`${slides[currentSlide]?.mainText} ${slides[currentSlide]?.subText}`}
                 fill
-                className={`object-cover object-center md:object-cover transition-opacity duration-700 ${
+                className={`object-contain sm:object-cover object-center transition-opacity duration-700 ${
                   preloadedImages.has(slides[currentSlide]?.image) 
                     ? 'opacity-100' 
                     : 'opacity-0'
                 }`}
                 style={{
-                  objectFit: 'cover',
+                  objectFit: 'contain',
                   objectPosition: 'center center',
                   width: '100%',
                   height: '100%',
