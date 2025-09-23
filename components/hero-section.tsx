@@ -203,11 +203,19 @@ export default function HeroSection() {
                 src={slides[currentSlide]?.image}
                 alt={`${slides[currentSlide]?.mainText} ${slides[currentSlide]?.subText}`}
                 fill
-                className={`object-cover transition-opacity duration-700 ${
+                className={`object-cover object-center md:object-cover transition-opacity duration-700 ${
                   preloadedImages.has(slides[currentSlide]?.image) 
                     ? 'opacity-100' 
                     : 'opacity-0'
                 }`}
+                style={{
+                  objectFit: 'cover',
+                  objectPosition: 'center center',
+                  width: '100%',
+                  height: '100%',
+                  minHeight: '100vh',
+                  minWidth: '100vw'
+                }}
                 priority
                 sizes="100vw"
                 quality={85}
@@ -257,7 +265,7 @@ export default function HeroSection() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -50, opacity: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            >
+            > 
               <div
                 className="lg:text-8xl xl:text-9xl text-white relative text-5xl"
                 style={{
