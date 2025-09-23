@@ -215,7 +215,7 @@ export default function HeroSection() {
                   height: '100%',
                   minHeight: '100vh',
                   minWidth: '100vw'
-                }}
+                }} 
                 priority
                 sizes="100vw"
                 quality={85}
