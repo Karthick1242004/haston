@@ -455,36 +455,36 @@ export default function PopularProducts() {
   return (
     <section
       ref={ref}
-      className="py-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden"
+      className="py-6 md:py-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden"
     >
       {/* Background decoration */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmNmY2ZjYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')]"></div>
-      <div className="container mx-auto px-2 sm:px-4 relative z-10">
+      <div className="container mx-auto px-5 sm:px-4 relative z-10">
         <motion.div
-          className="mb-16"
+          className="mb-4 md:mb-16"
           initial={{ opacity: 0, x: -100 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.8 }}
         >
           <h2
-            className="text-6xl md:text-8xl font-bold text-blue-950 tracking-tight"
-            style={{ fontFamily: "var(--font-poppins)" }}
+            className="text-6xl md:text-8xl mt-4 font-extrabold tracking-tight text-blue-950"
+            style={{ fontFamily: "var(--font-nunito)" }}
           >
-            Popular Products
+            New Arrivals
           </h2>
         </motion.div>
 
         {/* Category Filters */}
         <motion.div
-          className="mb-8"
+          className="mb-4 md:mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row gap-2 md:gap-4 items-start sm:items-center justify-between mb-3 md:mb-6">
             <div className="flex items-center gap-2 text-blue-950">
-              <Filter className="w-5 h-5" />
-              <span className="font-medium">Filter by Category</span>
+              <Filter className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="text-sm md:text-base font-medium">Filter by Category</span>
             </div>
             {(selectedCategory !== "all" || selectedSubcategory !== "all") && (
               <Badge

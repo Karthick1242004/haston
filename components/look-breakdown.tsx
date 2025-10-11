@@ -202,7 +202,7 @@ export default function LookBreakdown() {
           transition={{ duration: 0.8 }}
         >
           <div className="flex flex-wrap items-center gap-8 mb-6">
-            <h2 className="text-6xl md:text-8xl mt-4 font-bold tracking-tight text-blue-950" style={{ fontFamily: "var(--font-poppins)" }}>
+            <h2 className="text-6xl md:text-8xl mt-4 font-extrabold tracking-tight text-blue-950" style={{ fontFamily: "var(--font-nunito)" }}>
               The{" "}
               Look{" "}
               Breakdown
@@ -393,7 +393,7 @@ export default function LookBreakdown() {
                 <>
                   <h3 
                     className="text-4xl font-bold text-blue-950 mb-4 cursor-pointer hover:text-blue-800 transition-colors duration-200" 
-                    style={{ fontFamily: "var(--font-poppins)" }}
+                    style={{ fontFamily: "var(--font-nunito)" }}
                     onClick={() => handleProductClick(carouselItems[safeIndex]?.id)}
                   >
                     {carouselItems[safeIndex]?.title}

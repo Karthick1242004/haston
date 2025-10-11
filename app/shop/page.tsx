@@ -433,13 +433,13 @@ export default function ShopPage() {
             >
               <h1
                 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 tracking-tight leading-tight"
-                style={{ fontFamily: "var(--font-poppins)" }}
+                style={{ fontFamily: "var(--font-nunito)" }}
               >
                 Explore a World of Style,
               </h1>
               <p
                 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-600 font-bold"
-                style={{ fontFamily: "var(--font-poppins)" }}
+                style={{ fontFamily: "var(--font-nunito)" }}
               >
                 Crafted for You
               </p>

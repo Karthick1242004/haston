@@ -110,7 +110,7 @@ export default function PrivacyPolicyPage() {
               
               <motion.h1
                 className="text-5xl md:text-7xl lg:text-8xl text-blue-950 leading-none tracking-tight mb-6 font-bold"
-                style={{ fontFamily: "var(--font-poppins)" }}
+                style={{ fontFamily: "var(--font-nunito)" }}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={heroInView ? { scale: 1, opacity: 1 } : {}}
                 transition={{ duration: 1, ease: "easeOut" }}
@@ -155,7 +155,7 @@ export default function PrivacyPolicyPage() {
             >
               <h2 
                 className="text-4xl md:text-6xl text-blue-950 leading-tight mb-6 font-bold"
-                style={{ fontFamily: "var(--font-poppins)" }}
+                style={{ fontFamily: "var(--font-nunito)" }}
               >
                 OUR{" "}Commitment
               </h2>
@@ -246,7 +246,7 @@ export default function PrivacyPolicyPage() {
             >
               <h2 
                 className="text-4xl md:text-6xl text-blue-950 leading-tight mb-6 font-bold"
-                style={{ fontFamily: "var(--font-poppins)" }}
+                style={{ fontFamily: "var(--font-nunito)" }}
               >
                 QUESTIONS{" "}
                 <span 

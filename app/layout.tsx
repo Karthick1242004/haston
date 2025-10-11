@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Poppins, Anton, Allura } from "next/font/google"
+import { Inter, Poppins, Anton, Allura, Nunito } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import AuthProvider from "@/components/auth-provider"
@@ -25,6 +25,11 @@ const allura = Allura({
   subsets: ["latin"],
   variable: "--font-allura",
 })
+const nunito = Nunito({
+  weight: ["800"],
+  subsets: ["latin"],
+  variable: "--font-nunito",
+})
 
 export const metadata: Metadata = {
   title: "Hex & Hue - Summer Collection 2025",
@@ -39,7 +44,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} ${anton.variable} ${poppins.variable} ${allura.variable}`}>
+      <body className={`${inter.className} ${anton.variable} ${poppins.variable} ${allura.variable} ${nunito.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

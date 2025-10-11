@@ -138,7 +138,7 @@ export default function HeroSection() {
   // Show loading or error states
   if (isLoading) {
     return (
-      <section className="h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative overflow-hidden">
+      <section className="h-[50vh] md:h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative overflow-hidden">
         {/* Animated background */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 animate-pulse"></div>
         
@@ -165,7 +165,7 @@ export default function HeroSection() {
 
   if (error || slides.length === 0) {
     return (
-      <section className="h-screen bg-gray-100 flex items-center justify-center">
+      <section className="h-[50vh] md:h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 text-lg mb-4">{error || 'No slides available'}</p>
           <button 
@@ -180,7 +180,7 @@ export default function HeroSection() {
   }
 
   return (
-    <section ref={ref} className="relative h-screen overflow-hidden">
+    <section ref={ref} className="relative h-[50vh] md:h-screen overflow-hidden">
       <motion.div style={{ y, opacity }} className="absolute inset-0">
         <AnimatePresence mode="wait">
           <motion.div
@@ -208,14 +208,6 @@ export default function HeroSection() {
                     ? 'opacity-100' 
                     : 'opacity-0'
                 }`}
-                style={{
-                  objectFit: 'contain',
-                  objectPosition: 'center center',
-                  width: '100%',
-                  height: '100%',
-                  minHeight: '100vh',
-                  minWidth: '100vw'
-                }} 
                 priority
                 sizes="100vw"
                 quality={85}
@@ -238,12 +230,12 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
 
       {/* Content */}
-      <div className="relative z-10 h-full flex items-end justify-center pb-20">
-        <div className="text-center">
+      <div className="relative z-10 h-full flex items-end justify-center pb-8 md:pb-20">
+        <div className="text-center px-4">
           <AnimatePresence mode="wait">
             <motion.h1
               key={`${currentSlide}-main`}
-              className="text-[6rem] md:text-[12rem] lg:text-[16rem] xl:text-[20rem] text-white leading-none tracking-tighter drop-shadow-2xl"
+              className="text-[3rem] sm:text-[4rem] md:text-[12rem] lg:text-[16rem] xl:text-[20rem] text-white leading-none tracking-tighter drop-shadow-2xl"
               style={{
                 fontFamily: "var(--font-anton)",
                 textShadow: "0 4px 20px rgba(0,0,0,0.3)",
@@ -260,18 +252,18 @@ export default function HeroSection() {
           <AnimatePresence mode="wait">
             <motion.div
               key={`${currentSlide}-sub`}
-              className="relative mt-[-3rem] md:mt-[-4rem] lg:mt-[-6rem]"
+              className="relative mt-[-1.5rem] sm:mt-[-2rem] md:mt-[-4rem] lg:mt-[-6rem]"
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -50, opacity: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             > 
               <div
-                className="lg:text-8xl xl:text-9xl text-white relative text-5xl"
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-9xl text-white relative"
                 style={{
                   fontFamily: "var(--font-allura)",
                   textShadow: "0 2px 10px rgba(0,0,0,0.3)",
-                  WebkitTextStroke: "2px #92400e",
+                  WebkitTextStroke: "1px #92400e",
                 }}
               >
                 {slides[currentSlide]?.subText}
@@ -282,29 +274,29 @@ export default function HeroSection() {
       </div>
 
       {/* Navigation Buttons */}
-      <div className="absolute top-1/2 left-4 right-4 transform -translate-y-1/2 flex justify-between items-center z-20 pointer-events-none">
+      <div className="absolute top-1/2 left-2 right-2 md:left-4 md:right-4 transform -translate-y-1/2 flex justify-between items-center z-20 pointer-events-none">
         <motion.button
           onClick={prevSlide}
-          className="p-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full transition-all duration-200 pointer-events-auto"
+          className="p-2 md:p-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full transition-all duration-200 pointer-events-auto"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 1 }}
         >
-          <ChevronLeft className="w-6 h-6 text-white" />
+          <ChevronLeft className="w-4 h-4 md:w-6 md:h-6 text-white" />
         </motion.button>
 
         <motion.button
           onClick={nextSlide}
-          className="p-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full transition-all duration-200 pointer-events-auto"
+          className="p-2 md:p-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full transition-all duration-200 pointer-events-auto"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 1 }}
         >
-          <ChevronRight className="w-6 h-6 text-white" />
+          <ChevronRight className="w-4 h-4 md:w-6 md:h-6 text-white" />
         </motion.button>
       </div>
 

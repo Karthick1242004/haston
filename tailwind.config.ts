@@ -14,6 +14,7 @@ const config: Config = {
   			'anton': ['var(--font-anton)', 'sans-serif'],
   			'poppins': ['var(--font-poppins)', 'sans-serif'],
   			'allura': ['var(--font-allura)', 'cursive'],
+  			'nunito': ['var(--font-nunito)', 'sans-serif'],
   		},
   		colors: {
   			background: 'hsl(var(--background))',

@@ -57,7 +57,7 @@ export default function SizeGuidePage() {
             >
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Ruler className="w-8 h-8 text-blue-950" />
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-950" style={{ fontFamily: "var(--font-poppins)" }}>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-blue-950" style={{ fontFamily: "var(--font-nunito)" }}>
                   Size Guide
                 </h1>
               </div>
