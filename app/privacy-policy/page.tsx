@@ -115,7 +115,7 @@ export default function PrivacyPolicyPage() {
                 animate={heroInView ? { scale: 1, opacity: 1 } : {}}
                 transition={{ duration: 1, ease: "easeOut" }}
               >
-                PRIVACY{" "}Policy
+                Privacy{" "}Policy
               </motion.h1>
               
               <motion.p

@@ -6,7 +6,7 @@ import Image from "next/image"
 export default function Loader() {
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-white"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#F7F7F7]"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
@@ -19,10 +19,10 @@ export default function Loader() {
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <Image
-            src="/logomain.png"
+            src="/newlogomain2.jpg"
             alt="HEX & HUE"
-            width={200}
-            height={80}
+            width={250}
+            height={130}
             className="object-contain"
             priority
           />

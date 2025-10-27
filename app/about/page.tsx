@@ -58,7 +58,7 @@ export default function AboutPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-amber-200/30 via-transparent to-purple-200/30" />
           </div>
           
-          <div className="relative w-full  px-6 md:px-12">
+          <div className="relative w-full mt-10 px-6 md:px-12">
             <motion.div
               className="mb-8 text-center"
               initial={{ opacity: 0, y: 50 }}
@@ -254,7 +254,7 @@ export default function AboutPage() {
         </section>
 
         {/* Stats Section */}
-        <section ref={statsRef} className="py-20 relative">
+        {/* <section ref={statsRef} className="py-20 relative">
           <div className="absolute inset-0 bg-gradient-to-r from-amber-100/50 to-purple-100/50" />
           <div className="relative w-full px-6 md:px-12">
             <motion.div
@@ -288,7 +288,7 @@ export default function AboutPage() {
               })}
             </motion.div>
           </div>
-        </section>
+        </section> */}
 
         {/* Values Section */}
         {/* <section ref={valuesRef} className="py-20">

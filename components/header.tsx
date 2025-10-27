@@ -96,7 +96,7 @@ export default function Header() {
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
                 <Image
-                  src="/logomain11.png"
+                  src="/new-trans-logo.jpeg"
                   alt="HEX & HUE"
                   width={100}
                   height={100}
