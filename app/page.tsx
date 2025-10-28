@@ -30,11 +30,9 @@ export default function HomePage() {
     <PageTransition>
       <div className="min-h-screen bg-[#F1EFEE]">
         <Header />
-        <main className="md:block">
-          <div className="md:min-h-screen">
-            <HeroSection />
-            <PopularProducts />
-          </div>
+        <main>
+          <HeroSection />
+          <PopularProducts />
           <LookBreakdown />
           {/* <Testimonials/> */}
         </main>
