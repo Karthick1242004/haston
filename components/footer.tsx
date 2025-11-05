@@ -79,11 +79,11 @@ export default function Footer() {
             {/* If not using Next.js, replace with <img ... /> */}
             {/* If using Next.js, make sure to import: import Image from "next/image" */}
             <img
-              src="/logomain.png"
+              src="/trans-logo-new.png"
               alt="HEX & HUE"
-              width={100}
-              height={100}
-              className="object-contain"
+              width={110}
+              height={110}
+              className="object-contain mb-5"
               loading="eager"
             />
             <div className="space-y-3 text-xs text-gray-600">

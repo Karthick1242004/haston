@@ -49,7 +49,7 @@ const sortOptions: SortOption[] = [
 
 const categories = ["Outerwear", "Tops", "Bottoms", "Suits", "Footwear", "Accessories"]
 const colors = ["Black", "White", "Gray", "Navy", "Blue", "Green", "Beige", "Brown", "Pink", "Red"]
-const sizes = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "28", "30", "32", "34", "36", "7", "8", "9", "10", "11", "12"]
+const sizes = ["S", "M", "L", "XL"]
 
 const colorMap: Record<string, string> = {
   "Black": "bg-black",

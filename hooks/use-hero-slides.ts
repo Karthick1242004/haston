@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import useSWR from 'swr'
+import useSWR, { mutate as globalMutate } from 'swr'
 
 export interface HeroSlide {
   id?: string
@@ -42,11 +42,11 @@ export function useHeroSlides() {
     '/api/hero-slides',
     fetcher,
     {
-      // Optimization settings for better performance
-      revalidateOnFocus: false,          // Don't refetch when window regains focus
+      // Optimization settings with better balance between performance and freshness
+      revalidateOnFocus: true,           // Refetch when window regains focus (to show new banners)
       revalidateOnReconnect: true,       // Refetch when reconnecting to internet
-      refreshInterval: 300000,           // Refresh every 5 minutes (300 seconds)
-      dedupingInterval: 60000,           // Dedupe requests within 1 minute
+      refreshInterval: 60000,            // Refresh every 1 minute (reduced from 5 minutes)
+      dedupingInterval: 5000,            // Dedupe requests within 5 seconds (reduced from 1 minute)
       errorRetryInterval: 5000,          // Retry failed requests after 5 seconds
       errorRetryCount: 3,                // Maximum 3 retry attempts
       loadingTimeout: 10000,             // 10 second timeout for requests
@@ -154,7 +154,9 @@ export function useAdminHeroSlides() {
       const data = await response.json()
       
       if (data.success) {
-        await mutate() // Use SWR mutate to refresh list
+        // Invalidate both admin and public caches for immediate update
+        await mutate() // Refresh admin list
+        await globalMutate('/api/hero-slides') // Invalidate public cache globally
         return { success: true, slide: data.slide }
       } else {
         return { success: false, error: data.error }
@@ -195,7 +197,9 @@ export function useAdminHeroSlides() {
       const data = await response.json()
       
       if (data.success) {
-        await mutate() // Use SWR mutate to refresh list
+        // Invalidate both admin and public caches for immediate update
+        await mutate() // Refresh admin list
+        await globalMutate('/api/hero-slides') // Invalidate public cache globally
         return { success: true, slide: data.slide }
       } else {
         return { success: false, error: data.error }
@@ -216,7 +220,9 @@ export function useAdminHeroSlides() {
       const data = await response.json()
       
       if (data.success) {
-        await mutate() // Use SWR mutate to refresh list
+        // Invalidate both admin and public caches for immediate update
+        await mutate() // Refresh admin list
+        await globalMutate('/api/hero-slides') // Invalidate public cache globally
         return { success: true }
       } else {
         return { success: false, error: data.error }

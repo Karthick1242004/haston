@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getDatabase } from '@/lib/mongodb'
+import { unstable_cache } from 'next/cache'
 
 // Enable ISR (Incremental Static Regeneration) for better performance
-export const revalidate = 300 // Revalidate every 5 minutes
+export const revalidate = 60 // Revalidate every 1 minute (reduced from 5 minutes)
 
 export async function GET() {
   try {
@@ -18,8 +19,9 @@ export async function GET() {
             mainText: 1,
             subText: 1,
             image: 1,
-            order: 1
-            // Exclude unnecessary fields like createdAt, updatedAt, etc.
+            order: 1,
+            updatedAt: 1
+            // Exclude unnecessary fields like createdAt, etc.
           }
         }
       )
@@ -36,19 +38,24 @@ export async function GET() {
         image: slide.image,
         order: slide.order || 0
       })),
-      // Add metadata for debugging (only in development)
-      ...(process.env.NODE_ENV === 'development' && {
-        meta: {
-          count: slides.length,
-          timestamp: new Date().toISOString(),
-          cached: false // Will be true when served from cache
-        }
-      })
+      // Add metadata with cache info
+      meta: {
+        count: slides.length,
+        timestamp: new Date().toISOString(),
+        // Include a hash based on last update for cache busting
+        lastUpdate: slides.length > 0 
+          ? Math.max(...slides.map((s: any) => s.updatedAt?.getTime() || 0))
+          : Date.now()
+      }
+    }, {
+      headers: {
+        // Reduced cache time to 60 seconds, allow stale content for 120 seconds
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+        'X-Response-Time': new Date().toISOString(),
+        // Add cache tag for targeted revalidation
+        'Cache-Tag': 'hero-slides'
+      }
     })
-
-    // Add proper caching headers
-    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
-    response.headers.set('X-Response-Time', new Date().toISOString())
 
     return response
   } catch (error) {

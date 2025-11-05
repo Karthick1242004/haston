@@ -4,6 +4,7 @@ import { isAdminEmail } from '@/lib/isAdmin'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { v2 as cloudinary } from 'cloudinary'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 // Configure Cloudinary
 cloudinary.config({
@@ -125,9 +126,20 @@ export async function POST(request: NextRequest) {
 
     const result = await db.collection('heroSlides').insertOne(slide)
     
+    // Revalidate the hero slides cache to show new banner immediately
+    try {
+      revalidatePath('/api/hero-slides')
+      revalidatePath('/')
+      revalidateTag('hero-slides')
+    } catch (revalidateError) {
+      console.warn('Cache revalidation failed:', revalidateError)
+    }
+    
     return NextResponse.json({ 
       success: true, 
-      slide: { ...slide, _id: result.insertedId }
+      slide: { ...slide, _id: result.insertedId },
+      revalidated: true,
+      timestamp: new Date().toISOString()
     }, { status: 201 })
 
   } catch (error) {
@@ -212,7 +224,21 @@ export async function PUT(request: NextRequest) {
       { $set: updateData }
     )
     
-    return NextResponse.json({ success: true, slide: { _id: slideId, ...updateData } })
+    // Revalidate the hero slides cache to show updated banner immediately
+    try {
+      revalidatePath('/api/hero-slides')
+      revalidatePath('/')
+      revalidateTag('hero-slides')
+    } catch (revalidateError) {
+      console.warn('Cache revalidation failed:', revalidateError)
+    }
+    
+    return NextResponse.json({ 
+      success: true, 
+      slide: { _id: slideId, ...updateData },
+      revalidated: true,
+      timestamp: new Date().toISOString()
+    })
   } catch (error) {
     console.error('Error updating hero slide:', error)
     return NextResponse.json({ success: false, error: 'Failed to update slide' }, { status: 500 })
@@ -262,7 +288,20 @@ export async function DELETE(request: NextRequest) {
       _id: new (require('mongodb')).ObjectId(slideId) 
     })
     
-    return NextResponse.json({ success: true })
+    // Revalidate the hero slides cache to reflect deletion immediately
+    try {
+      revalidatePath('/api/hero-slides')
+      revalidatePath('/')
+      revalidateTag('hero-slides')
+    } catch (revalidateError) {
+      console.warn('Cache revalidation failed:', revalidateError)
+    }
+    
+    return NextResponse.json({ 
+      success: true,
+      revalidated: true,
+      timestamp: new Date().toISOString()
+    })
   } catch (error) {
     console.error('Error deleting hero slide:', error)
     return NextResponse.json({ success: false, error: 'Failed to delete slide' }, { status: 500 })
