@@ -13,10 +13,10 @@ import PageTransition from "@/components/page-transition"
 export default function SizeGuidePage() {
   const router = useRouter()
 
-  const handleDownload = () => {
+  const handleDownload = (type: 'regular' | 'oversize') => {
     const link = document.createElement('a')
-    link.href = '/sizeguide.png'
-    link.download = 'size-guide.png'
+    link.href = type === 'regular' ? '/regularfit.png' : '/oversizefit.png'
+    link.download = type === 'regular' ? 'regular-fit-size-guide.png' : 'oversize-fit-size-guide.png'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -66,40 +66,79 @@ export default function SizeGuidePage() {
               </p>
             </motion.div>
 
-            {/* Size Guide Card */}
+            {/* Size Guide Cards */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mb-8"
+              className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-6"
             >
+              {/* Regular Fit Chart */}
               <Card className="bg-white shadow-lg border border-gray-200 overflow-hidden">
                 <CardHeader className="bg-white border-b border-gray-100">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <CardTitle className="text-2xl font-bold text-blue-950">
-                      Clothing Size Chart
+                    <CardTitle className="text-xl font-extrabold text-blue-950" style={{ fontFamily: "var(--font-nunito)" }}>
+                      Regular Fit
                     </CardTitle>
                     <Button
-                      onClick={handleDownload}
+                      onClick={() => handleDownload('regular')}
                       variant="outline"
+                      size="sm"
                       className="flex items-center gap-2 text-blue-950 border-blue-950 hover:bg-blue-950 hover:text-white transition-all"
                     >
                       <Download className="w-4 h-4" />
-                      Download Chart
+                      Download
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="relative w-full">
-                    <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                    <div className="bg-gray-50 rounded-lg p-4">
                       <div className="relative w-full aspect-[16/10] overflow-hidden rounded-lg">
                         <Image
-                          src="/sizeguide.png"
-                          alt="Size Guide Chart"
+                          src="/regularfit.png"
+                          alt="Regular Fit Size Guide Chart"
                           fill
                           className="object-contain"
                           priority
-                          sizes="(max-width: 768px) 100vw, 80vw"
+                          sizes="(max-width: 1024px) 100vw, 50vw"
+                          quality={90}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Oversize Fit Chart */}
+              <Card className="bg-white shadow-lg border border-gray-200 overflow-hidden">
+                <CardHeader className="bg-white border-b border-gray-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <CardTitle className="text-xl font-extrabold text-blue-950" style={{ fontFamily: "var(--font-nunito)" }}>
+                      Oversize Fit
+                    </CardTitle>
+                    <Button
+                      onClick={() => handleDownload('oversize')}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 text-blue-950 border-blue-950 hover:bg-blue-950 hover:text-white transition-all"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="relative w-full">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="relative w-full aspect-[16/10] overflow-hidden rounded-lg">
+                        <Image
+                          src="/oversizefit.png"
+                          alt="Oversize Fit Size Guide Chart"
+                          fill
+                          className="object-contain"
+                          priority
+                          sizes="(max-width: 1024px) 100vw, 50vw"
                           quality={90}
                         />
                       </div>
