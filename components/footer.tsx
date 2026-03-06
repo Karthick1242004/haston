@@ -180,7 +180,7 @@ export default function Footer() {
           >
             <h4 className="text-xl font-extrabold font-sans tracking-wide text-blue-950 mb-6" style={{ fontFamily: "var(--font-nunito)" }}>STAY CONNECTED</h4>
             <p className="text-gray-600 mb-6 text-sm">
-              Subscribe to Our Newsletter for the Latest Updates, Offers, and Exclusive Releases
+              {/* Subscribe to Our Newsletter for the Latest Updates, Offers, and Exclusive Releases */}
             </p>
 
             <form onSubmit={handleSubscribe} className="space-y-4">
