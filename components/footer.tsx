@@ -95,13 +95,13 @@ export default function Footer() {
                 <Phone className="w-4 h-4" />
                 <span>+91 70604 77331</span>
               </div>
-              <div className="flex items-start space-x-3">
+              {/* <div className="flex items-start space-x-3">
                 <MapPin className="w-4 h-4 mt-1" />
                 <div>
                   <p>1247 Fashion District, Noida</p>
                   <p>201301, India</p>
                 </div>
-              </div>
+              </div> */}
             </div>
           </motion.div>
 
