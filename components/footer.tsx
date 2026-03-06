@@ -123,11 +123,11 @@ export default function Footer() {
                   Shipping Information
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a href="/size-guide" className="hover:text-blue-950 transition-colors duration-200">
                   Size Guide
                 </a>
-              </li>
+              </li> */}
               <li>
                 <a href="/privacy-policy" className="hover:text-blue-950 transition-colors duration-200">
                   Privacy Policy
