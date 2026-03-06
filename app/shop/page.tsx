@@ -334,7 +334,7 @@ export default function ShopPage() {
           </div>
 
           {/* Colors */}
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             <h4 className="font-medium text-gray-900">Color</h4>
             <div className="grid grid-cols-4 gap-2">
               {colors.map((color) => (
@@ -350,7 +350,7 @@ export default function ShopPage() {
                 />
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Sizes */}
           <div className="space-y-3">
