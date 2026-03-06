@@ -15,8 +15,8 @@ export default function SizeGuidePage() {
 
   const handleDownload = () => {
     const link = document.createElement('a')
-    link.href = '/sizeguide.png'
-    link.download = 'size-guide.png'
+    link.href = '/oversizefit.png'
+    link.download = 'oversizefit.png'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -94,7 +94,7 @@ export default function SizeGuidePage() {
                     <div className="bg-gray-50 rounded-lg p-4 mb-6">
                       <div className="relative w-full aspect-[16/10] overflow-hidden rounded-lg">
                         <Image
-                          src="/sizeguide.png"
+                          src="/oversizefit.png"
                           alt="Size Guide Chart"
                           fill
                           className="object-contain"
