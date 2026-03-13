@@ -157,7 +157,7 @@ export default function PrivacyPolicyPage() {
                 className="text-4xl md:text-6xl text-blue-950 leading-tight mb-6 font-bold"
                 style={{ fontFamily: "var(--font-nunito)" }}
               >
-                OUR{" "}Commitment
+                Our{" "}Commitment
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 We are committed to protecting your privacy and being transparent about our data practices.
