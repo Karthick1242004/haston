@@ -304,8 +304,11 @@ export default function ShopPage() {
                 {CATEGORIES
                   .filter(cat => filters.mainCategories.includes(cat.value))
                   .flatMap(cat => cat.subcategories || [])
+                  .filter((subcategory, index, self) => 
+                    index === self.findIndex((s) => s.value === subcategory.value)
+                  )
                   .map((subcategory) => (
-                    <label key={subcategory.id} className="flex items-center space-x-2 cursor-pointer">
+                    <label key={subcategory.value} className="flex items-center space-x-2 cursor-pointer">
                       <Checkbox
                         checked={filters.subCategories.includes(subcategory.value)}
                         onCheckedChange={() => toggleFilter("subCategories", subcategory.value)}

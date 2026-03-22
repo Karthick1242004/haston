@@ -736,7 +736,7 @@ export default function ProfilePage() {
               {/* Right Column - Quick Stats & Actions */}
               <div className="lg:col-span-1 space-y-6">
                 {/* Quick Stats */}
-                <motion.div
+                {/* <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
@@ -775,7 +775,7 @@ export default function ProfilePage() {
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </motion.div> */}
 
                 {/* Quick Actions */}
                 <motion.div
