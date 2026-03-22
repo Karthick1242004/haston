@@ -74,6 +74,7 @@ import {
   Plus,
   X,
 } from "lucide-react";
+import { GenerateInvoiceButton } from "@/components/generate-invoice-button";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -3168,13 +3169,14 @@ export default function AdminPage() {
                           </Card> */}
 
                           {/* Admin Actions */}
-                          <div className="flex justify-end gap-3 pt-6 border-t">
+                          <div className="flex flex-wrap justify-end gap-3 pt-6 border-t">
                             <Button
                               variant="outline"
                               onClick={() => setIsOrderModalOpen(false)}
                             >
                               Close
                             </Button>
+                            <GenerateInvoiceButton orderId={selectedOrder.orderId} />
                             <Button
                               onClick={() => setIsEditingOrder(true)}
                               className="bg-blue-950 text-white"
