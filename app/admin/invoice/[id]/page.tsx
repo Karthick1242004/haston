@@ -231,7 +231,9 @@ export default function InvoicePage() {
         @media print {
           body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           @page { margin: 10mm; }
+          #site-animated-banner, header, footer { display: none !important; }
         }
+        #site-animated-banner { display: none !important; }
       `}} />
     </div>
   );

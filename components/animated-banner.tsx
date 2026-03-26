@@ -98,7 +98,7 @@ export default function AnimatedBanner() {
   }
 
   return (
-    <div className="bg-yellow-300 text-black overflow-hidden relative z-50">
+    <div id="site-animated-banner" className="bg-yellow-300 text-black overflow-hidden relative z-50">
       <div className="relative h-10 flex items-center">
         {/* Animated banner content */}
         <motion.div
