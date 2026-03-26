@@ -73,7 +73,7 @@ export default function InvoicePage() {
       {/* Header section */}
       <div className="flex justify-between items-start mb-12">
         <div>
-          <h1 className="text-4xl font-bold tracking-tighter text-blue-950 mb-4">Hex & Hue</h1>
+          <h1 className="text-4xl font-bold tracking-tighter text-blue-950 mb-4">HASTON</h1>
           <h2 className="text-3xl font-light text-gray-700 mb-2">E-Commerce Invoice</h2>
           <p className="text-gray-500 font-medium">Invoice #: {order.orderId}</p>
         </div>
@@ -189,7 +189,7 @@ export default function InvoicePage() {
               <td className="py-4 text-gray-800">
                 <p className="font-medium">{item.name}</p>
                 <p className="text-xs text-gray-500 mt-1">
-                  Size: {item.selectedSize} | Color: {item.selectedColor}
+                  Size: {item.selectedSize} | Color: {typeof item.selectedColor === 'object' ? (item.selectedColor.name || item.selectedColor.value) : item.selectedColor}
                 </p>
               </td>
               <td className="py-4 text-center text-gray-800">{item.quantity}</td>
