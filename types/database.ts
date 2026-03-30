@@ -25,6 +25,7 @@ export interface ExtendedUser {
   cartItems?: CartItem[]
   wishlist?: string[] // Array of product IDs
   orderHistory?: string[] // Array of order IDs
+  usedCoupons?: string[] // Array of used discount codes
   
   // Preferences
   preferences?: {
@@ -77,4 +78,13 @@ export interface CartItem {
   selectedColor: string
   quantity: number
   addedAt?: Date
+}
+
+export interface Coupon {
+  _id?: string
+  code: string
+  discountPercentage: number
+  isActive: boolean
+  createdAt: Date
+  updatedAt?: Date
 }

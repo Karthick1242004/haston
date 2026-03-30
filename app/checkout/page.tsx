@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Script from "next/script"
-import { ChevronLeft, Minus, Plus, Trash2, CreditCard, ShoppingBag, User, Loader2 } from "lucide-react"
+import { ChevronLeft, Minus, Plus, Trash2, CreditCard, ShoppingBag, User, Loader2, Tag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -79,6 +79,7 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string>("")
   const [discountCode, setDiscountCode] = useState("")
   const [appliedDiscount, setAppliedDiscount] = useState(0)
+  const [availableCoupons, setAvailableCoupons] = useState<{code: string, discountPercentage: number}[]>([])
   const [isFormValid, setIsFormValid] = useState(false)
   const [isLoadingProfile, setIsLoadingProfile] = useState(false)
   const [isProcessingPayment, setIsProcessingPayment] = useState(false)
@@ -87,9 +88,9 @@ export default function CheckoutPage() {
   const subtotal = getCartTotal()
   const shipping = subtotal > 200 ? 0 : 12.00
   const taxRate = 0.08 // 8% tax
-  const taxes = subtotal * taxRate
   const discount = (subtotal * appliedDiscount) / 100
-  const total = subtotal + shipping + taxes - discount
+  const taxes = (subtotal - discount) * taxRate
+  const total = subtotal - discount + shipping + taxes
 
   useEffect(() => {
     if (cartItems.length === 0) {
@@ -103,6 +104,23 @@ export default function CheckoutPage() {
       fetchUserProfile()
     }
   }, [session, userProfile])
+
+  useEffect(() => {
+    if (session?.user) {
+      const fetchAvailableCoupons = async () => {
+        try {
+          const res = await fetch('/api/coupons/available')
+          const data = await res.json()
+          if (data.success) {
+            setAvailableCoupons(data.coupons || [])
+          }
+        } catch (error) {
+          console.error('Failed to fetch coupons:', error)
+        }
+      }
+      fetchAvailableCoupons()
+    }
+  }, [session])
 
   // Pre-fill form with session data
   useEffect(() => {
@@ -241,21 +259,48 @@ export default function CheckoutPage() {
     }
   }
 
-  const applyDiscountCode = () => {
-    // Mock discount codes
-    const discountCodes: { [key: string]: number } = {
-      "SAVE10": 10,
-      "WELCOME15": 15,
-      "SUMMER20": 20
+  const applyDiscountCode = async (codeToApply?: any) => {
+    // If it's an event handler it passes an event. So strictly check if codeToApply is a string
+    const code = typeof codeToApply === 'string' ? codeToApply : discountCode;
+    
+    if (!code) {
+      toast({
+        title: "Code Required",
+        description: "Please enter a discount code to apply",
+        variant: "destructive"
+      })
+      return
     }
     
-    if (discountCodes[discountCode.toUpperCase()]) {
-      setAppliedDiscount(discountCodes[discountCode.toUpperCase()])
-    } else {
-      setAppliedDiscount(0)
+    try {
+      const res = await fetch('/api/coupons/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      })
+      
+      const data = await res.json()
+      
+      if (data.success) {
+        setAppliedDiscount(data.discountPercentage)
+        setDiscountCode(data.code) // update exact formatting
+        toast({
+          title: "Discount Applied",
+          description: `Successfully applied ${data.discountPercentage}% discount!`
+        })
+      } else {
+        setAppliedDiscount(0)
+        toast({
+          title: "Invalid Code",
+          description: data.error || "The discount code you entered is not valid",
+          variant: "destructive"
+        })
+      }
+    } catch (error) {
+      console.error('Apply coupon error:', error)
       toast({
-        title: "Invalid Code",
-        description: "The discount code you entered is not valid",
+        title: "Error",
+        description: "Failed to apply discount code",
         variant: "destructive"
       })
     }
@@ -888,11 +933,52 @@ export default function CheckoutPage() {
                           </Button>
                         </div>
                         {appliedDiscount > 0 && (
-                          <p className="text-sm text-green-600 mt-2">
-                            {appliedDiscount}% discount applied!
-                          </p>
+                          <div className="flex items-center justify-between mt-2">
+                            <p className="text-sm text-green-600">
+                              {appliedDiscount}% discount applied!
+                            </p>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-6 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => {
+                                setAppliedDiscount(0)
+                                setDiscountCode("")
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </div>
                         )}
                       </div>
+
+                      {/* Available Coupons */}
+                      {!appliedDiscount && availableCoupons.length > 0 && (
+                        <div className="space-y-3 mt-4">
+                          <p className="text-sm font-medium text-gray-700">Available Coupons</p>
+                          {availableCoupons.map((coupon) => (
+                            <div key={coupon.code} className="bg-green-50/50 border border-green-200/60 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-colors hover:bg-green-50">
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2 text-green-800">
+                                  <Tag className="w-4 h-4 fill-green-800 text-green-800" />
+                                  <span className="font-bold tracking-tight">{coupon.code}</span>
+                                  <span className="text-sm font-medium">Save {(getCartTotal() * coupon.discountPercentage) / 100 > 0 ? `₹${((getCartTotal() * coupon.discountPercentage) / 100).toFixed(0)}` : `${coupon.discountPercentage}%`}</span>
+                                </div>
+                                <p className="text-xs text-gray-600">Congrats! '{coupon.code}' unlocked. Use at checkout to get {coupon.discountPercentage}% OFF</p>
+                              </div>
+                              <Button
+                                variant="outline"
+                                className="w-full sm:w-auto shrink-0 uppercase text-xs font-semibold tracking-wider text-green-900 border-green-300 bg-white hover:bg-green-100 hover:text-green-950 px-4 h-8"
+                                onClick={() => applyDiscountCode(coupon.code)}
+                                disabled={isProcessingPayment}
+                              >
+                                {coupon.code}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
                       <Separator />
 

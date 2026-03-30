@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
-import { getOrdersCollection } from '@/lib/mongodb'
+import { getOrdersCollection, getUsersCollection } from '@/lib/mongodb'
 import { Order, ServerOrder, OrderItem, PaymentDetails, ShippingAddress, OrderSummary } from '@/types/order'
 
 export async function POST(request: NextRequest) {
@@ -63,6 +63,15 @@ export async function POST(request: NextRequest) {
 
     if (!result.insertedId) {
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
+    }
+
+    // If a discount code was used, register it for the user
+    if (orderSummary.discountCode) {
+      const usersCollection = await getUsersCollection()
+      await usersCollection.updateOne(
+        { email: session.user.email },
+        { $addToSet: { usedCoupons: orderSummary.discountCode } as any }
+      )
     }
 
     // Convert server order to client order for response

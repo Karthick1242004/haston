@@ -77,6 +77,11 @@ export async function getOrdersCollection(): Promise<Collection> {
   return db.collection("orders")
 }
 
+export async function getCouponsCollection(): Promise<Collection> {
+  const db = await getDatabase()
+  return db.collection("coupons")
+}
+
 // Re-export types from database types file for server-side usage
 // This ensures API routes can still use these types while keeping client bundle clean
 export type { ExtendedUser, Address, CartItem } from '@/types/database'

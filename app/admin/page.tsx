@@ -32,6 +32,7 @@ import Header from "@/components/header";
 import AdminsManager from "@/components/admins-manager";
 import HeroSlidesManager from "@/components/hero-slides-manager";
 import BannerManager from "@/components/banner-manager";
+import CouponManager from "@/components/admin/coupon-manager";
 import { Order } from "@/types/order";
 import { ProductColor, Product, ProductCategory } from "@/types/product";
 import {
@@ -73,6 +74,7 @@ import {
   Image as ImageIcon,
   Plus,
   X,
+  Tag,
 } from "lucide-react";
 import { GenerateInvoiceButton } from "@/components/generate-invoice-button";
 
@@ -153,7 +155,7 @@ export default function AdminPage() {
 
   // Order management state
   const [currentView, setCurrentView] = useState<
-    "products" | "orders" | "hero" | "admins" | "banners"
+    "products" | "orders" | "hero" | "admins" | "banners" | "coupons"
   >("products");
   const [orders, setOrders] = useState<Order[]>([]);
   const [orderStats, setOrderStats] = useState<any>({});
@@ -804,12 +806,12 @@ export default function AdminPage() {
             value={currentView}
             onValueChange={(value) =>
               setCurrentView(
-                value as "products" | "orders" | "hero" | "admins" | "banners"
+                value as "products" | "orders" | "hero" | "admins" | "banners" | "coupons"
               )
             }
             className="space-y-6"
           >
-            <TabsList className="grid w-full grid-cols-5 lg:w-[750px]">
+            <TabsList className="grid w-full grid-cols-6 lg:w-[900px]">
               <TabsTrigger value="products" className="flex items-center gap-2">
                 <Package className="w-4 h-4" />
                 Products
@@ -829,6 +831,10 @@ export default function AdminPage() {
               <TabsTrigger value="banners" className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" />
                 Banners
+              </TabsTrigger>
+              <TabsTrigger value="coupons" className="flex items-center gap-2">
+                <Tag className="w-4 h-4" />
+                Coupons
               </TabsTrigger>
             </TabsList>
 
@@ -3203,6 +3209,10 @@ export default function AdminPage() {
 
             <TabsContent value="banners" className="space-y-6">
               <BannerManager />
+            </TabsContent>
+
+            <TabsContent value="coupons" className="space-y-6">
+              <CouponManager />
             </TabsContent>
           </Tabs>
         </div>
