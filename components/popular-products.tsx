@@ -659,10 +659,6 @@ export default function PopularProducts() {
                       e.stopPropagation();
                       handleToggleWishlist(product.id, e);
                     }}
-                    onTouchEnd={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
                     disabled={wishlistLoading}
                   >
                     <Heart
@@ -731,10 +727,6 @@ export default function PopularProducts() {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 handleColorSelect(product.id, colorIndex, e);
-                              }}
-                              onTouchEnd={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
                               }}
                               title={color.name}
                             />
@@ -838,10 +830,6 @@ export default function PopularProducts() {
                         e.preventDefault();
                         e.stopPropagation();
                         handleAddToCart(product, pricingInfo.actualPrice);
-                      }}
-                      onTouchEnd={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
                       }}
                     >
                       <ShoppingBag className="w-4 h-4 mr-2" />

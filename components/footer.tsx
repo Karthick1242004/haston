@@ -89,7 +89,9 @@ export default function Footer() {
             <div className="space-y-3 text-xs text-gray-600">
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4" />
-                <span>hexhueclothing@gmail.com</span>
+                <span
+                onClick={() => window.location.href = 'mailto:hexhueclothing@gmail.com'}
+                className="cursor-pointer hover:text-blue-950 transition-colors duration-200">hexhueclothing@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4" />
@@ -215,7 +217,7 @@ export default function Footer() {
               {[Facebook, Instagram].map((Icon, index) => (
                 <motion.a
                   key={index}
-                  href="https://www.instagram.com/thatprosperinegirl?igsh=NTA5ZzUxeTZ3eXBh"
+                  href="https://www.instagram.com/hex_and_hue?igsh=MW00Z2NwdWV5NHN0eA=="
                   className="p-2 bg-blue-950 text-white rounded-full hover:bg-blue-950 transition-colors duration-200"
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
