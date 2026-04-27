@@ -836,7 +836,7 @@ export default function PopularProducts() {
                       {/* Mobile: Just "Add to Cart" */}
                       <span className="sm:hidden">Add to Cart</span>
                       {/* Desktop: "Add to Cart - ₹price" */}
-                      <span className="hidden sm:inline">Add to Cart - ₹{pricingInfo.actualPrice}</span>
+                      <span className="hidden sm:inline">Add to Cart </span>
                     </Button>
                   </div>
                 </div>
