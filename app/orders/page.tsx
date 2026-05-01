@@ -375,7 +375,7 @@ export default function OrderHistoryPage() {
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center flex-wrap gap-3">
                               <Badge className={`${getStatusColor(order.status)} text-sm px-3 py-1`}>
                                 {getStatusIcon(order.status)}
                                 <span className="ml-2 capitalize">{order.status}</span>

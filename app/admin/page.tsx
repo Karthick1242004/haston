@@ -2284,7 +2284,7 @@ export default function AdminPage() {
                     <CardContent className="p-6">
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-4 mb-3">
+                          <div className="flex items-center flex-wrap gap-4 mb-3">
                             <Badge
                               variant="outline"
                               className="font-mono text-sm"

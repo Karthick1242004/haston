@@ -189,7 +189,7 @@ function OrderSuccessContent() {
       
       <div className="min-h-screen bg-[#F1EFEE]">
         {/* Header */}
-        <div className="relative bg-white shadow-sm">
+        <div className="relative bg-white -mt-9 shadow-sm">
           <Header />
         </div>
 
@@ -206,10 +206,10 @@ function OrderSuccessContent() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="mb-8"
+                className="mb-8 mt-14"
               >
                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 max-w-2xl mx-auto">
-                  <div className="flex items-center justify-center space-x-4">
+                  <div className="flex flex-wrap items-center justify-center space-x-4">
                     {session.user?.image ? (
                       <Image
                         src={session.user.image}
@@ -264,7 +264,7 @@ function OrderSuccessContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="flex items-center justify-center space-x-4"
+                className="flex items-center flex-wrap justify-center space-x-4"
               >
                 <Badge className="text-lg px-4 py-2 bg-blue-950 text-white">
                   Order #{order.orderId}
