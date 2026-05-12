@@ -22,7 +22,7 @@ export function InvoiceTemplate({ order }: InvoiceTemplateProps) {
               day: "numeric",
             })}
           </p>
-          <p className="font-bold text-gray-900 mt-2">HEX & HUE (PRAGYA SINGH)</p>
+          <p className="font-bold text-gray-900 mt-2">HEX & HUE</p>
           <p>Flat No-2902, The Dhan Pothowar CGHS Ltd,</p>
           <p>Plot No. 17, Sector 12 Dwarka,</p>
           <p>South West Delhi - 110078, Delhi</p>
@@ -169,7 +169,7 @@ export function InvoiceTemplate({ order }: InvoiceTemplateProps) {
         </div>
         
         <div className="text-right">
-          <p className="font-bold text-gray-900 mb-8">For HEX & HUE (PRAGYA SINGH)</p>
+          <p className="font-bold text-gray-900 mb-8">For HEX & HUE</p>
           <p className="text-sm text-gray-600 border-t border-gray-300 pt-2 inline-block px-4">Authorized Signatory</p>
         </div>
       </div>
