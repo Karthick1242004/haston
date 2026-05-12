@@ -4,7 +4,7 @@ import { useRef } from "react";
 
 const testimonials = [
   {
-    text: "Absolutely love the quality of the clothing! The fabric feels premium and the fit is perfect. Haston has become my go-to for stylish, comfortable pieces.",
+    text: "Absolutely love the quality of the clothing! The fabric feels premium and the fit is perfect. Hex & Hue has become my go-to for stylish, comfortable pieces.",
     image: "https://randomuser.me/api/portraits/women/1.jpg",
     name: "Sarah Johnson",
     role: "Fashion Blogger",
@@ -28,7 +28,7 @@ const testimonials = [
     role: "Business Owner",
   },
   {
-    text: "Quality clothing at reasonable prices. The materials are top-notch and the designs are always on-trend. Haston never disappoints!",
+    text: "Quality clothing at reasonable prices. The materials are top-notch and the designs are always on-trend. Hex & Hue never disappoints!",
     image: "https://randomuser.me/api/portraits/women/5.jpg",
     name: "Jessica Lee",
     role: "Designer",

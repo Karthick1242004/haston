@@ -349,8 +349,8 @@ export default function CheckoutPage() {
         key: orderData.key_id,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: 'Haston E-commerce',
-        description: 'Purchase from Haston Store',
+        name: 'Hex & Hue',
+        description: 'Purchase from Hex & Hue Store',
         order_id: orderData.order_id,
         handler: async function (response: any) {
           try {

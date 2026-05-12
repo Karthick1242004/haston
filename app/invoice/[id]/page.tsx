@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { InvoiceTemplate } from "@/components/invoice-template";
 
-export default function InvoicePage() {
+export default function UserInvoicePage() {
   const params = useParams();
   const orderId = params.id as string;
   const { data: session, status } = useSession();
@@ -25,7 +25,7 @@ export default function InvoicePage() {
           return;
         }
 
-        const res = await fetch(`/api/admin/orders/${orderId}`);
+        const res = await fetch(`/api/orders/${orderId}`);
 
         if (!res.ok) throw new Error("Failed to fetch order");
 
@@ -64,7 +64,7 @@ export default function InvoicePage() {
     return (
       <div className="p-8 text-center text-red-600">
         <h2 className="text-xl font-bold">Error</h2>
-        <p>{error || "Order not found"}</p>
+        <p>{error || "Order not found or unauthorized access."}</p>
       </div>
     );
   }

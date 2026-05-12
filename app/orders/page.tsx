@@ -18,7 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  AlertTriangle
+  AlertTriangle,
+  Download
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -388,6 +389,15 @@ export default function OrderHistoryPage() {
                               >
                                 <Eye className="w-4 h-4 mr-2" />
                                 View Details
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => router.push(`/invoice/${order.orderId}`)}
+                                className="border-green-600 text-green-600 hover:bg-green-600 hover:text-white"
+                              >
+                                <Download className="w-4 h-4 mr-2" />
+                                Invoice
                               </Button>
                               {cancellationInfo.canCancel && (
                                 <Button
