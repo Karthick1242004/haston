@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import {  useMemo } from "react"
 import { Filter, ChevronDown, Grid, List, Star, Heart, ShoppingBag, X, SlidersHorizontal } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -586,9 +587,14 @@ export default function ShopPage() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: index * 0.05 }}
-                      className="group cursor-pointer"
-                      onClick={() => handleProductClick(product.id)}
+                      className="group relative"
                     >
+                      <Link
+                        href={`/product/${product.id}`}
+                        prefetch={false}
+                        aria-label={product.name}
+                        className="absolute inset-0 z-0"
+                      />
                       <CardMain className="overflow-hidden bg-white ">
                         <div className="relative overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                             <div className={`${
@@ -630,8 +636,12 @@ export default function ShopPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="absolute top-2 right-2 bg-white/90 hover:bg-white backdrop-blur-sm transition-all duration-200 rounded-full w-8 h-8"
-                            onClick={(e) => handleToggleWishlist(typeof product.id === 'string' ? parseInt(product.id, 16) : product.id, e)}
+                            className="absolute top-2 right-2 z-10 bg-white/90 hover:bg-white backdrop-blur-sm transition-all duration-200 rounded-full w-8 h-8 pointer-events-auto"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleToggleWishlist(typeof product.id === 'string' ? parseInt(product.id, 16) : product.id, e)
+                            }}
                             disabled={wishlistLoading}
                           >
                             <Heart
@@ -644,11 +654,12 @@ export default function ShopPage() {
                           </Button>
 
                           {/* Quick Add to Cart */}
-                          <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
+                          <div className="absolute bottom-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 pointer-events-auto">
                             <Button
                               size="sm"
                               className="bg-white text-black hover:bg-gray-200 transition-all duration-200 rounded-full px-2.5 py-1 text-xs"
                               onClick={(e) => {
+                                e.preventDefault()
                                 e.stopPropagation()
                                 const defaultSize = product.sizes?.[0] || "M"
                                 const defaultColor = Array.isArray(product.colors) ? product.colors[0] : "Black"

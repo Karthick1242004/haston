@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { Heart, ShoppingBag, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,15 +30,6 @@ export default function PopularProducts() {
   }>({});
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("all");
-  // Touch handling states for proper tap vs scroll detection
-  const [touchState, setTouchState] = useState<{
-    [key: string]: {
-      startX: number;
-      startY: number;
-      startTime: number;
-      moved: boolean;
-    };
-  }>({});
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const router = useRouter();
@@ -96,95 +88,6 @@ export default function PopularProducts() {
   useEffect(() => {
     setSelectedSubcategory("all");
   }, [selectedCategory]);
-
-  // Cleanup touch state when component unmounts or products change
-  useEffect(() => {
-    return () => {
-      setTouchState({});
-    };
-  }, [products]);
-
-  const handleProductClick = (productId: string | number) => {
-    console.log("handleProductClick called with productId:", productId);
-    console.log("Navigating to:", `/product/${productId}`);
-    router.push(`/product/${productId}`);
-  };
-
-  // Touch handling functions for proper tap vs scroll detection
-  const handleTouchStart = (productId: string | number, e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    const productIdStr = productId.toString();
-    
-    setTouchState(prev => ({
-      ...prev,
-      [productIdStr]: {
-        startX: touch.clientX,
-        startY: touch.clientY,
-        startTime: Date.now(),
-        moved: false
-      }
-    }));
-  };
-
-  const handleTouchMove = (productId: string | number, e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    const productIdStr = productId.toString();
-    const currentState = touchState[productIdStr];
-    
-    if (!currentState) return;
-
-    const deltaX = Math.abs(touch.clientX - currentState.startX);
-    const deltaY = Math.abs(touch.clientY - currentState.startY);
-    
-    // If movement is more than 15px in any direction, consider it a scroll/drag
-    // Increased threshold for better scroll vs tap detection
-    if (deltaX > 15 || deltaY > 15) {
-      setTouchState(prev => ({
-        ...prev,
-        [productIdStr]: {
-          ...currentState,
-          moved: true
-        }
-      }));
-    }
-  };
-
-  const handleTouchEnd = (productId: string | number, e: React.TouchEvent) => {
-    const productIdStr = productId.toString();
-    const currentState = touchState[productIdStr];
-    
-    if (!currentState) return;
-
-    const touchDuration = Date.now() - currentState.startTime;
-    
-    // Check if this was a tap (not moved, duration between 50ms and 600ms)
-    // Added minimum duration to avoid accidental taps, increased max for accessibility
-    const isTap = !currentState.moved && touchDuration >= 50 && touchDuration < 600;
-    
-    // Clean up touch state
-    setTouchState(prev => {
-      const newState = { ...prev };
-      delete newState[productIdStr];
-      return newState;
-    });
-
-    // Only navigate if it was a proper tap and not on interactive elements
-    if (isTap) {
-      const target = e.target as HTMLElement;
-      if (
-        !target.closest("button") &&
-        !target.closest('[role="button"]') &&
-        !target.closest("input") &&
-        !target.closest("select") &&
-        target.tagName !== "BUTTON"
-      ) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log("Touch tap detected - navigating to product:", productId);
-        handleProductClick(productId);
-      }
-    }
-  };
 
   const handleToggleWishlist = async (
     productId: string | number,
@@ -572,7 +475,7 @@ export default function PopularProducts() {
             return (
               <motion.div
                 key={product.id}
-                className="group mx-auto w-full sm:w-[300px] cursor-pointer bg-white rounded-md shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden relative touch-manipulation flex flex-col h-full"
+                className="group mx-auto w-full sm:w-[300px] bg-white rounded-md shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden relative flex flex-col h-full"
                 initial={{ opacity: 0, y: 50, scale: 0.9 }}
                 animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
                 transition={{
@@ -595,36 +498,16 @@ export default function PopularProducts() {
                   boxShadow:
                     "0 4px 20px rgba(0,0,0,0.08), 0 8px 40px rgba(0,0,0,0.04)",
                   transformStyle: "preserve-3d",
-                  touchAction: "pan-y", // Allow vertical scrolling but detect taps
-                }}
-                onTouchStart={(e) => {
-                  handleTouchStart(product.id, e);
-                }}
-                onTouchMove={(e) => {
-                  handleTouchMove(product.id, e);
-                }}
-                onTouchEnd={(e) => {
-                  handleTouchEnd(product.id, e);
-                }}
-                onClick={(e) => {
-                  // Check if click is on interactive elements
-                  const target = e.target as HTMLElement;
-                  if (
-                    target.closest("button") ||
-                    target.closest('[role="button"]') ||
-                    target.closest("input") ||
-                    target.closest("select") ||
-                    target.tagName === "BUTTON"
-                  ) {
-                    e.stopPropagation();
-                    return;
-                  }
-                  console.log("Card clicked - navigating to product:", product.id);
-                  handleProductClick(product.id);
                 }}
               >
+                <Link
+                  href={`/product/${product.id}`}
+                  prefetch={false}
+                  aria-label={product.name}
+                  className="absolute inset-0 z-0"
+                />
                 <motion.div
-                  className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex-shrink-0"
+                  className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex-shrink-0 pointer-events-none"
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.4 }}
                 >
@@ -649,8 +532,8 @@ export default function PopularProducts() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute top-3 left-3 w-9 h-9 bg-white/95 hover:bg-white transition-all backdrop-blur-sm rounded-full p-0 shadow-lg transform -translate-y-1 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 touch-manipulation"
-                    style={{ 
+                    className="absolute top-3 left-3 z-10 w-9 h-9 bg-white/95 hover:bg-white transition-all backdrop-blur-sm rounded-full p-0 shadow-lg transform -translate-y-1 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 touch-manipulation pointer-events-auto"
+                    style={{
                       transitionDelay: "50ms",
                       touchAction: "manipulation"
                     }}
@@ -671,7 +554,7 @@ export default function PopularProducts() {
                   </Button>
                 </motion.div>
 
-                <div className="p-3 sm:p-4 space-y-2 sm:space-y-3 flex flex-col flex-1">
+                <div className="p-3 sm:p-4 space-y-2 sm:space-y-3 flex flex-col flex-1 pointer-events-none">
                   {/* Product Name */}
                   <h3 className="font-semibold text-gray-900 text-sm md:text-base leading-tight line-clamp-1 group-hover:text-orange-700 transition-colors duration-200">
                     {product.name}
@@ -714,12 +597,13 @@ export default function PopularProducts() {
                           .map((color: ProductColor, colorIndex: number) => (
                             <button
                               key={colorIndex}
-                              className={`w-5 h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 touch-manipulation ${
+                              type="button"
+                              className={`relative z-10 w-5 h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 touch-manipulation pointer-events-auto ${
                                 selectedColorIndex === colorIndex
                                   ? "border-orange-500 scale-110 shadow-lg"
                                   : "border-gray-300 hover:border-gray-400 shadow-sm"
                               }`}
-                              style={{ 
+                              style={{
                                 backgroundColor: color.value,
                                 touchAction: "manipulation"
                               }}
@@ -821,7 +705,7 @@ export default function PopularProducts() {
                   <div className="flex-1"></div>
 
                   {/* Action Buttons */}
-                  <div className="pt-2 border-t border-gray-100 mt-auto">
+                  <div className="pt-2 border-t border-gray-100 mt-auto relative z-10 pointer-events-auto">
                     <Button
                       size="sm"
                       className="w-full text-xs bg-gray-900 hover:bg-gray-800 text-white transition-all duration-200 hover:scale-105 touch-manipulation"

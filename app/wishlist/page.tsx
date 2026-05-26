@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import Link from "next/link"
 import { Heart, ShoppingBag, ArrowLeft, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -151,10 +152,16 @@ export default function WishlistPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="group cursor-pointer"
+                    className="group relative"
                   >
+                    <Link
+                      href={`/product/${product.id}`}
+                      prefetch={false}
+                      aria-label={product.name}
+                      className="absolute inset-0 z-0"
+                    />
                     <Card className="overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300">
-                      <div className="relative" onClick={() => handleProductClick(typeof product.id === 'string' ? parseInt(product.id) : product.id)}>
+                      <div className="relative">
                         <div className="aspect-[3/4] overflow-hidden">
                           <Image
                             src={product.image || '/placeholder.jpg'}
@@ -170,8 +177,9 @@ export default function WishlistPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="absolute top-3 right-3 bg-white/80 hover:bg-white transition-colors"
+                          className="absolute top-3 right-3 z-10 bg-white/80 hover:bg-white transition-colors pointer-events-auto"
                           onClick={(e) => {
+                            e.preventDefault()
                             e.stopPropagation()
                             handleRemoveFromWishlist(typeof product.id === 'string' ? parseInt(product.id) : product.id)
                           }}
@@ -182,8 +190,9 @@ export default function WishlistPage() {
                         {/* Quick Add to Cart */}
                         <Button
                           size="sm"
-                          className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute bottom-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto"
                           onClick={(e) => {
+                            e.preventDefault()
                             e.stopPropagation()
                             handleAddToCart(product)
                           }}
@@ -199,19 +208,27 @@ export default function WishlistPage() {
                         <p className="text-lg font-bold text-gray-900 mb-3">
                           ₹{product.price.toFixed(2)}
                         </p>
-                        
+
                         {/* Action Buttons */}
-                        <div className="space-y-2">
+                        <div className="space-y-2 relative z-10 pointer-events-auto">
                           <Button
                             className="w-full bg-blue-950 text-white hover:bg-blue-800 transition-all"
-                            onClick={() => handleAddToCart(product)}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleAddToCart(product)
+                            }}
                           >
                             Add to Cart
                           </Button>
                           <Button
                             variant="outline"
                             className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
-                            onClick={() => handleRemoveFromWishlist(typeof product.id === 'string' ? parseInt(product.id) : product.id)}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleRemoveFromWishlist(typeof product.id === 'string' ? parseInt(product.id) : product.id)
+                            }}
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Remove
