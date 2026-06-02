@@ -595,7 +595,7 @@ export default function ShopPage() {
                         aria-label={product.name}
                         className="absolute inset-0 z-0"
                       />
-                      <CardMain className="overflow-hidden bg-white ">
+                      <CardMain className="overflow-hidden bg-white pointer-events-none">
                         <div className="relative overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                             <div className={`${
                               viewMode === "grid" ? "aspect-[3/4]" : "aspect-square w-48"

@@ -72,7 +72,9 @@ export const useProductStore = create<ProductState>((set, get) => ({
             productId: product.id.toString(),
             name: product.name,
             price: product.price,
-            image: product.images?.[0] || product.image,
+            // Trust the caller's chosen image (color-specific from the swatch)
+            // before falling back to the product's image list.
+            image: product.image || product.images?.[0],
             selectedSize,
             selectedColor,
             quantity,

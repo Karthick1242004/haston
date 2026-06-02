@@ -160,17 +160,18 @@ export default function PopularProducts() {
           ? product.sizes[0]
           : "One Size";
 
-      // console.log('Adding to cart:', {
-      //   productId: product.id,
-      //   selectedSize,
-      //   selectedColor: selectedColor.name,
-      //   price: actualPrice
-      // })
+      // Match the cart image to the swatch the user picked. Falls back to the
+      // product's main image if there is no per-color image at that index.
+      const colorSpecificImage =
+        (product.images && product.images.length > selectedColorIndex
+          ? product.images[selectedColorIndex]
+          : undefined) || product.image;
 
       // Create a proper product object with the updated price for cart
       const productForCart: Product = {
         ...product,
         price: actualPrice, // Use the actual selling price (with discount applied)
+        image: colorSpecificImage,
       };
 
       // Use the proper cart store method - this will:
