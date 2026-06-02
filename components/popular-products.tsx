@@ -588,9 +588,9 @@ export default function PopularProducts() {
                     )}
                   </div>
 
-                  {/* Color Options - Hidden on mobile */}
-                  <div className="hidden sm:flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                  {/* Color Options */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       {productColors.length > 0 ? (
                         productColors
                           .slice(0, 4)
@@ -598,22 +598,25 @@ export default function PopularProducts() {
                             <button
                               key={colorIndex}
                               type="button"
-                              className={`relative z-10 w-5 h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 touch-manipulation pointer-events-auto ${
-                                selectedColorIndex === colorIndex
-                                  ? "border-orange-500 scale-110 shadow-lg"
-                                  : "border-gray-300 hover:border-gray-400 shadow-sm"
-                              }`}
-                              style={{
-                                backgroundColor: color.value,
-                                touchAction: "manipulation"
-                              }}
+                              aria-label={`Select color ${color.name}`}
+                              className={`relative z-10 inline-flex items-center justify-center p-1 -m-1 touch-manipulation pointer-events-auto`}
+                              style={{ touchAction: "manipulation" }}
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 handleColorSelect(product.id, colorIndex, e);
                               }}
                               title={color.name}
-                            />
+                            >
+                              <span
+                                className={`block w-5 h-5 sm:w-5 sm:h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
+                                  selectedColorIndex === colorIndex
+                                    ? "border-orange-500 scale-110 shadow-lg"
+                                    : "border-gray-300 hover:border-gray-400 shadow-sm"
+                                }`}
+                                style={{ backgroundColor: color.value }}
+                              />
+                            </button>
                           ))
                       ) : (
                         <span className="text-xs text-gray-500">No colors</span>
@@ -624,7 +627,7 @@ export default function PopularProducts() {
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="hidden sm:block text-xs text-gray-500">
                       {productColors.length} color
                       {productColors.length !== 1 ? "s" : ""}
                     </div>
