@@ -749,6 +749,26 @@ export default function ShopPage() {
                                   </div>
                                 </div>
                               )} */}
+
+                              {/* Add to Cart - always visible */}
+                              <div className="mt-2 relative z-10 pointer-events-auto">
+                                <Button
+                                  size="sm"
+                                  className="w-full text-xs bg-gray-900 hover:bg-gray-800 text-white transition-all duration-200 touch-manipulation"
+                                  style={{ touchAction: "manipulation" }}
+                                  onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    const defaultSize = product.sizes?.[0] || "M"
+                                    const defaultColor = Array.isArray(product.colors) ? product.colors[0] : "Black"
+                                    addProductToCart(product, defaultSize, defaultColor, 1)
+                                  }}
+                                  disabled={(product.stock || 0) === 0}
+                                >
+                                  <ShoppingBag className="w-4 h-4 mr-2" />
+                                  {(product.stock || 0) === 0 ? "Out of Stock" : "Add to Cart"}
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </CardContent>
