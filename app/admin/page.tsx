@@ -33,6 +33,7 @@ import AdminsManager from "@/components/admins-manager";
 import HeroSlidesManager from "@/components/hero-slides-manager";
 import BannerManager from "@/components/banner-manager";
 import CouponManager from "@/components/admin/coupon-manager";
+import ReturnsManager from "@/components/admin/returns-manager";
 import { Order } from "@/types/order";
 import { ProductColor, Product, ProductCategory } from "@/types/product";
 import {
@@ -75,6 +76,7 @@ import {
   Plus,
   X,
   Tag,
+  RotateCcw,
 } from "lucide-react";
 import { GenerateInvoiceButton } from "@/components/generate-invoice-button";
 
@@ -155,7 +157,7 @@ export default function AdminPage() {
 
   // Order management state
   const [currentView, setCurrentView] = useState<
-    "products" | "orders" | "hero" | "admins" | "banners" | "coupons"
+    "products" | "orders" | "returns" | "hero" | "admins" | "banners" | "coupons"
   >("products");
   const [orders, setOrders] = useState<Order[]>([]);
   const [orderStats, setOrderStats] = useState<any>({});
@@ -806,12 +808,12 @@ export default function AdminPage() {
             value={currentView}
             onValueChange={(value) =>
               setCurrentView(
-                value as "products" | "orders" | "hero" | "admins" | "banners" | "coupons"
+                value as "products" | "orders" | "returns" | "hero" | "admins" | "banners" | "coupons"
               )
             }
             className="space-y-6"
           >
-            <TabsList className="grid w-full grid-cols-6 lg:w-[900px]">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 lg:w-[1050px] h-auto">
               <TabsTrigger value="products" className="flex items-center gap-2">
                 <Package className="w-4 h-4" />
                 Products
@@ -819,6 +821,10 @@ export default function AdminPage() {
               <TabsTrigger value="orders" className="flex items-center gap-2">
                 <ShoppingBag className="w-4 h-4" />
                 Orders
+              </TabsTrigger>
+              <TabsTrigger value="returns" className="flex items-center gap-2">
+                <RotateCcw className="w-4 h-4" />
+                Returns
               </TabsTrigger>
               <TabsTrigger value="hero" className="flex items-center gap-2">
                 <ImageIcon className="w-4 h-4" />
@@ -3197,6 +3203,10 @@ export default function AdminPage() {
                   )}
                 </DialogContent>
               </Dialog>
+            </TabsContent>
+
+            <TabsContent value="returns" className="space-y-6">
+              <ReturnsManager />
             </TabsContent>
 
             <TabsContent value="hero" className="space-y-6">

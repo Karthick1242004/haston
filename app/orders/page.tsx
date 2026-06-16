@@ -5,12 +5,12 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
-import { 
-  Package, 
-  Truck, 
-  CheckCircle, 
-  Calendar, 
-  CreditCard, 
+import {
+  Package,
+  Truck,
+  CheckCircle,
+  Calendar,
+  CreditCard,
   ArrowLeft,
   Eye,
   Search,
@@ -19,7 +19,10 @@ import {
   ChevronRight,
   X,
   AlertTriangle,
-  Download
+  Download,
+  RotateCcw,
+  Minus,
+  Plus
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,8 +35,10 @@ import { Label } from "@/components/ui/label"
 import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import Loader from "@/components/loader"
-import { Order } from "@/types/order"
+import { Order, OrderItem } from "@/types/order"
+import { RETURN_REASONS, RETURN_WINDOW_DAYS } from "@/types/return"
 import { useToast } from "@/hooks/use-toast"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export default function OrderHistoryPage() {
   const router = useRouter()
@@ -70,6 +75,18 @@ export default function OrderHistoryPage() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [cancelReason, setCancelReason] = useState("")
   const [isCancelling, setIsCancelling] = useState(false)
+
+  // Return state
+  type ReturnDraftItem = { quantity: number; selected: boolean }
+  const [selectedOrderForReturn, setSelectedOrderForReturn] = useState<Order | null>(null)
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false)
+  const [returnReason, setReturnReason] = useState<string>(RETURN_REASONS[0])
+  const [returnNotes, setReturnNotes] = useState("")
+  const [returnDraft, setReturnDraft] = useState<Record<string, ReturnDraftItem>>({})
+  const [isSubmittingReturn, setIsSubmittingReturn] = useState(false)
+
+  const itemKey = (item: OrderItem) =>
+    `${item.id}|${item.selectedSize}|${item.selectedColor}`
 
   useEffect(() => {
     if (status === 'loading') return
@@ -204,6 +221,132 @@ export default function OrderHistoryPage() {
     }
   }
 
+  const canReturnOrder = (order: Order) => {
+    if (order.status !== "delivered") {
+      return { canReturn: false, reason: "Returns are available only for delivered orders" }
+    }
+    if (!order.estimatedDelivery) {
+      return { canReturn: true, reason: "Eligible for return" }
+    }
+    const deliveredOn = new Date(order.estimatedDelivery)
+    const daysSinceDelivery = Math.floor(
+      (Date.now() - deliveredOn.getTime()) / (1000 * 60 * 60 * 24)
+    )
+    if (daysSinceDelivery > RETURN_WINDOW_DAYS) {
+      return {
+        canReturn: false,
+        reason: `Return window expired (delivered ${daysSinceDelivery} days ago, ${RETURN_WINDOW_DAYS}-day limit)`,
+      }
+    }
+    const daysLeft = RETURN_WINDOW_DAYS - daysSinceDelivery
+    return {
+      canReturn: true,
+      reason: `${daysLeft} day${daysLeft !== 1 ? "s" : ""} left to return`,
+    }
+  }
+
+  const openReturnDialog = (order: Order) => {
+    const draft: Record<string, ReturnDraftItem> = {}
+    for (const item of order.items) {
+      draft[itemKey(item)] = { quantity: item.quantity, selected: false }
+    }
+    setReturnDraft(draft)
+    setReturnReason(RETURN_REASONS[0])
+    setReturnNotes("")
+    setSelectedOrderForReturn(order)
+    setReturnDialogOpen(true)
+  }
+
+  const toggleReturnItem = (item: OrderItem) => {
+    const k = itemKey(item)
+    setReturnDraft((prev) => ({
+      ...prev,
+      [k]: { ...prev[k], selected: !prev[k]?.selected },
+    }))
+  }
+
+  const setReturnItemQuantity = (item: OrderItem, qty: number) => {
+    const k = itemKey(item)
+    const clamped = Math.max(1, Math.min(qty, item.quantity))
+    setReturnDraft((prev) => ({
+      ...prev,
+      [k]: { ...prev[k], quantity: clamped },
+    }))
+  }
+
+  const handleSubmitReturn = async () => {
+    if (!selectedOrderForReturn) return
+    const selectedItems = selectedOrderForReturn.items
+      .filter((item) => returnDraft[itemKey(item)]?.selected)
+      .map((item) => ({
+        productId: item.id.toString(),
+        selectedSize: item.selectedSize,
+        selectedColor: item.selectedColor,
+        quantity: returnDraft[itemKey(item)].quantity,
+      }))
+
+    if (selectedItems.length === 0) {
+      toast({
+        title: "Select at least one item",
+        description: "Choose which item(s) you want to return.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsSubmittingReturn(true)
+    try {
+      const response = await fetch(
+        `/api/orders/${selectedOrderForReturn.orderId}/return`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: selectedItems,
+            reason: returnReason,
+            additionalNotes: returnNotes,
+          }),
+        }
+      )
+      const data = await response.json()
+      if (response.ok && data.success) {
+        toast({
+          title: "Return request submitted",
+          description: "We'll review your request and update you shortly.",
+        })
+        setReturnDialogOpen(false)
+        setSelectedOrderForReturn(null)
+        setReturnDraft({})
+        setReturnNotes("")
+      } else {
+        toast({
+          title: "Could not submit return",
+          description: data.error || "Please try again.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Error submitting return:", error)
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmittingReturn(false)
+    }
+  }
+
+  const computeReturnTotal = () => {
+    if (!selectedOrderForReturn) return 0
+    return selectedOrderForReturn.items.reduce((sum, item) => {
+      const k = itemKey(item)
+      const draft = returnDraft[k]
+      if (!draft?.selected) return sum
+      return sum + item.price * draft.quantity
+    }, 0)
+  }
+
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.items.some(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -332,6 +475,7 @@ export default function OrderHistoryPage() {
               ) : (
                 filteredOrders.map((order, index) => {
                   const cancellationInfo = canCancelOrder(order)
+                  const returnInfo = canReturnOrder(order)
                   
                   return (
                     <motion.div
@@ -411,6 +555,17 @@ export default function OrderHistoryPage() {
                                 >
                                   <X className="w-4 h-4 mr-2" />
                                   Cancel Order
+                                </Button>
+                              )}
+                              {returnInfo.canReturn && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => openReturnDialog(order)}
+                                  className="border-orange-500 text-orange-600 hover:bg-orange-50 hover:text-orange-700"
+                                >
+                                  <RotateCcw className="w-4 h-4 mr-2" />
+                                  Return Item(s)
                                 </Button>
                               )}
                             </div>
@@ -632,7 +787,194 @@ export default function OrderHistoryPage() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Return Items Dialog */}
+        <Dialog
+          open={returnDialogOpen}
+          onOpenChange={(open) => {
+            setReturnDialogOpen(open)
+            if (!open) {
+              setSelectedOrderForReturn(null)
+              setReturnDraft({})
+              setReturnNotes("")
+            }
+          }}
+        >
+          <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-orange-700">
+                Return items from #{selectedOrderForReturn?.orderId}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-2">
+              <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                <div className="flex items-start gap-2">
+                  <RotateCcw className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm">
+                    <p className="font-medium text-orange-900 mb-1">Return policy</p>
+                    <p className="text-orange-700">
+                      Select the items you want to return and choose a reason.
+                      After approval, we&apos;ll refund the eligible amount to
+                      your original payment method within 5-7 business days.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700">
+                  Choose items to return
+                </Label>
+                <div className="mt-2 space-y-2">
+                  {selectedOrderForReturn?.items.map((item) => {
+                    const k = itemKey(item)
+                    const draft = returnDraft[k] || { selected: false, quantity: 1 }
+                    return (
+                      <div
+                        key={k}
+                        className={`flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg ${
+                          draft.selected
+                            ? "border-orange-300 bg-orange-50"
+                            : "border-gray-200"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3 flex-1">
+                          <Checkbox
+                            checked={draft.selected}
+                            onCheckedChange={() => toggleReturnItem(item)}
+                            className="mt-1"
+                            aria-label={`Select ${item.name} for return`}
+                          />
+                          <div className="relative w-12 h-16 rounded overflow-hidden bg-gray-100 flex-shrink-0">
+                            <Image
+                              src={item.image || "/placeholder.jpg"}
+                              alt={item.name}
+                              fill
+                              className="object-cover"
+                              sizes="48px"
+                              quality={70}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm text-gray-900 truncate">
+                              {item.name}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              {getColorName(item.selectedColor)} • {item.selectedSize}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              Ordered: {item.quantity} • ₹{item.price.toFixed(2)} ea.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between sm:justify-end gap-3 sm:flex-shrink-0">
+                          <div
+                            className={`flex items-center border rounded-md ${
+                              draft.selected
+                                ? "border-orange-400"
+                                : "border-gray-200"
+                            }`}
+                          >
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() =>
+                                setReturnItemQuantity(item, draft.quantity - 1)
+                              }
+                              disabled={!draft.selected || draft.quantity <= 1}
+                              className="h-8 w-8 rounded-none"
+                            >
+                              <Minus className="w-3 h-3" />
+                            </Button>
+                            <span className="px-3 text-sm font-medium min-w-[2rem] text-center">
+                              {draft.quantity}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() =>
+                                setReturnItemQuantity(item, draft.quantity + 1)
+                              }
+                              disabled={
+                                !draft.selected || draft.quantity >= item.quantity
+                              }
+                              className="h-8 w-8 rounded-none"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                            ₹{(item.price * draft.quantity).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="returnReason" className="text-sm font-medium text-gray-700">
+                  Reason for return
+                </Label>
+                <Select value={returnReason} onValueChange={setReturnReason}>
+                  <SelectTrigger id="returnReason" className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RETURN_REASONS.map((reason) => (
+                      <SelectItem key={reason} value={reason}>
+                        {reason}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="returnNotes" className="text-sm font-medium text-gray-700">
+                  Additional details (Optional)
+                </Label>
+                <Textarea
+                  id="returnNotes"
+                  value={returnNotes}
+                  onChange={(e) => setReturnNotes(e.target.value)}
+                  placeholder="Anything else we should know..."
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <span className="text-sm font-medium text-gray-700">Refund amount</span>
+                <span className="text-lg font-bold text-gray-900">
+                  ₹{computeReturnTotal().toFixed(2)}
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setReturnDialogOpen(false)}
+                  className="flex-1"
+                  disabled={isSubmittingReturn}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmitReturn}
+                  className="flex-1 bg-orange-600 text-white hover:bg-orange-700"
+                  disabled={isSubmittingReturn}
+                >
+                  {isSubmittingReturn ? "Submitting..." : "Submit return request"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </PageTransition>
   )
-} 
+}

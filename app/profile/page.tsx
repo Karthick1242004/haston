@@ -19,7 +19,8 @@ import {
   X,
   Plus,
   Trash2,
-  ArrowLeft
+  ArrowLeft,
+  RotateCcw
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -816,6 +817,14 @@ export default function ProfilePage() {
                             {orderCount}
                           </Badge>
                         )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300 transition-all"
+                        onClick={() => router.push('/returns')}
+                      >
+                        <RotateCcw className="w-4 h-4 mr-3" />
+                        My Returns
                       </Button>
                     </CardContent>
                   </Card>
