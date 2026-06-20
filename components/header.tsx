@@ -62,7 +62,7 @@ export default function Header() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                     style={{
-                      fontFamily: "var(--font-nunito)",
+                      fontFamily: "var(--font-inter)",
                     }}
                   >
                     {item}
@@ -243,7 +243,7 @@ export default function Header() {
                     href="/"
                     className="text-2xl font-bold text-gray-800 tracking-normal hover:text-gray-600 transition-colors"
                     style={{
-                      fontFamily: "var(--font-nunito)",
+                      fontFamily: "var(--font-inter)",
                     }}
                     onClick={toggleMobileMenu}
                   >

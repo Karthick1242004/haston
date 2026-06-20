@@ -77,7 +77,7 @@ export default function AboutPage() {
               
               <motion.h1
                 className="text-6xl md:text-8xl lg:text-9xl text-blue-950 leading-none tracking-tight mb-6 font-bold"
-                style={{ fontFamily: "var(--font-nunito)" }}
+                style={{ fontFamily: "var(--font-inter)" }}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={heroInView ? { scale: 1, opacity: 1 } : {}}
                 transition={{ duration: 1, ease: "easeOut" }}
@@ -112,7 +112,7 @@ export default function AboutPage() {
                 <div>
                   <motion.h2
                     className="text-5xl md:text-7xl text-blue-950 leading-tight mb-6 font-bold"
-                    style={{ fontFamily: "var(--font-nunito)" }}
+                    style={{ fontFamily: "var(--font-inter)" }}
                     initial={{ opacity: 0, y: 30 }}
                     animate={contentInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.8, delay: 0.2 }}
@@ -186,7 +186,7 @@ export default function AboutPage() {
                     </div>
                     <h3 
                       className="text-4xl md:text-5xl font-thin text-blue-950 mb-2"
-                      style={{ fontFamily: "var(--font-nunito)" }}
+                      style={{ fontFamily: "var(--font-inter)" }}
                     >
                       {stat.number}
                     </h3>
@@ -209,7 +209,7 @@ export default function AboutPage() {
             >
               <h2 
                 className="text-5xl md:text-7xl text-blue-950 leading-tight mb-6 font-bold"
-                style={{ fontFamily: "var(--font-nunito)" }}
+                style={{ fontFamily: "var(--font-inter)" }}
               >
                 OUR{" "}
                 <span 
@@ -238,7 +238,7 @@ export default function AboutPage() {
                       className={`h-48 bg-gradient-to-br ${value.color} transition-transform duration-300 group-hover:scale-110`}
                     />
                   </div>
-                  <h3 className="text-2xl font-extrabold text-blue-950 mb-4" style={{ fontFamily: "var(--font-nunito)" }}>
+                  <h3 className="text-2xl font-bold text-blue-950 mb-4" style={{ fontFamily: "var(--font-inter)" }}>
                     {value.title}
                   </h3>
                   <p className="text-gray-600 leading-relaxed">

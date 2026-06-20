@@ -62,13 +62,13 @@ export default function PopularProducts() {
     let filtered = allProducts;
 
     if (selectedCategory !== "all") {
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter(product =>
         product.productCategory?.main === selectedCategory
       );
     }
 
     if (selectedSubcategory !== "all") {
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter(product =>
         product.productCategory?.sub === selectedSubcategory
       );
     }
@@ -79,7 +79,7 @@ export default function PopularProducts() {
   // Get available subcategories for the selected main category
   const getAvailableSubcategories = () => {
     if (selectedCategory === "all") return [];
-    
+
     const category = CATEGORIES.find(cat => cat.value === selectedCategory);
     return category?.subcategories || [];
   };
@@ -371,8 +371,8 @@ export default function PopularProducts() {
           transition={{ duration: 0.8 }}
         >
           <h2
-            className="text-6xl md:text-8xl font-extrabold tracking-tight text-blue-950"
-            style={{ fontFamily: "var(--font-nunito)" }}
+            className="text-6xl md:text-8xl font-bold tracking-tight text-blue-950"
+            style={{ fontFamily: "var(--font-inter)" }}
           >
             New Arrivals
           </h2>
@@ -546,11 +546,10 @@ export default function PopularProducts() {
                     disabled={wishlistLoading}
                   >
                     <Heart
-                      className={`w-4 h-4 transition-colors ${
-                        isInWishlist(product.id)
+                      className={`w-4 h-4 transition-colors ${isInWishlist(product.id)
                           ? "fill-red-500 text-red-500"
                           : "text-gray-600 hover:text-red-400"
-                      }`}
+                        }`}
                     />
                   </Button>
                 </motion.div>
@@ -610,11 +609,10 @@ export default function PopularProducts() {
                               title={color.name}
                             >
                               <span
-                                className={`block w-5 h-5 sm:w-5 sm:h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
-                                  selectedColorIndex === colorIndex
+                                className={`block w-5 h-5 sm:w-5 sm:h-5 rounded-full border-2 transition-all duration-200 hover:scale-110 ${selectedColorIndex === colorIndex
                                     ? "border-orange-500 scale-110 shadow-lg"
                                     : "border-gray-300 hover:border-gray-400 shadow-sm"
-                                }`}
+                                  }`}
                                 style={{ backgroundColor: color.value }}
                               />
                             </button>
@@ -638,23 +636,22 @@ export default function PopularProducts() {
                   <div className="flex items-center gap-1 sm:gap-2 flex-wrap min-h-[20px] sm:min-h-[24px] max-h-[32px] sm:max-h-[40px] overflow-hidden">
                     {productBadges.length > 0
                       ? productBadges.slice(0, 3).map((badge: string) => (
-                          <span
-                            key={badge}
-                            className={`px-1.5 sm:px-3 py-0.5 sm:py-1.5 text-xs font-medium rounded-full shadow-sm whitespace-nowrap flex-shrink-0 ${
-                              badge === "new-arrival"
-                                ? "bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700"
-                                : badge === "trendy"
+                        <span
+                          key={badge}
+                          className={`px-1.5 sm:px-3 py-0.5 sm:py-1.5 text-xs font-medium rounded-full shadow-sm whitespace-nowrap flex-shrink-0 ${badge === "new-arrival"
+                              ? "bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700"
+                              : badge === "trendy"
                                 ? "bg-gradient-to-r from-green-100 to-green-200 text-green-700"
                                 : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700"
                             }`}
-                          >
-                            {badge === "new-arrival"
-                              ? "New Arrival"
-                              : badge === "trendy"
+                        >
+                          {badge === "new-arrival"
+                            ? "New Arrival"
+                            : badge === "trendy"
                               ? "Trendy"
                               : badge}
-                          </span>
-                        ))
+                        </span>
+                      ))
                       : ""}
                     {productBadges.length > 3 && (
                       <span className="text-xs text-gray-500 flex-shrink-0">

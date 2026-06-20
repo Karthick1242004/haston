@@ -237,41 +237,41 @@ function OrderSuccessContent() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", delay: 0.2 }}
-                className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+                className="w-14 h-14 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4"
               >
-                <CheckCircle className="w-12 h-12 text-green-600" />
+                <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8 text-green-600" />
               </motion.div>
-              
+
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-4xl font-bold text-blue-950 mb-4"
+                className="text-2xl sm:text-3xl font-bold text-blue-950 mb-2 sm:mb-3 [text-wrap:balance]"
               >
                 Order Confirmed! 🎉
               </motion.h1>
-              
+
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-xl text-gray-600 mb-6"
+                className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-5 max-w-md mx-auto"
               >
                 Your order has been successfully placed and is being processed.
               </motion.p>
-              
+
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="flex items-center flex-wrap justify-center space-x-4"
+                className="flex items-center flex-wrap justify-center gap-2 sm:gap-3"
               >
-                <Badge className="text-lg px-4 py-2 bg-blue-950 text-white">
+                <Badge className="text-xs sm:text-sm px-3 py-1.5 bg-blue-950 text-white break-all">
                   Order #{order.orderId}
                 </Badge>
-                <Badge className={`text-lg px-4 py-2 ${getStatusColor(order.status)}`}>
+                <Badge className={`text-xs sm:text-sm px-3 py-1.5 ${getStatusColor(order.status)}`}>
                   {getStatusIcon(order.status)}
-                  <span className="ml-2 capitalize">{order.status}</span>
+                  <span className="ml-1.5 capitalize">{order.status}</span>
                 </Badge>
               </motion.div>
             </motion.div>
@@ -291,8 +291,8 @@ function OrderSuccessContent() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Order Date */}
                     <div className="text-center">
-                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Calendar className="w-6 h-6 text-green-600" />
+                      <div className="w-12 h-12 bg-blue-950/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Calendar className="w-6 h-6 text-blue-950" />
                       </div>
                       <h3 className="font-semibold text-gray-900 mb-1">Order Placed</h3>
                       <p className="text-sm text-gray-600">
@@ -306,7 +306,7 @@ function OrderSuccessContent() {
 
                     {/* Current Status */}
                     <div className="text-center">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <div className="w-12 h-12 bg-blue-950/10 rounded-full flex items-center justify-center mx-auto mb-3">
                         {getStatusIcon(order.status)}
                       </div>
                       <h3 className="font-semibold text-gray-900 mb-1">Current Status</h3>
@@ -315,8 +315,8 @@ function OrderSuccessContent() {
 
                     {/* Estimated Delivery */}
                     <div className="text-center">
-                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Truck className="w-6 h-6 text-purple-600" />
+                      <div className="w-12 h-12 bg-blue-950/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Truck className="w-6 h-6 text-blue-950" />
                       </div>
                       <h3 className="font-semibold text-gray-900 mb-1">Expected Delivery</h3>
                       <p className="text-sm text-gray-600">
