@@ -21,6 +21,7 @@ import PageTransition from "@/components/page-transition"
 import { useProductStore } from "@/stores/product-store"
 import { ExtendedUser } from "@/types/database"
 import { useToast } from "@/hooks/use-toast"
+import { computeTotals } from "@/lib/pricing"
 
 interface UserDetails {
   email: string
@@ -85,12 +86,10 @@ export default function CheckoutPage() {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false)
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'success' | 'failed'>('idle')
 
+  // Display only. The server re-prices the cart from the products collection and
+  // charges its own figure; see lib/pricing.ts for the shared formula.
   const subtotal = getCartTotal()
-  const shipping = subtotal > 200 ? 0 : 12.00
-  const taxRate = 0.08 // 8% tax
-  const discount = (subtotal * appliedDiscount) / 100
-  const taxes = (subtotal - discount) * taxRate
-  const total = subtotal - discount + shipping + taxes
+  const { discount, shipping, taxes, total } = computeTotals(subtotal, appliedDiscount)
 
   useEffect(() => {
     if (cartItems.length === 0) {
@@ -326,15 +325,9 @@ export default function CheckoutPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        // No amount is sent: the server prices the cart itself.
         body: JSON.stringify({
-          amount: total,
-          currency: 'INR',
-          receipt: `order_${Date.now()}`,
-          notes: {
-            customer_name: `${userDetails.firstName} ${userDetails.lastName}`,
-            customer_email: userDetails.email,
-            items_count: getCartItemsCount(),
-          },
+          discountCode: appliedDiscount > 0 ? discountCode : undefined,
         }),
       })
 
@@ -371,19 +364,14 @@ export default function CheckoutPage() {
 
             if (verifyData.success) {
               setPaymentStatus('success')
-              
-              // Create order in database
+
+              // Items and totals are rebuilt server-side from the checkout
+              // intent created above; only proof of payment and the delivery
+              // address travel from the browser.
               const orderData = {
-                items: cartItems.map(item => ({
-                  id: item.id,
-                  name: item.name,
-                  image: item.image,
-                  price: item.price,
-                  quantity: item.quantity,
-                  selectedSize: item.selectedSize,
-                  selectedColor: item.selectedColor,
-                  subtotal: item.price * item.quantity
-                })),
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
                 shippingAddress: {
                   firstName: userDetails.firstName,
                   lastName: userDetails.lastName,
@@ -394,22 +382,6 @@ export default function CheckoutPage() {
                   state: userDetails.state,
                   zipCode: userDetails.zipCode,
                   country: userDetails.country
-                },
-                paymentDetails: {
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_signature: response.razorpay_signature,
-                  amount: total,
-                  currency: 'INR',
-                  status: 'success' as const
-                },
-                orderSummary: {
-                  subtotal,
-                  shipping,
-                  taxes,
-                  discount,
-                  discountCode: appliedDiscount > 0 ? discountCode : undefined,
-                  total
                 }
               }
 

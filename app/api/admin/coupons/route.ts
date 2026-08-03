@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getCouponsCollection } from "@/lib/mongodb";
 import { isAdminEmail } from "@/lib/isAdmin";
+import { escapeRegex } from "@/lib/pricing";
 
 export async function GET(req: NextRequest) {
   try {
@@ -39,18 +40,34 @@ export async function POST(req: NextRequest) {
 
     const { code, discountPercentage, isActive = true } = await req.json();
 
-    if (!code || typeof discountPercentage !== "number") {
+    if (typeof code !== "string" || code.trim() === "" || code.length > 64) {
       return NextResponse.json(
-        { error: "Missing or invalid required fields" },
+        { error: "Coupon code must be a string of at most 64 characters" },
         { status: 400 }
       );
+    }
+
+    if (
+      typeof discountPercentage !== "number" ||
+      !Number.isFinite(discountPercentage) ||
+      discountPercentage <= 0 ||
+      discountPercentage > 100
+    ) {
+      return NextResponse.json(
+        { error: "Discount percentage must be a number between 1 and 100" },
+        { status: 400 }
+      );
+    }
+
+    if (typeof isActive !== "boolean") {
+      return NextResponse.json({ error: "isActive must be a boolean" }, { status: 400 });
     }
 
     const collection = await getCouponsCollection();
 
     // Check if code already exists
     const existing = await collection.findOne({
-      code: { $regex: new RegExp(`^${code}$`, "i") },
+      code: { $regex: new RegExp(`^${escapeRegex(code)}$`, "i") },
     });
     
     if (existing) {

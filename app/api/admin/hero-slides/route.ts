@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDatabase } from '@/lib/mongodb'
+import { ObjectId } from 'mongodb'
 import { isAdminEmail } from '@/lib/isAdmin'
+import { assertValidImage, isUploadedFile, UploadValidationError } from '@/lib/upload-validation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { v2 as cloudinary } from 'cloudinary'
@@ -23,8 +25,13 @@ function extractPublicId(url: string): string | null {
 // GET - Fetch all hero slides
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email || !(await isAdminEmail(session.user.email))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const db = await getDatabase()
-    
+
     // Optimized admin query with projection
     const slides = await db.collection('heroSlides')
       .find(
@@ -83,13 +90,10 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const mainText = formData.get('mainText') as string
     const subText = formData.get('subText') as string
-    const imageFile = formData.get('image') as File
     const order = parseInt(formData.get('order') as string) || 0
     const isActive = formData.get('isActive') === 'true'
 
-    if (!imageFile) {
-      return NextResponse.json({ success: false, error: 'Image is required' }, { status: 400 })
-    }
+    const imageFile = assertValidImage(formData.get('image'))
 
     // Upload image to Cloudinary
     const arrayBuffer = await imageFile.arrayBuffer()
@@ -143,6 +147,9 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
 
   } catch (error) {
+    if (error instanceof UploadValidationError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: error.status })
+    }
     console.error('Error creating hero slide:', error)
     return NextResponse.json({ success: false, error: 'Failed to create slide' }, { status: 500 })
   }
@@ -160,20 +167,21 @@ export async function PUT(request: NextRequest) {
     const slideId = formData.get('slideId') as string
     const mainText = formData.get('mainText') as string
     const subText = formData.get('subText') as string
-    const imageFile = formData.get('image') as File | null
+    const rawImage = formData.get('image')
     const currentImageUrl = formData.get('currentImageUrl') as string
     const order = parseInt(formData.get('order') as string) || 0
     const isActive = formData.get('isActive') === 'true'
 
-    if (!slideId) {
-      return NextResponse.json({ success: false, error: 'Slide ID is required' }, { status: 400 })
+    if (!slideId || !ObjectId.isValid(slideId)) {
+      return NextResponse.json({ success: false, error: 'A valid slide ID is required' }, { status: 400 })
     }
 
     const db = await getDatabase()
     let imageUrl = currentImageUrl
 
     // If new image is uploaded, handle image replacement
-    if (imageFile && imageFile.size > 0) {
+    if (isUploadedFile(rawImage) && rawImage.size > 0) {
+      const imageFile = assertValidImage(rawImage)
       // Delete old image from Cloudinary
       if (currentImageUrl) {
         const oldPublicId = extractPublicId(currentImageUrl)
@@ -220,7 +228,7 @@ export async function PUT(request: NextRequest) {
     }
 
     await db.collection('heroSlides').updateOne(
-      { _id: new (require('mongodb')).ObjectId(slideId) },
+      { _id: new ObjectId(slideId) },
       { $set: updateData }
     )
     
@@ -240,6 +248,9 @@ export async function PUT(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
   } catch (error) {
+    if (error instanceof UploadValidationError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: error.status })
+    }
     console.error('Error updating hero slide:', error)
     return NextResponse.json({ success: false, error: 'Failed to update slide' }, { status: 500 })
   }
@@ -256,15 +267,15 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const slideId = searchParams.get('id')
 
-    if (!slideId) {
-      return NextResponse.json({ success: false, error: 'Slide ID required' }, { status: 400 })
+    if (!slideId || !ObjectId.isValid(slideId)) {
+      return NextResponse.json({ success: false, error: 'A valid slide ID is required' }, { status: 400 })
     }
 
     const db = await getDatabase()
     
     // Get slide details before deletion for image cleanup
     const slide = await db.collection('heroSlides').findOne({ 
-      _id: new (require('mongodb')).ObjectId(slideId) 
+      _id: new ObjectId(slideId) 
     })
 
     if (!slide) {
@@ -285,7 +296,7 @@ export async function DELETE(request: NextRequest) {
 
     // Delete slide from database
     await db.collection('heroSlides').deleteOne({ 
-      _id: new (require('mongodb')).ObjectId(slideId) 
+      _id: new ObjectId(slideId) 
     })
     
     // Revalidate the hero slides cache to reflect deletion immediately

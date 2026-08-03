@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { getProductsCollection } from '@/lib/mongodb'
 import { ObjectId } from 'mongodb'
+import { stripReviewPii } from '@/lib/reviews'
 
 // GET - Fetch reviews for a product
 export async function GET(request: NextRequest) {
@@ -17,6 +18,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    if (!ObjectId.isValid(productId)) {
+      return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 })
+    }
+
     const collection = await getProductsCollection()
     const product = await collection.findOne({
       _id: new ObjectId(productId)
@@ -29,12 +34,12 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const reviews = product.reviews || []
-    
+    const reviews = (product.reviews || []).map(stripReviewPii)
+
     return NextResponse.json({
       reviews,
       reviewCount: reviews.length,
-      averageRating: reviews.length > 0 
+      averageRating: reviews.length > 0
         ? reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviews.length
         : 0
     })
@@ -71,9 +76,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (rating < 1 || rating > 5) {
+    if (!ObjectId.isValid(productId)) {
+      return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 })
+    }
+
+    if (typeof comment !== 'string') {
+      return NextResponse.json({ error: 'Comment must be text' }, { status: 400 })
+    }
+
+    // Must be an integer 1-5. A bare `< 1 || > 5` comparison lets non-numbers
+    // through (both sides are false for NaN) and parseInt then stores NaN,
+    // permanently poisoning this product's average. Booleans are excluded
+    // explicitly because Number(true) === 1 would otherwise pass as a 1-star.
+    const parsedRating = typeof rating === 'number' ? rating : NaN
+    if (!Number.isInteger(parsedRating) || parsedRating < 1 || parsedRating > 5) {
       return NextResponse.json(
-        { error: 'Rating must be between 1 and 5' },
+        { error: 'Rating must be a whole number between 1 and 5' },
+        { status: 400 }
+      )
+    }
+
+    if (comment.length > 5000) {
+      return NextResponse.json(
+        { error: 'Review must be 5000 characters or fewer' },
         { status: 400 }
       )
     }
@@ -119,35 +144,55 @@ export async function POST(request: NextRequest) {
       userName: session.user.name || 'Anonymous',
       userEmail: session.user.email || '',
       userImage: session.user.image || '',
-      rating: parseInt(rating),
+      rating: parsedRating,
       comment: comment.trim(),
       createdAt: new Date(),
       updatedAt: new Date()
     }
 
-    // Add review to product
-    const updatedReviews = [...existingReviews, newReview]
-    
-    // Calculate new average rating
-    const averageRating = updatedReviews.reduce((sum: number, review: any) => sum + review.rating, 0) / updatedReviews.length
+    // $push against a filter that still excludes this reviewer. Rewriting the
+    // whole array instead let concurrent reviewers clobber each other and let
+    // one user slip several reviews past the duplicate check.
+    const write = await collection.updateOne(
+      {
+        _id: new ObjectId(productId),
+        'reviews.userId': { $ne: session.user.id },
+      },
+      { $push: { reviews: newReview } as any }
+    )
 
-    // Update product in database
+    if (write.matchedCount === 0) {
+      return NextResponse.json(
+        { error: 'You have already reviewed this product' },
+        { status: 400 }
+      )
+    }
+
+    // Recompute the aggregate from what is actually stored now.
+    const updated = await collection.findOne(
+      { _id: new ObjectId(productId) },
+      { projection: { reviews: 1 } }
+    )
+    const storedReviews = updated?.reviews || []
+    const averageRating =
+      storedReviews.reduce((sum: number, review: any) => sum + Number(review.rating || 0), 0) /
+      (storedReviews.length || 1)
+
     await collection.updateOne(
       { _id: new ObjectId(productId) },
-      { 
-        $set: { 
-          reviews: updatedReviews,
-          reviewCount: updatedReviews.length,
+      {
+        $set: {
+          reviewCount: storedReviews.length,
           rating: Math.round(averageRating * 10) / 10 // Round to 1 decimal place
         }
       }
     )
 
     return NextResponse.json(
-      { 
+      {
         message: 'Review added successfully',
-        review: newReview,
-        reviewCount: updatedReviews.length,
+        review: stripReviewPii(newReview),
+        reviewCount: storedReviews.length,
         averageRating: Math.round(averageRating * 10) / 10
       },
       { status: 201 }

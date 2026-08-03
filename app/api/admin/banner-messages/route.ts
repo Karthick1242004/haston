@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { getDatabase } from '@/lib/mongodb'
+import { isAdminEmail } from '@/lib/isAdmin'
 import { ObjectId } from 'mongodb'
 import type { BannerMessage, CreateBannerMessageRequest } from '@/types/banner'
 
@@ -12,8 +13,13 @@ export const revalidate = 0
 // GET - Fetch all banner messages
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions)
+    if (!(await isAdminEmail(session?.user?.email))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const db = await getDatabase()
-    
+
     const bannerMessages = await db
       .collection('bannerMessages')
       .find({})
@@ -41,8 +47,7 @@ export async function GET() {
     const response = NextResponse.json(
       { 
         success: false, 
-        error: 'Failed to fetch banner messages',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Failed to fetch banner messages'
       },
       { status: 500 }
     )
@@ -60,20 +65,12 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.email) {
+
+    if (!(await isAdminEmail(session?.user?.email))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is admin
     const db = await getDatabase()
-    const adminUser = await db.collection('admins').findOne({ 
-      email: session.user.email 
-    })
-    
-    if (!adminUser) {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
-    }
 
     const body: CreateBannerMessageRequest = await request.json()
     

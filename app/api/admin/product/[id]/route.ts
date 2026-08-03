@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb'
 import { getProductsCollection } from '@/lib/mongodb'
 import cloudinary from '@/lib/cloudinary'
 import { isAdminEmail } from '@/lib/isAdmin'
+import { assertValidImages, UploadValidationError } from '@/lib/upload-validation'
 import { deleteImagesFromCloudinary, getRemovedImages } from '@/lib/cloudinary-utils'
 
 export const dynamic = 'force-dynamic'
@@ -14,8 +15,12 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const session = await getServerSession(authOptions)
     if (!await isAdminEmail(session?.user?.email)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    if (!ObjectId.isValid(params.id)) {
+      return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 })
+    }
+
     const collection = await getProductsCollection()
-    
+
     // First, get the product to retrieve its images for cleanup
     const product = await collection.findOne({ _id: new ObjectId(params.id) })
     if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
@@ -45,6 +50,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     return NextResponse.json({ success: true })
   } catch(err) {
+    if (err instanceof UploadValidationError) {
+      return NextResponse.json({ error: err.message }, { status: err.status })
+    }
     console.error(err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -55,8 +63,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const session = await getServerSession(authOptions)
     if (!await isAdminEmail(session?.user?.email)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    if (!ObjectId.isValid(params.id)) {
+      return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 })
+    }
+
     const collection = await getProductsCollection()
-    
+
     // Get existing product to compare images for cleanup
     const existingProduct = await collection.findOne({ _id: new ObjectId(params.id) })
     if (!existingProduct) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
@@ -67,20 +79,27 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     let mainCategory = null
     let subCategory = null
     
-    for (const [key,value] of form.entries()) {
-      if (key === 'images') continue
-      if (key === 'isLook') { isLookFlag = value==='true'; continue }
-      if (key === 'existingImages') continue
-      if (key === 'colors') continue
-      if (key === 'badges') continue
-      if (key === 'specifications') continue
-      if (key === 'hasDiscount') continue
-      if (key === 'discountPercentage') continue
-      if (key === 'originalPrice') continue
-      if (key === 'mainCategory') { mainCategory = value as string; continue }
-      if (key === 'subCategory') { subCategory = value as string; continue }
-      updateDoc[key] = key === 'price' ? parseFloat(value as string) : value
+    // Allowlist, not a denylist: any key not named here used to land in $set,
+    // which let an arbitrary form field overwrite `rating`, `reviews`, `stock`
+    // or `createdAt` on the product document.
+    const EDITABLE_TEXT_FIELDS = ['name', 'description', 'deliveryDays', 'category']
+
+    for (const field of EDITABLE_TEXT_FIELDS) {
+      if (form.has(field)) updateDoc[field] = String(form.get(field))
     }
+
+    if (form.has('isLook')) isLookFlag = form.get('isLook') === 'true'
+    if (form.has('mainCategory')) mainCategory = form.get('mainCategory') as string
+    if (form.has('subCategory')) subCategory = form.get('subCategory') as string
+
+    if (form.has('price')) {
+      const price = parseFloat(form.get('price') as string)
+      if (!Number.isFinite(price) || price < 0) {
+        return NextResponse.json({ error: 'Price must be a non-negative number' }, { status: 400 })
+      }
+      updateDoc.price = price
+    }
+
     if (form.has('sizes')) {
       updateDoc.sizes = (form.get('sizes') as string).split(',').map(s=>s.trim()).filter(Boolean)
     }
@@ -128,10 +147,18 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       
       if (hasDiscount) {
         if (form.has('discountPercentage')) {
-          updateDoc.discountPercentage = parseFloat(form.get('discountPercentage') as string)
+          const pct = parseFloat(form.get('discountPercentage') as string)
+          if (!Number.isFinite(pct) || pct <= 0 || pct > 100) {
+            return NextResponse.json({ error: 'Discount percentage must be between 1 and 100' }, { status: 400 })
+          }
+          updateDoc.discountPercentage = pct
         }
         if (form.has('originalPrice')) {
-          updateDoc.originalPrice = parseFloat(form.get('originalPrice') as string)
+          const original = parseFloat(form.get('originalPrice') as string)
+          if (!Number.isFinite(original) || original < 0) {
+            return NextResponse.json({ error: 'Original price must be a non-negative number' }, { status: 400 })
+          }
+          updateDoc.originalPrice = original
         }
       } else {
         // Remove discount fields if discount is disabled
@@ -159,7 +186,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       } catch {}
     }
 
-    const imageFiles = form.getAll('images') as File[]
+    const imageFiles = assertValidImages(form.getAll('images'))
     if (imageFiles.length) {
       const urls: string[] = []
       for (const f of imageFiles) {
@@ -196,6 +223,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     
     return NextResponse.json({ success: true })
   } catch(err) {
+    if (err instanceof UploadValidationError) {
+      return NextResponse.json({ error: err.message }, { status: err.status })
+    }
     console.error(err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

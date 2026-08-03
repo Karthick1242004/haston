@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getCouponsCollection } from "@/lib/mongodb";
 import { isAdminEmail } from "@/lib/isAdmin";
+import { escapeRegex } from "@/lib/pricing";
 import { ObjectId } from "mongodb";
 
 export async function PUT(
@@ -15,13 +16,41 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (!ObjectId.isValid(params.id)) {
+      return NextResponse.json({ error: "Invalid coupon ID" }, { status: 400 });
+    }
+
     const { code, discountPercentage, isActive } = await req.json();
     const collection = await getCouponsCollection();
+
+    if (code !== undefined && (typeof code !== "string" || code.trim() === "" || code.length > 64)) {
+      return NextResponse.json(
+        { error: "Coupon code must be a string of at most 64 characters" },
+        { status: 400 }
+      );
+    }
+
+    if (
+      discountPercentage !== undefined &&
+      (typeof discountPercentage !== "number" ||
+        !Number.isFinite(discountPercentage) ||
+        discountPercentage <= 0 ||
+        discountPercentage > 100)
+    ) {
+      return NextResponse.json(
+        { error: "Discount percentage must be a number between 1 and 100" },
+        { status: 400 }
+      );
+    }
+
+    if (isActive !== undefined && typeof isActive !== "boolean") {
+      return NextResponse.json({ error: "isActive must be a boolean" }, { status: 400 });
+    }
 
     // If code is updated, check for uniqueness
     if (code) {
       const existing = await collection.findOne({
-        code: { $regex: new RegExp(`^${code}$`, "i") },
+        code: { $regex: new RegExp(`^${escapeRegex(code)}$`, "i") },
         _id: { $ne: new ObjectId(params.id) },
       });
       if (existing) {
@@ -64,6 +93,10 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     if (!session || !session.user || !(await isAdminEmail(session.user.email))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!ObjectId.isValid(params.id)) {
+      return NextResponse.json({ error: "Invalid coupon ID" }, { status: 400 });
     }
 
     const collection = await getCouponsCollection();

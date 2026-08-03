@@ -87,6 +87,13 @@ export async function getReturnsCollection(): Promise<Collection> {
   return db.collection("returns")
 }
 
+// Server-computed price snapshot for an in-flight Razorpay payment. The order is
+// written from this document, so the browser cannot influence what it is charged.
+export async function getCheckoutIntentsCollection(): Promise<Collection> {
+  const db = await getDatabase()
+  return db.collection("checkoutIntents")
+}
+
 // Re-export types from database types file for server-side usage
 // This ensures API routes can still use these types while keeping client bundle clean
 export type { ExtendedUser, Address, CartItem } from '@/types/database'

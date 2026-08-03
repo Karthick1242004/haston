@@ -100,7 +100,7 @@ export async function POST(
     const sanitizedItems: ReturnItem[] = []
     for (const incoming of incomingItems) {
       const qty = Number(incoming.quantity)
-      if (!Number.isFinite(qty) || qty <= 0) {
+      if (!Number.isInteger(qty) || qty <= 0) {
         return NextResponse.json(
           { error: "Invalid quantity in return request" },
           { status: 400 }
@@ -130,6 +130,11 @@ export async function POST(
           { status: 400 }
         )
       }
+
+      // Count this line against the item's allowance immediately. Without it the
+      // same item repeated across the payload is approved N times over, each
+      // iteration re-reading the same untouched remaining count.
+      alreadyReturned.set(key, (alreadyReturned.get(key) || 0) + qty)
 
       sanitizedItems.push({
         productId: orderItem.id.toString(),

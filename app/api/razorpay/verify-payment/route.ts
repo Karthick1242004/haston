@@ -1,52 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
+// Advisory check only — it lets the browser show a success state early. The
+// authoritative verification (signature + Razorpay payment lookup + amount
+// match against the server-computed price) happens in POST /api/orders, which
+// is the only place an order is ever created.
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json().catch(() => ({}))
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body
 
-    // Validate required fields
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    if (
+      typeof razorpay_order_id !== 'string' ||
+      typeof razorpay_payment_id !== 'string' ||
+      typeof razorpay_signature !== 'string'
+    ) {
       return NextResponse.json(
         { error: 'Missing required payment verification parameters' },
         { status: 400 }
       )
     }
 
-    // Create expected signature
-    const secret = process.env.RAZORPAY_KEY_SECRET!
-    const body_string = razorpay_order_id + "|" + razorpay_payment_id
-    const expected_signature = crypto
-      .createHmac('sha256', secret)
-      .update(body_string.toString())
+    const expected = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest('hex')
 
-    // Verify signature
-    const is_authentic = expected_signature === razorpay_signature
+    const expectedBuf = Buffer.from(expected, 'utf8')
+    const providedBuf = Buffer.from(razorpay_signature, 'utf8')
+    const isAuthentic =
+      expectedBuf.length === providedBuf.length &&
+      crypto.timingSafeEqual(expectedBuf, providedBuf)
 
-    if (is_authentic) {
-      // TODO: Update order status in database
-      // TODO: Send confirmation email
-      // TODO: Clear cart
-      
-      return NextResponse.json({
-        success: true,
-        message: 'Payment verified successfully',
-        payment_id: razorpay_payment_id,
-        order_id: razorpay_order_id,
-      })
-    } else {
-      return NextResponse.json(
-        { error: 'Invalid payment signature' },
-        { status: 400 }
-      )
+    if (!isAuthentic) {
+      return NextResponse.json({ error: 'Invalid payment signature' }, { status: 400 })
     }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Payment verified successfully',
+      payment_id: razorpay_payment_id,
+      order_id: razorpay_order_id,
+    })
   } catch (error) {
     console.error('Error verifying payment:', error)
-    return NextResponse.json(
-      { error: 'Payment verification failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Payment verification failed' }, { status: 500 })
   }
-} 
+}

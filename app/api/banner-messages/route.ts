@@ -37,12 +37,7 @@ export async function GET() {
     // Create response with cache control headers
     const response = NextResponse.json({
       success: true,
-      bannerMessages: transformedMessages,
-      debug: {
-        totalFound: bannerMessages.length,
-        timestamp: new Date().toISOString(),
-        query: { isActive: true }
-      }
+      bannerMessages: transformedMessages
     })
 
     // Add headers to prevent caching
@@ -65,11 +60,7 @@ export async function GET() {
     const response = NextResponse.json({
       success: true,
       bannerMessages: fallbackMessages,
-      error: 'Using fallback messages due to database error',
-      debug: {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      }
+      error: 'Using fallback messages due to database error'
     })
 
     // Add cache control headers to fallback response too

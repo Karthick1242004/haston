@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import clientPromise, { getDatabase } from '@/lib/mongodb'
 import cloudinary from '@/lib/cloudinary'
 import { isAdminEmail } from '@/lib/isAdmin'
+import { assertValidImages, UploadValidationError } from '@/lib/upload-validation'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -30,15 +31,13 @@ export async function POST(request: NextRequest) {
     }
 
     const sizeArray = sizes.split(',').map(s => s.trim()).filter(Boolean)
-    const imageFiles = form.getAll('images') as File[]
+    const rawImages = form.getAll('images')
 
-    if (imageFiles.length === 0) {
+    if (rawImages.length === 0) {
       return NextResponse.json({ error: 'At least one image is required' }, { status: 400 })
     }
 
-    if (imageFiles.length > 5) {
-      return NextResponse.json({ error: 'Maximum 5 images allowed' }, { status: 400 })
-    }
+    const imageFiles = assertValidImages(rawImages)
 
     // Parse optional form data
     let colors = ['Default']
@@ -125,9 +124,23 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const parsedPrice = parseFloat(price)
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+      return NextResponse.json({ error: 'Price must be a non-negative number' }, { status: 400 })
+    }
+
+    if (hasDiscount) {
+      if (discountPercentage === null || !Number.isFinite(discountPercentage) || discountPercentage <= 0 || discountPercentage > 100) {
+        return NextResponse.json({ error: 'Discount percentage must be between 1 and 100' }, { status: 400 })
+      }
+      if (originalPrice === null || !Number.isFinite(originalPrice) || originalPrice < 0) {
+        return NextResponse.json({ error: 'Original price must be a non-negative number' }, { status: 400 })
+      }
+    }
+
     const productDoc:any = {
       name,
-      price: parseFloat(price),
+      price: parsedPrice,
       description,
       sizes: sizeArray,
       deliveryDays: deliveryDays || '2-3 days',
@@ -165,6 +178,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, id: insertRes.insertedId, product: productDoc })
   } catch (error) {
+    if (error instanceof UploadValidationError) {
+      return NextResponse.json({ error: error.message }, { status: error.status })
+    }
     console.error('Product creation error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

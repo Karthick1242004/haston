@@ -61,13 +61,29 @@ export async function POST(
       const today = new Date()
       const deliveryDate = new Date(order.estimatedDelivery)
       const daysDifference = Math.ceil((deliveryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-      
+
       if (daysDifference < 3) {
         return NextResponse.json(
           { error: 'Cannot cancel order with delivery date less than 3 days away' },
           { status: 400 }
         )
       }
+    }
+
+    // Claim the cancellation before any money moves. Two concurrent requests
+    // both pass the checks above off the same stale document, so without this
+    // atomic transition each would fire its own refund for the full total.
+    const previousStatus = order.status
+    const claim = await collection.updateOne(
+      { orderId, userEmail: session.user.email, status: { $nin: ['cancelled', 'cancelling'] } },
+      { $set: { status: 'cancelling', updatedAt: new Date() } }
+    )
+
+    if (claim.modifiedCount === 0) {
+      return NextResponse.json(
+        { error: 'This order is already being cancelled' },
+        { status: 409 }
+      )
     }
 
     // Process refund with Razorpay
@@ -112,14 +128,19 @@ export async function POST(
           throw new Error('Payment is not captured, cannot process refund')
         }
 
-        // Check if payment amount matches order amount
+        // Refund what Razorpay actually captured, never the stored order total.
+        // Refusing on a mismatch keeps a tampered order from draining more than
+        // was ever paid.
         const expectedAmount = Math.round(order.orderSummary.total * 100)
-        if (payment.amount !== expectedAmount) {
-          console.warn(`Payment amount mismatch: expected ${expectedAmount}, got ${payment.amount}`)
+        const capturedAmount = Number(payment.amount)
+        if (capturedAmount !== expectedAmount) {
+          console.error(
+            `Refusing refund for ${orderId}: order total ${expectedAmount} paise but payment captured ${capturedAmount} paise`
+          )
+          throw new Error('Order total does not match the captured payment')
         }
 
-        // Prepare refund data
-        const refundAmount = Math.round(order.orderSummary.total * 100) // Convert to paise
+        const refundAmount = capturedAmount
         const refundData = {
           amount: refundAmount,
           speed: 'normal' as const,
@@ -160,7 +181,7 @@ export async function POST(
             
             // Still cancel the order but without processing refund
             await collection.updateOne(
-              { orderId },
+              { orderId, userEmail: session.user.email },
               {
                 $set: {
                   status: 'cancelled',
@@ -191,11 +212,14 @@ export async function POST(
           }
         }
 
+        // Release the claim so the order is not stranded in `cancelling`.
+        await collection.updateOne(
+          { orderId, userEmail: session.user.email, status: 'cancelling' },
+          { $set: { status: previousStatus, updatedAt: new Date() } }
+        )
+
         return NextResponse.json(
-          { 
-            error: 'Failed to process refund. Please contact support.',
-            details: refundError.error?.description || refundError.message || 'Unknown error'
-          },
+          { error: 'Failed to process refund. Please contact support.' },
           { status: 500 }
         )
       }
@@ -215,7 +239,7 @@ export async function POST(
 
     // Update order status to cancelled
     await collection.updateOne(
-      { orderId },
+      { orderId, userEmail: session.user.email },
       {
         $set: {
           status: 'cancelled',

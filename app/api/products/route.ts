@@ -1,24 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ObjectId } from 'mongodb'
 import { getProductsCollection } from '@/lib/mongodb'
+import { stripReviewPii } from '@/lib/reviews'
 
 export const dynamic = 'force-dynamic'
+
+// This endpoint is public, and product documents embed the full review array —
+// including each reviewer's email and account id. Scrub them on the way out.
+function toPublicProduct(doc: any) {
+  const { _id, reviews, ...rest } = doc
+  return {
+    ...rest,
+    id: _id.toString(),
+    reviews: Array.isArray(reviews) ? reviews.map(stripReviewPii) : [],
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
     const collection = await getProductsCollection()
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
-    const limit = parseInt(searchParams.get('limit') || '0')
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '0', 10) || 0, 0), 200)
     const isLookParam = searchParams.get('isLook')
     const mainCategory = searchParams.get('mainCategory')
     const subCategory = searchParams.get('subCategory')
 
     if (id) {
+      if (!ObjectId.isValid(id)) {
+        return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 })
+      }
       const doc = await collection.findOne({ _id: new ObjectId(id) })
       if (!doc) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-      const { _id, ...rest } = doc as any
-      return NextResponse.json({ ...rest, id: _id.toString() })
+      return NextResponse.json(toPublicProduct(doc))
     }
 
     const filter: any = {}
@@ -36,7 +50,7 @@ export async function GET(request: NextRequest) {
     const cursor = collection.find(filter).sort({ createdAt: -1 })
     if (limit) cursor.limit(limit)
     const docs = await cursor.toArray()
-    const products = docs.map((d: any) => ({ id: d._id.toString(), ...d }))
+    const products = docs.map(toPublicProduct)
     return NextResponse.json({ products })
   } catch (err) {
     console.error('Products fetch error', err)

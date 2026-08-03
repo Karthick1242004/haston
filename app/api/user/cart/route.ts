@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
-import { findUserById, updateUser } from '@/lib/mongodb'
+import { findUserById, updateUser, getProductsCollection } from '@/lib/mongodb'
 import { CartItem } from '@/lib/mongodb'
+import { ObjectId } from 'mongodb'
 
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic'
@@ -42,13 +43,35 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { productId, name, price, image, selectedSize, selectedColor, quantity = 1, action = 'add' } = body
+    const { productId, name, image, selectedSize, selectedColor, quantity = 1, action = 'add' } = body
 
-    if (!productId || !name || !price || !selectedSize || !selectedColor) {
-      return NextResponse.json({ 
-        error: 'Product ID, name, price, selected size, and selected color are required' 
+    if (!productId || !name || !selectedSize || !selectedColor) {
+      return NextResponse.json({
+        error: 'Product ID, name, selected size, and selected color are required'
       }, { status: 400 })
     }
+
+    if (!ObjectId.isValid(String(productId))) {
+      return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 })
+    }
+
+    const parsedQuantity = Number(quantity)
+    if (!Number.isInteger(parsedQuantity) || parsedQuantity < -100 || parsedQuantity > 100) {
+      return NextResponse.json({ error: 'Invalid quantity' }, { status: 400 })
+    }
+
+    // The price is read from the product, never taken from the request. Checkout
+    // re-prices from the products collection anyway, but storing a client price
+    // here would still show the customer a total the server will not honour.
+    const products = await getProductsCollection()
+    const product = await products.findOne(
+      { _id: new ObjectId(String(productId)) },
+      { projection: { price: 1 } }
+    )
+    if (!product) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+    }
+    const price = Number(product.price)
 
     const user = await findUserById(session.user.id)
     
@@ -69,7 +92,10 @@ export async function POST(request: NextRequest) {
     if (action === 'add') {
       if (existingItemIndex > -1) {
         // Update existing item quantity
-        updatedCartItems[existingItemIndex].quantity += quantity
+        updatedCartItems[existingItemIndex].quantity = Math.min(
+          updatedCartItems[existingItemIndex].quantity + parsedQuantity,
+          100
+        )
       } else {
         // Add new item
         const newItem: CartItem = {
@@ -79,19 +105,19 @@ export async function POST(request: NextRequest) {
           image,
           selectedSize,
           selectedColor,
-          quantity,
+          quantity: parsedQuantity,
           addedAt: new Date()
         }
         updatedCartItems.push(newItem)
       }
     } else if (action === 'update') {
       if (existingItemIndex > -1) {
-        if (quantity <= 0) {
+        if (parsedQuantity <= 0) {
           // Remove item if quantity is 0 or negative
           updatedCartItems.splice(existingItemIndex, 1)
         } else {
           // Update quantity
-          updatedCartItems[existingItemIndex].quantity = quantity
+          updatedCartItems[existingItemIndex].quantity = parsedQuantity
         }
       }
     } else if (action === 'remove') {

@@ -116,13 +116,51 @@ export async function PUT(
 
       let refundDetails: RefundDetails | undefined
 
+      if (!order) {
+        return NextResponse.json(
+          { error: "The order for this return no longer exists" },
+          { status: 409 }
+        )
+      }
+
+      // Never pay out more than this order took in, minus whatever earlier
+      // returns on the same order have already been refunded.
+      const alreadyRefunded = (
+        (await collection
+          .find({ orderId: ret.orderId, status: "refunded", returnId: { $ne: ret.returnId } })
+          .toArray()) as unknown as ServerReturn[]
+      ).reduce((sum, prior) => sum + (Number(prior.refundAmount) || 0), 0)
+
+      const orderTotal = Number(order.orderSummary?.total) || 0
+      const refundCeiling = Number((orderTotal - alreadyRefunded).toFixed(2))
+      const requestedRefund = Number(ret.refundAmount) || 0
+
+      if (!Number.isFinite(requestedRefund) || requestedRefund <= 0) {
+        return NextResponse.json(
+          { error: "This return has an invalid refund amount" },
+          { status: 400 }
+        )
+      }
+
+      if (requestedRefund > refundCeiling) {
+        console.error(
+          `Blocked over-refund on ${ret.returnId}: requested ${requestedRefund}, ceiling ${refundCeiling} (order total ${orderTotal}, already refunded ${alreadyRefunded})`
+        )
+        return NextResponse.json(
+          {
+            error: `Refund of ₹${requestedRefund} exceeds the ₹${refundCeiling} still refundable on this order`,
+          },
+          { status: 400 }
+        )
+      }
+
       if (
-        order?.paymentDetails?.razorpay_payment_id &&
+        order.paymentDetails?.razorpay_payment_id &&
         order.paymentDetails.status === "success" &&
         order.paymentDetails.razorpay_payment_id.startsWith("pay_")
       ) {
         try {
-          const refundAmountPaise = Math.round(ret.refundAmount * 100)
+          const refundAmountPaise = Math.round(requestedRefund * 100)
           const refund = await razorpay.payments.refund(
             order.paymentDetails.razorpay_payment_id,
             {

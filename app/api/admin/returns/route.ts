@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { isAdminEmail } from "@/lib/isAdmin"
+import { escapeRegex } from "@/lib/pricing"
 import { getReturnsCollection } from "@/lib/mongodb"
 import type { ServerReturn } from "@/types/return"
 
@@ -28,10 +29,11 @@ export async function GET(request: NextRequest) {
     const filter: Record<string, any> = {}
     if (status && status !== "all") filter.status = status
     if (search) {
+      const safeSearch = escapeRegex(search.slice(0, 100))
       filter.$or = [
-        { returnId: { $regex: search, $options: "i" } },
-        { orderId: { $regex: search, $options: "i" } },
-        { userEmail: { $regex: search, $options: "i" } },
+        { returnId: { $regex: safeSearch, $options: "i" } },
+        { orderId: { $regex: safeSearch, $options: "i" } },
+        { userEmail: { $regex: safeSearch, $options: "i" } },
       ]
     }
 

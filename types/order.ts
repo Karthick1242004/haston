@@ -11,7 +11,7 @@ export interface Order {
   shippingAddress: ShippingAddress
   paymentDetails: PaymentDetails
   orderSummary: OrderSummary
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelling' | 'cancelled'
   estimatedDelivery?: Date
   createdAt: Date
   updatedAt?: Date
@@ -32,7 +32,7 @@ export interface ServerOrder {
   shippingAddress: ShippingAddress
   paymentDetails: PaymentDetails
   orderSummary: OrderSummary
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelling' | 'cancelled'
   estimatedDelivery?: Date
   createdAt: Date
   updatedAt?: Date

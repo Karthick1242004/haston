@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { getOrdersCollection } from '@/lib/mongodb'
 import { isAdminEmail } from '@/lib/isAdmin'
+import { escapeRegex } from '@/lib/pricing'
 
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic'
@@ -15,31 +16,39 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
+    const page = Math.max(parseInt(searchParams.get('page') || '1', 10) || 1, 1)
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '10', 10) || 10, 1), 100)
     const status = searchParams.get('status')
-    const search = searchParams.get('search')
-    const sortBy = searchParams.get('sortBy') || 'createdAt'
+    const search = searchParams.get('search')?.slice(0, 100)
     const sortOrder = searchParams.get('sortOrder') || 'desc'
-    
+
+    // Only sortable fields the admin UI offers; an arbitrary key would force an
+    // unindexed in-memory sort across the whole collection.
+    const SORTABLE = ['createdAt', 'updatedAt', 'orderSummary.total', 'status', 'orderId']
+    const requestedSort = searchParams.get('sortBy') || 'createdAt'
+    const sortBy = SORTABLE.includes(requestedSort) ? requestedSort : 'createdAt'
+
     const skip = (page - 1) * limit
 
     const collection = await getOrdersCollection()
-    
+
     // Build filter query
     const filterQuery: any = {}
-    
+
     if (status && status !== 'all') {
       filterQuery.status = status
     }
-    
+
     if (search) {
+      // Escaped: an unescaped pattern such as "(a+)+$" backtracks across five
+      // unindexed fields on every order document.
+      const safeSearch = escapeRegex(search)
       filterQuery.$or = [
-        { orderId: { $regex: search, $options: 'i' } },
-        { userEmail: { $regex: search, $options: 'i' } },
-        { 'shippingAddress.firstName': { $regex: search, $options: 'i' } },
-        { 'shippingAddress.lastName': { $regex: search, $options: 'i' } },
-        { 'items.name': { $regex: search, $options: 'i' } }
+        { orderId: { $regex: safeSearch, $options: 'i' } },
+        { userEmail: { $regex: safeSearch, $options: 'i' } },
+        { 'shippingAddress.firstName': { $regex: safeSearch, $options: 'i' } },
+        { 'shippingAddress.lastName': { $regex: safeSearch, $options: 'i' } },
+        { 'items.name': { $regex: safeSearch, $options: 'i' } }
       ]
     }
 

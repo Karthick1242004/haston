@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { getDatabase } from '@/lib/mongodb'
+import { isAdminEmail } from '@/lib/isAdmin'
 import { ObjectId } from 'mongodb'
 import type { UpdateBannerMessageRequest } from '@/types/banner'
 
@@ -13,19 +14,11 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.email) {
+    if (!(await isAdminEmail(session?.user?.email))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is admin
     const db = await getDatabase()
-    const adminUser = await db.collection('admins').findOne({ 
-      email: session.user.email 
-    })
-    
-    if (!adminUser) {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
-    }
 
     const body: UpdateBannerMessageRequest = await request.json()
     
@@ -102,19 +95,11 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.email) {
+    if (!(await isAdminEmail(session?.user?.email))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is admin
     const db = await getDatabase()
-    const adminUser = await db.collection('admins').findOne({ 
-      email: session.user.email 
-    })
-    
-    if (!adminUser) {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
-    }
 
     // Validate ObjectId
     if (!ObjectId.isValid(params.id)) {
