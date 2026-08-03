@@ -8,11 +8,6 @@ import { isAdminEmail } from '@/lib/isAdmin'
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
-async function isAdmin(session: any) {
-  const adminEmail = process.env.ADMIN_MAILID
-  return session?.user?.email && adminEmail && session.user.email === adminEmail
-}
-
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)

@@ -160,10 +160,7 @@ export default function TermsPage() {
                 animate={heroInView ? { scale: 1, opacity: 1 } : {}}
                 transition={{ duration: 1, ease: "easeOut" }}
               >
-                TERMS{" "}
-                
-                  & Conditions
-              
+                Terms{" "}& Conditions
               </motion.h1>
               
               <motion.p
@@ -205,7 +202,7 @@ export default function TermsPage() {
                 className="text-4xl md:text-6xl text-blue-950 leading-tight mb-6 font-bold"
                 style={{ fontFamily: "var(--font-inter)" }}
               >
-                OUR{" "}Promise
+                Our{" "}Promise
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 We believe in fair and transparent terms that protect both our customers and our business.

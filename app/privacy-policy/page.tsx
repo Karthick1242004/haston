@@ -248,8 +248,8 @@ export default function PrivacyPolicyPage() {
                 className="text-4xl md:text-6xl text-blue-950 leading-tight mb-6 font-bold"
                 style={{ fontFamily: "var(--font-inter)" }}
               >
-                QUESTIONS{" "}
-                <span 
+                Questions{" "}
+                <span
                   style={{ fontFamily: "var(--font-allura)" }}
                   className="text-5xl md:text-7xl text-blue-950"
                 >

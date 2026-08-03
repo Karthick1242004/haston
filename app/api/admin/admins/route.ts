@@ -8,6 +8,10 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions)
+    if (!(await isAdminEmail(session?.user?.email))) {
+      return NextResponse.json({ error:'Unauthorized' }, { status:401 })
+    }
     const collection = await getAdminsCollection()
     const docs = await collection.find({}).toArray()
     return NextResponse.json({ admins: docs.map(d=>d.email) })
@@ -20,7 +24,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (session?.user?.email !== process.env.ADMIN_MAILID) {
+    if (!(await isAdminEmail(session?.user?.email))) {
       return NextResponse.json({ error:'Unauthorized' }, { status:401 })
     }
     const body = await request.json()
@@ -35,7 +39,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (session?.user?.email !== process.env.ADMIN_MAILID) {
+    if (!(await isAdminEmail(session?.user?.email))) {
       return NextResponse.json({ error:'Unauthorized' }, { status:401 })
     }
     const body = await request.json()

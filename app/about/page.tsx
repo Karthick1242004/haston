@@ -211,8 +211,8 @@ export default function AboutPage() {
                 className="text-5xl md:text-7xl text-blue-950 leading-tight mb-6 font-bold"
                 style={{ fontFamily: "var(--font-inter)" }}
               >
-                OUR{" "}
-                <span 
+                Our{" "}
+                <span
                   style={{ fontFamily: "var(--font-allura)" }}
                   className="text-6xl md:text-8xl text-blue-950"
                 >
