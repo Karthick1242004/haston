@@ -120,7 +120,10 @@ export async function updateUser(id: string, updates: Partial<ExtendedUser>): Pr
       } 
     }
   )
-  return result.modifiedCount > 0
+  // matchedCount, not modifiedCount: writing the same value again is a
+  // successful update, not a failure. Clearing an already-empty cart used to
+  // report "Failed to clear cart" on that distinction alone.
+  return result.matchedCount > 0
 }
 
 export async function createUserProfile(user: Partial<ExtendedUser>): Promise<ExtendedUser | null> {

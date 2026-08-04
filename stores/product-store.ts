@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import type { Product, CartItem } from "@/types/product"
 import { useUIStore } from "./ui-store"
+import { cartLineKey, normalizeColor, normalizeSize } from "@/lib/cart"
 
 interface ProductState {
   cartItems: CartItem[]
@@ -26,12 +27,16 @@ export const useProductStore = create<ProductState>((set, get) => ({
   error: null,
 
   addToCart: async (product, selectedSize, selectedColor, quantity = 1, syncToDb = true) => {
+    // Collapse the colour to its name up front so a line added from the shop
+    // grid (object) and the same line added from the product page (string)
+    // are the same line.
+    const size = normalizeSize(selectedSize)
+    const color = normalizeColor(selectedColor)
+    const lineKey = cartLineKey(product.id, size, color)
+
     set((state) => {
       const existingItemIndex = state.cartItems.findIndex(
-        (item) => 
-          item.id.toString() === product.id.toString() && 
-          item.selectedSize === selectedSize && 
-          item.selectedColor === selectedColor
+        (item) => cartLineKey(item.id, item.selectedSize, item.selectedColor) === lineKey
       )
 
       let newCartItems: CartItem[]
@@ -45,8 +50,8 @@ export const useProductStore = create<ProductState>((set, get) => ({
         const newItem: CartItem = {
           ...product,
           quantity,
-          selectedSize,
-          selectedColor,
+          selectedSize: size,
+          selectedColor: color,
         }
         newCartItems = [...state.cartItems, newItem]
       }
@@ -71,12 +76,11 @@ export const useProductStore = create<ProductState>((set, get) => ({
           body: JSON.stringify({
             productId: product.id.toString(),
             name: product.name,
-            price: product.price,
             // Trust the caller's chosen image (color-specific from the swatch)
             // before falling back to the product's image list.
             image: product.image || product.images?.[0],
-            selectedSize,
-            selectedColor,
+            selectedSize: size,
+            selectedColor: color,
             quantity,
             action: 'add'
           }),
@@ -97,24 +101,21 @@ export const useProductStore = create<ProductState>((set, get) => ({
 
   removeFromCart: async (productId, selectedSize, selectedColor, syncToDb = true) => {
     // Find the item first for API sync
+    const size = normalizeSize(selectedSize)
+    const color = normalizeColor(selectedColor)
+    const lineKey = cartLineKey(productId, size, color)
+
     const { cartItems } = get()
     const itemToRemove = cartItems.find(
-      (item) => 
-        item.id.toString() === productId.toString() && 
-        item.selectedSize === selectedSize && 
-        item.selectedColor === selectedColor
+      (item) => cartLineKey(item.id, item.selectedSize, item.selectedColor) === lineKey
     )
 
     // Update local state first
-    set((state) => {
-      const newCartItems = state.cartItems.filter(
-        (item) => 
-          !(item.id.toString() === productId.toString() && 
-            item.selectedSize === selectedSize && 
-            item.selectedColor === selectedColor)
-      )
-      return { cartItems: newCartItems }
-    })
+    set((state) => ({
+      cartItems: state.cartItems.filter(
+        (item) => cartLineKey(item.id, item.selectedSize, item.selectedColor) !== lineKey
+      ),
+    }))
     
     // Update UI store cart count
     const { getCartItemsCount } = get()
@@ -130,10 +131,9 @@ export const useProductStore = create<ProductState>((set, get) => ({
           body: JSON.stringify({
             productId: productId.toString(),
             name: itemToRemove.name,
-            price: itemToRemove.price,
             image: itemToRemove.image,
-            selectedSize,
-            selectedColor,
+            selectedSize: size,
+            selectedColor: color,
             action: 'remove'
           }),
         })
@@ -158,25 +158,23 @@ export const useProductStore = create<ProductState>((set, get) => ({
     }
 
     // Find the item first for API sync
+    const size = normalizeSize(selectedSize)
+    const color = normalizeColor(selectedColor)
+    const lineKey = cartLineKey(productId, size, color)
+
     const { cartItems } = get()
     const itemToUpdate = cartItems.find(
-      (item) => 
-        item.id.toString() === productId.toString() && 
-        item.selectedSize === selectedSize && 
-        item.selectedColor === selectedColor
+      (item) => cartLineKey(item.id, item.selectedSize, item.selectedColor) === lineKey
     )
 
     // Update local state first
-    set((state) => {
-      const newCartItems = state.cartItems.map((item) =>
-        item.id.toString() === productId.toString() && 
-        item.selectedSize === selectedSize && 
-        item.selectedColor === selectedColor
+    set((state) => ({
+      cartItems: state.cartItems.map((item) =>
+        cartLineKey(item.id, item.selectedSize, item.selectedColor) === lineKey
           ? { ...item, quantity }
           : item
-      )
-      return { cartItems: newCartItems }
-    })
+      ),
+    }))
     
     // Update UI store cart count
     const { getCartItemsCount } = get()
@@ -192,10 +190,9 @@ export const useProductStore = create<ProductState>((set, get) => ({
           body: JSON.stringify({
             productId: productId.toString(),
             name: itemToUpdate.name,
-            price: itemToUpdate.price,
             image: itemToUpdate.image,
-            selectedSize,
-            selectedColor,
+            selectedSize: size,
+            selectedColor: color,
             quantity,
             action: 'update'
           }),
@@ -240,23 +237,43 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
   syncCartFromDB: (dbCartItems) => {
-    // Convert database cart items to local cart items format
-    const localCartItems: CartItem[] = dbCartItems.map((dbItem) => ({
-      id: dbItem.productId, // Use string ID directly, don't parse as integer
-      name: dbItem.name,
-      price: dbItem.price,
-      image: dbItem.image, // Set the singular image property for cart display
-      images: [dbItem.image],
-      description: '',
-      category: '',
-      colors: [dbItem.selectedColor],
-      sizes: [dbItem.selectedSize],
-      isLook: false,
-      quantity: dbItem.quantity,
-      selectedSize: dbItem.selectedSize,
-      selectedColor: dbItem.selectedColor,
-    }))
+    // Normalise on the way in and fold duplicates together. Carts written
+    // before colours were normalised can hold the same garment twice — once
+    // with an object colour, once with the plain name — and those should
+    // present as a single line with the combined quantity.
+    const byLine = new Map<string, CartItem>()
 
+    for (const dbItem of dbCartItems || []) {
+      const size = normalizeSize(dbItem.selectedSize)
+      const color = normalizeColor(dbItem.selectedColor)
+      const key = cartLineKey(dbItem.productId, size, color)
+      const quantity = Number(dbItem.quantity) || 0
+      if (quantity <= 0) continue
+
+      const existing = byLine.get(key)
+      if (existing) {
+        existing.quantity += quantity
+        continue
+      }
+
+      byLine.set(key, {
+        id: dbItem.productId, // Use string ID directly, don't parse as integer
+        name: dbItem.name,
+        price: dbItem.price,
+        image: dbItem.image, // Set the singular image property for cart display
+        images: [dbItem.image],
+        description: '',
+        category: '',
+        colors: [color],
+        sizes: [size],
+        isLook: false,
+        quantity,
+        selectedSize: size,
+        selectedColor: color,
+      } as CartItem)
+    }
+
+    const localCartItems = Array.from(byLine.values())
     set({ cartItems: localCartItems })
     useUIStore.setState({ cartCount: localCartItems.reduce((count, item) => count + item.quantity, 0) })
   },

@@ -6,6 +6,7 @@ import {
 } from '@/lib/mongodb'
 import type { OrderItem, OrderSummary } from '@/types/order'
 import { computeTotals, escapeRegex } from '@/lib/pricing'
+import { normalizeColor, normalizeSize } from '@/lib/cart'
 
 const round2 = (n: number) => Math.round(n * 100) / 100
 
@@ -138,8 +139,8 @@ export async function priceUserCart(
       image: cartItem.image || product.image || product.images?.[0] || '',
       price,
       quantity,
-      selectedSize: String(cartItem.selectedSize || ''),
-      selectedColor: String(cartItem.selectedColor || ''),
+      selectedSize: normalizeSize(cartItem.selectedSize),
+      selectedColor: normalizeColor(cartItem.selectedColor),
       subtotal: itemSubtotal,
     })
   }

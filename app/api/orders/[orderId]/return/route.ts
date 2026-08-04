@@ -5,6 +5,7 @@ import { getOrdersCollection, getReturnsCollection } from "@/lib/mongodb"
 import type { ServerOrder } from "@/types/order"
 import type { ServerReturn, ReturnItem } from "@/types/return"
 import { RETURN_WINDOW_DAYS } from "@/types/return"
+import { cartLineKey } from "@/lib/cart"
 import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 interface IncomingReturnItem {
@@ -95,7 +96,7 @@ export async function POST(
     const alreadyReturned = new Map<string, number>()
     for (const ret of activeReturns) {
       for (const item of ret.items) {
-        const key = `${item.productId}|${item.selectedSize}|${item.selectedColor}`
+        const key = cartLineKey(item.productId, item.selectedSize, item.selectedColor)
         alreadyReturned.set(key, (alreadyReturned.get(key) || 0) + item.quantity)
       }
     }
@@ -111,11 +112,13 @@ export async function POST(
         )
       }
 
+      const incomingKey = cartLineKey(
+        incoming.productId,
+        incoming.selectedSize,
+        incoming.selectedColor
+      )
       const orderItem = order.items.find(
-        (oi) =>
-          oi.id?.toString() === incoming.productId?.toString() &&
-          oi.selectedSize === incoming.selectedSize &&
-          oi.selectedColor === incoming.selectedColor
+        (oi) => cartLineKey(oi.id, oi.selectedSize, oi.selectedColor) === incomingKey
       )
       if (!orderItem) {
         return NextResponse.json(
@@ -124,7 +127,7 @@ export async function POST(
         )
       }
 
-      const key = `${orderItem.id}|${orderItem.selectedSize}|${orderItem.selectedColor}`
+      const key = cartLineKey(orderItem.id, orderItem.selectedSize, orderItem.selectedColor)
       const remaining = orderItem.quantity - (alreadyReturned.get(key) || 0)
       if (qty > remaining) {
         return NextResponse.json(
