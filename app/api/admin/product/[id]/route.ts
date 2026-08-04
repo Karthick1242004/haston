@@ -6,6 +6,8 @@ import { getProductsCollection } from '@/lib/mongodb'
 import cloudinary from '@/lib/cloudinary'
 import { isAdminEmail } from '@/lib/isAdmin'
 import { assertValidImages, UploadValidationError } from '@/lib/upload-validation'
+import { parseStockInput } from '@/lib/stock'
+import { revalidatePath } from 'next/cache'
 import { deleteImagesFromCloudinary, getRemovedImages } from '@/lib/cloudinary-utils'
 
 export const dynamic = 'force-dynamic'
@@ -28,6 +30,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     // Delete the product from database
     const res = await collection.deleteOne({ _id: new ObjectId(params.id) })
     if (res.deletedCount === 0) return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 })
+
+    revalidatePath('/api/products')
 
     // Clean up images from Cloudinary
     const imagesToDelete: string[] = []
@@ -98,6 +102,14 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         return NextResponse.json({ error: 'Price must be a non-negative number' }, { status: 400 })
       }
       updateDoc.price = price
+    }
+
+    if (form.has('stock')) {
+      const stockValue = parseStockInput(form.get('stock'))
+      if (stockValue === null) {
+        return NextResponse.json({ error: 'Stock must be a whole number of 0 or more' }, { status: 400 })
+      }
+      updateDoc.stock = stockValue
     }
 
     if (form.has('sizes')) {
@@ -213,7 +225,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     
     // Update the product
     await collection.updateOne({ _id: new ObjectId(params.id) }, { $set: updateDoc })
-    
+
+    // Drop the cached catalogue so edits appear immediately.
+    revalidatePath('/api/products')
+
     // Clean up removed images from Cloudinary (async, don't block response)
     if (removedImages.length > 0) {
       deleteImagesFromCloudinary(removedImages).catch(error => {

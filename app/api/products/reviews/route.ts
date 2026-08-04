@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { getProductsCollection } from '@/lib/mongodb'
+import { getProductsCollection, getOrdersCollection } from '@/lib/mongodb'
 import { ObjectId } from 'mongodb'
 import { stripReviewPii } from '@/lib/reviews'
+import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 // GET - Fetch reviews for a product
 export async function GET(request: NextRequest) {
@@ -65,6 +66,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const limited = await enforceRateLimit(request, RATE_LIMITS.reviewCreate, session.user.id)
+    if (limited) return limited
+
     const body = await request.json()
     const { productId, rating, comment } = body
 
@@ -113,7 +117,7 @@ export async function POST(request: NextRequest) {
     }
 
     const collection = await getProductsCollection()
-    
+
     // Check if product exists
     const product = await collection.findOne({
       _id: new ObjectId(productId)
@@ -123,6 +127,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Product not found' },
         { status: 404 }
+      )
+    }
+
+    // Reviews are verified-purchase only: the reviewer must own a delivered
+    // order containing this product. Without this, any signed-in account could
+    // rate any product, which is the cheapest possible review-spam vector.
+    const orders = await getOrdersCollection()
+    const purchased = await orders.findOne({
+      userEmail: session.user.email,
+      status: 'delivered',
+      'items.id': productId.toString(),
+    })
+
+    if (!purchased) {
+      return NextResponse.json(
+        { error: 'You can only review products from an order that has been delivered' },
+        { status: 403 }
       )
     }
 
@@ -146,6 +167,9 @@ export async function POST(request: NextRequest) {
       userImage: session.user.image || '',
       rating: parsedRating,
       comment: comment.trim(),
+      // Always true now that a delivered order is required to reach this point;
+      // stored so the UI can show a "Verified purchase" badge.
+      verifiedPurchase: true,
       createdAt: new Date(),
       updatedAt: new Date()
     }

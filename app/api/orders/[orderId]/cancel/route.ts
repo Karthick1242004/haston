@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { getOrdersCollection } from '@/lib/mongodb'
 import { Order, ServerOrder } from '@/types/order'
+import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { releaseStock } from '@/lib/stock'
 import Razorpay from 'razorpay'
 
 const razorpay = new Razorpay({
@@ -22,6 +24,9 @@ export async function POST(
         { status: 401 }
       )
     }
+
+    const limited = await enforceRateLimit(request, RATE_LIMITS.orderMutation, session.user.id)
+    if (limited) return limited
 
     const { orderId } = params
     const { reason } = await request.json()
@@ -179,7 +184,14 @@ export async function POST(
           if (refundError.error?.code === 'BAD_REQUEST_ERROR') {
             console.error('Bad request error - likely invalid payment ID or payment not eligible for refund')
             
-            // Still cancel the order but without processing refund
+            // The cancellation stands, but no money has actually moved. Flag the
+            // order so it surfaces in admin rather than sitting in a queue nobody
+            // watches, and do not quote the customer a settlement date the system
+            // cannot keep.
+            console.error(
+              `MANUAL REFUND REQUIRED: order ${orderId} cancelled but Razorpay refused the refund of ${order.orderSummary.total} for payment ${order.paymentDetails?.razorpay_payment_id}`
+            )
+
             await collection.updateOne(
               { orderId, userEmail: session.user.email },
               {
@@ -187,6 +199,7 @@ export async function POST(
                   status: 'cancelled',
                   cancelledAt: new Date(),
                   cancellationReason: reason || 'Cancelled by customer',
+                  requiresManualRefund: true,
                   refundDetails: {
                     refund_id: 'manual_refund_required',
                     amount: order.orderSummary.total,
@@ -194,14 +207,19 @@ export async function POST(
                     created_at: Date.now(),
                     error: 'Automatic refund failed - manual processing required'
                   },
+                  stockRestored: true,
                   updatedAt: new Date(),
                 }
               }
             )
 
+            await releaseStock(order.items)
+
             return NextResponse.json({
               success: true,
-              message: 'Order cancelled successfully. Refund will be processed manually within 2-3 business days.',
+              requiresManualRefund: true,
+              message:
+                'Your order has been cancelled. We could not process the refund automatically, so our team will review it and be in touch about your refund.',
               refundDetails: {
                 refund_id: 'manual_refund_required',
                 amount: order.orderSummary.total,
@@ -246,10 +264,14 @@ export async function POST(
           cancelledAt: new Date(),
           cancellationReason: reason || 'Cancelled by customer',
           refundDetails: refundDetails,
+          stockRestored: true,
           updatedAt: new Date(),
         }
       }
     )
+
+    // Nothing shipped, so the reserved units go back on the shelf.
+    await releaseStock(order.items)
 
     return NextResponse.json({
       success: true,

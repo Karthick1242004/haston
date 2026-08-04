@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { validateCoupon, PricingError } from "@/lib/pricing-server";
+import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,6 +10,9 @@ export async function POST(req: NextRequest) {
     if (!session || !session.user || !session.user.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const limited = await enforceRateLimit(req, RATE_LIMITS.couponApply, session.user.id);
+    if (limited) return limited;
 
     const { code } = await req.json().catch(() => ({}));
 

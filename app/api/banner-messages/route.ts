@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
 import { getDatabase } from '@/lib/mongodb'
 
-// Force dynamic rendering to prevent caching
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+// Public marketing strip: rendered on every page but changes only when an admin
+// edits it, and those routes call revalidatePath('/api/banner-messages').
+export const revalidate = 60
+
+const BANNER_CACHE = 'public, max-age=0, s-maxage=60, stale-while-revalidate=300'
 
 // GET - Fetch active banner messages for public display
 export async function GET() {
@@ -40,11 +42,7 @@ export async function GET() {
       bannerMessages: transformedMessages
     })
 
-    // Add headers to prevent caching
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
-    response.headers.set('Pragma', 'no-cache')
-    response.headers.set('Expires', '0')
-    response.headers.set('X-Response-Time', new Date().toISOString())
+    response.headers.set('Cache-Control', BANNER_CACHE)
 
     return response
   } catch (error) {
@@ -63,7 +61,7 @@ export async function GET() {
       error: 'Using fallback messages due to database error'
     })
 
-    // Add cache control headers to fallback response too
+    // The fallback is an error state; never let it stick in a shared cache.
     response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
     response.headers.set('Pragma', 'no-cache')
     response.headers.set('Expires', '0')

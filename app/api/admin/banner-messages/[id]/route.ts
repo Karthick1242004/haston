@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { getDatabase } from '@/lib/mongodb'
 import { isAdminEmail } from '@/lib/isAdmin'
+import { revalidatePath } from 'next/cache'
 import { ObjectId } from 'mongodb'
 import type { UpdateBannerMessageRequest } from '@/types/banner'
 
@@ -36,7 +37,7 @@ export async function PUT(
     }
 
     if (body.text !== undefined) {
-      if (body.text.trim() === '') {
+      if (typeof body.text !== 'string' || body.text.trim() === '') {
         return NextResponse.json(
           { success: false, error: 'Banner text cannot be empty' },
           { status: 400 }
@@ -56,6 +57,8 @@ export async function PUT(
     if (body.order !== undefined) {
       updateDoc.order = body.order
     }
+
+    revalidatePath('/api/banner-messages')
 
     const result = await db.collection('bannerMessages').updateOne(
       { _id: new ObjectId(params.id) },
@@ -108,6 +111,8 @@ export async function DELETE(
         { status: 400 }
       )
     }
+
+    revalidatePath('/api/banner-messages')
 
     const result = await db.collection('bannerMessages').deleteOne({
       _id: new ObjectId(params.id)

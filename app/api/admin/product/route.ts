@@ -5,6 +5,8 @@ import clientPromise, { getDatabase } from '@/lib/mongodb'
 import cloudinary from '@/lib/cloudinary'
 import { isAdminEmail } from '@/lib/isAdmin'
 import { assertValidImages, UploadValidationError } from '@/lib/upload-validation'
+import { parseStockInput } from '@/lib/stock'
+import { revalidatePath } from 'next/cache'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -124,6 +126,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Defaults to 0 rather than a fake number: an unset stock should read as
+    // "none available", not as unlimited supply.
+    const stockValue = form.has('stock') ? parseStockInput(form.get('stock')) : 0
+    if (stockValue === null) {
+      return NextResponse.json({ error: 'Stock must be a whole number of 0 or more' }, { status: 400 })
+    }
+
     const parsedPrice = parseFloat(price)
     if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
       return NextResponse.json({ error: 'Price must be a non-negative number' }, { status: 400 })
@@ -148,7 +157,7 @@ export async function POST(request: NextRequest) {
       images: imageUrls,
       colors: colors,
       rating: 0,
-      stock: 100,
+      stock: stockValue,
       category: "Fashion", // Keep legacy field for backward compatibility
       productCategory, // New structured category
       createdAt: now,
@@ -175,6 +184,9 @@ export async function POST(request: NextRequest) {
     }
 
     const insertRes = await products.insertOne(productDoc)
+
+    // Drop the cached catalogue so the new product appears immediately.
+    revalidatePath('/api/products')
 
     return NextResponse.json({ success: true, id: insertRes.insertedId, product: productDoc })
   } catch (error) {

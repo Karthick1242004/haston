@@ -101,6 +101,7 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("0");
   const [description, setDescription] = useState("");
   const [sizes, setSizes] = useState("S,M,L");
   const [deliveryDays, setDeliveryDays] = useState("2-3 days");
@@ -278,6 +279,7 @@ export default function AdminPage() {
     try {
       setName("");
       setPrice("");
+      setStock("0");
       setDescription("");
       setSizes("S,M,L");
       setDeliveryDays("2-3 days");
@@ -546,6 +548,7 @@ export default function AdminPage() {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("price", price);
+      formData.append("stock", stock);
       formData.append("description", description);
       formData.append("sizes", sizes);
       formData.append("deliveryDays", deliveryDays);
@@ -977,6 +980,7 @@ export default function AdminPage() {
                                     setEditId(String(p.id));
                                     setName(p.name);
                                     setPrice(String(p.price));
+                                    setStock(String(p.stock ?? 0));
                                     setDescription(p.description || "");
                                     setSizes(p.sizes?.join(",") || "S,M,L");
                                     setDeliveryDays(
@@ -1322,6 +1326,24 @@ export default function AdminPage() {
                       />
                       <p className="text-xs text-gray-500 mt-1">
                         This is the final price customers will pay
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block mb-1 text-sm font-medium text-blue-950">
+                        Stock
+                      </label>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={stock}
+                        onChange={(e) => setStock(e.target.value)}
+                        className="rounded-none"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Units available to sell. Decreases automatically with each
+                        order and is restored on cancellations and refunded returns.
                       </p>
                     </div>
 

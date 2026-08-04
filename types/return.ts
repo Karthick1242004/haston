@@ -27,6 +27,8 @@ export interface Return {
   refundDetails?: RefundDetails
   rejectionReason?: string
   adminNotes?: string
+  /** Set when Razorpay refused the automatic refund and a human must settle it. */
+  requiresManualRefund?: boolean
   requestedAt: Date
   approvedAt?: Date
   rejectedAt?: Date
@@ -48,6 +50,8 @@ export interface ServerReturn {
   refundDetails?: RefundDetails
   rejectionReason?: string
   adminNotes?: string
+  /** Set when Razorpay refused the automatic refund and a human must settle it. */
+  requiresManualRefund?: boolean
   requestedAt: Date
   approvedAt?: Date
   rejectedAt?: Date

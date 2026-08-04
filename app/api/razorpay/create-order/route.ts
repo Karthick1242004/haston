@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { getCheckoutIntentsCollection } from '@/lib/mongodb'
 import { priceUserCart, PricingError } from '@/lib/pricing-server'
+import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID!,
@@ -18,6 +19,9 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await enforceRateLimit(request, RATE_LIMITS.paymentCreate, session.user.id)
+    if (limited) return limited
 
     const body = await request.json().catch(() => ({}))
     const { discountCode } = body

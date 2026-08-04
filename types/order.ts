@@ -20,6 +20,10 @@ export interface Order {
   cancelledAt?: Date
   cancellationReason?: string
   refundDetails?: RefundDetails
+  /** Set when Razorpay refused the automatic refund and a human must settle it. */
+  requiresManualRefund?: boolean
+  /** Guards against double-restocking an order's inventory. */
+  stockRestored?: boolean
 }
 
 // Server-side Order interface (for MongoDB operations)
@@ -41,6 +45,10 @@ export interface ServerOrder {
   cancelledAt?: Date
   cancellationReason?: string
   refundDetails?: RefundDetails
+  /** Set when Razorpay refused the automatic refund and a human must settle it. */
+  requiresManualRefund?: boolean
+  /** Guards against double-restocking an order's inventory. */
+  stockRestored?: boolean
 }
 
 export interface RefundDetails {

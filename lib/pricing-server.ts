@@ -117,6 +117,18 @@ export async function priceUserCart(
       throw new PricingError(`"${product.name}" is mispriced and cannot be ordered`)
     }
 
+    // Fail before the customer pays. The binding check is the guarded decrement
+    // at order creation; this one exists so the common case produces a clear
+    // message instead of a refund.
+    const available = Number(product.stock ?? 0)
+    if (!Number.isFinite(available) || available < quantity) {
+      throw new PricingError(
+        available > 0
+          ? `Only ${available} of "${product.name}" left in stock`
+          : `"${product.name}" is out of stock`
+      )
+    }
+
     const itemSubtotal = round2(price * quantity)
     subtotal = round2(subtotal + itemSubtotal)
 

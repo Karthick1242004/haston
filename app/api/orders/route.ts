@@ -9,6 +9,8 @@ import {
   getCheckoutIntentsCollection,
 } from '@/lib/mongodb'
 import { Order, ServerOrder, ShippingAddress } from '@/types/order'
+import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { reserveStock, releaseStock } from '@/lib/stock'
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID!,
@@ -47,6 +49,9 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await enforceRateLimit(request, RATE_LIMITS.orderCreate, session.user.id)
+    if (limited) return limited
 
     const body = await request.json().catch(() => ({}))
     const {
@@ -134,6 +139,50 @@ export async function POST(request: NextRequest) {
 
     const claimed = intent
 
+    // 5. Reserve inventory. Stock was checked during pricing, but that was
+    //    before the customer paid — another buyer may have taken the last unit
+    //    since. If the guarded decrement fails we hold money for goods we
+    //    cannot ship, so refund immediately rather than confirm the order.
+    const reservation = await reserveStock(claimed.items)
+    if (!reservation.ok) {
+      let refunded = false
+      try {
+        await razorpay.payments.refund(razorpay_payment_id, {
+          amount: Number(claimed.amountPaise),
+          speed: 'normal' as const,
+          notes: { reason: 'Out of stock at order confirmation', razorpay_order_id },
+          receipt: `oos_${razorpay_order_id}`,
+        })
+        refunded = true
+      } catch (refundError) {
+        console.error(
+          `URGENT: payment ${razorpay_payment_id} captured but stock reservation failed and the automatic refund errored. Manual refund required.`,
+          refundError
+        )
+      }
+
+      await intents.updateOne(
+        { razorpayOrderId: razorpay_order_id },
+        {
+          $set: {
+            status: 'failed_out_of_stock',
+            failedAt: new Date(),
+            refunded,
+            requiresManualRefund: !refunded,
+          },
+        }
+      )
+
+      return NextResponse.json(
+        {
+          error: refunded
+            ? `Sorry — "${reservation.failure?.productName}" sold out while your payment was processing. You have been refunded in full.`
+            : `Sorry — "${reservation.failure?.productName}" sold out while your payment was processing. Our team will refund you shortly.`,
+        },
+        { status: 409 }
+      )
+    }
+
     const orderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
     // Calculate estimated delivery (7-10 business days from now)
@@ -165,9 +214,17 @@ export async function POST(request: NextRequest) {
 
     // Save to database
     const collection = await getOrdersCollection()
-    const result = await collection.insertOne(serverOrder)
+    let result
+    try {
+      result = await collection.insertOne(serverOrder)
+    } catch (insertError) {
+      // Put the reserved units back rather than leaking them out of inventory.
+      await releaseStock(claimed.items)
+      throw insertError
+    }
 
     if (!result.insertedId) {
+      await releaseStock(claimed.items)
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
     }
 

@@ -54,6 +54,13 @@ async function main() {
   )
   console.log('checkoutIntents: ttl_checkout_intents created')
 
+  // Rate-limit counters expire themselves; expiresAt is set per window.
+  await db.collection('rateLimits').createIndex(
+    { expiresAt: 1 },
+    { expireAfterSeconds: 0, name: 'ttl_rate_limits' }
+  )
+  console.log('rateLimits: ttl_rate_limits created')
+
   // Supports the owner-scoped order lookups used across the order routes.
   await db.collection('orders').createIndex({ orderId: 1 }, { name: 'idx_orderId' })
   await db.collection('orders').createIndex({ userEmail: 1, createdAt: -1 }, { name: 'idx_userEmail_createdAt' })

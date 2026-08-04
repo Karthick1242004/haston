@@ -41,23 +41,9 @@ const nextConfig = {
           },
         ],
       },
-      {
-        source: '/api/banner-messages',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate',
-          },
-          {
-            key: 'Pragma',
-            value: 'no-cache',
-          },
-          {
-            key: 'Expires',
-            value: '0',
-          },
-        ],
-      },
+      // The public /api/banner-messages route sets its own Cache-Control so the
+      // strip can be served from the shared cache; a blanket no-store rule here
+      // would override it. Admin endpoints below stay uncached.
       {
         source: '/api/admin/banner-messages',
         headers: [

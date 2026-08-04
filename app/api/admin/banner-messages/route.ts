@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { getDatabase } from '@/lib/mongodb'
 import { isAdminEmail } from '@/lib/isAdmin'
+import { revalidatePath } from 'next/cache'
 import { ObjectId } from 'mongodb'
 import type { BannerMessage, CreateBannerMessageRequest } from '@/types/banner'
 
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
     const body: CreateBannerMessageRequest = await request.json()
     
     // Validation
-    if (!body.text || body.text.trim() === '') {
+    if (typeof body.text !== 'string' || body.text.trim() === '') {
       return NextResponse.json(
         { success: false, error: 'Banner text is required' },
         { status: 400 }
@@ -99,6 +100,8 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await db.collection('bannerMessages').insertOne(bannerMessage)
+
+    revalidatePath('/api/banner-messages')
 
     const response = NextResponse.json({
       success: true,

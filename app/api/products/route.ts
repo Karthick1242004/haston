@@ -5,6 +5,14 @@ import { stripReviewPii } from '@/lib/reviews'
 
 export const dynamic = 'force-dynamic'
 
+// The catalogue is read on nearly every page (the shop pulls it whole, and the
+// wishlist hydrates item-by-item through it) but changes only when an admin
+// edits a product — and those routes call revalidatePath('/api/products'), so a
+// short shared-cache window costs nothing in freshness. Kept private=false so
+// the CDN, not the browser, holds it; stock counts should not go stale in a
+// user's own cache.
+const CATALOGUE_CACHE = 'public, max-age=0, s-maxage=60, stale-while-revalidate=300'
+
 // This endpoint is public, and product documents embed the full review array —
 // including each reviewer's email and account id. Scrub them on the way out.
 function toPublicProduct(doc: any) {
@@ -32,7 +40,9 @@ export async function GET(request: NextRequest) {
       }
       const doc = await collection.findOne({ _id: new ObjectId(id) })
       if (!doc) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-      return NextResponse.json(toPublicProduct(doc))
+      return NextResponse.json(toPublicProduct(doc), {
+        headers: { 'Cache-Control': CATALOGUE_CACHE },
+      })
     }
 
     const filter: any = {}
@@ -51,7 +61,9 @@ export async function GET(request: NextRequest) {
     if (limit) cursor.limit(limit)
     const docs = await cursor.toArray()
     const products = docs.map(toPublicProduct)
-    return NextResponse.json({ products })
+    return NextResponse.json({ products }, {
+      headers: { 'Cache-Control': CATALOGUE_CACHE },
+    })
   } catch (err) {
     console.error('Products fetch error', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

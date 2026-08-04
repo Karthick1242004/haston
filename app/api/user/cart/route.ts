@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { findUserById, updateUser, getProductsCollection } from '@/lib/mongodb'
 import { CartItem } from '@/lib/mongodb'
 import { ObjectId } from 'mongodb'
+import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic'
@@ -41,6 +42,9 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await enforceRateLimit(request, RATE_LIMITS.cartWrite, session.user.id)
+    if (limited) return limited
 
     const body = await request.json()
     const { productId, name, image, selectedSize, selectedColor, quantity = 1, action = 'add' } = body

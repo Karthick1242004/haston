@@ -35,7 +35,16 @@ export async function GET(request: NextRequest) {
     // Build filter query
     const filterQuery: any = {}
 
+    // Constrained to the real statuses: an arbitrary value silently returned an
+    // empty page, which reads as "no orders" rather than "bad filter".
+    const ORDER_STATUSES = [
+      'pending', 'confirmed', 'processing', 'shipped',
+      'delivered', 'cancelling', 'cancelled',
+    ]
     if (status && status !== 'all') {
+      if (!ORDER_STATUSES.includes(status)) {
+        return NextResponse.json({ error: 'Unknown order status filter' }, { status: 400 })
+      }
       filterQuery.status = status
     }
 

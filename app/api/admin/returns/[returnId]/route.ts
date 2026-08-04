@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { isAdminEmail } from "@/lib/isAdmin"
+import { releaseStock } from "@/lib/stock"
 import { getOrdersCollection, getReturnsCollection } from "@/lib/mongodb"
 import type { ServerOrder, RefundDetails } from "@/types/order"
 import type { ServerReturn, ReturnStatus } from "@/types/return"
@@ -184,10 +185,14 @@ export async function PUT(
             speed_processed: refund.speed_processed,
           }
         } catch (refundError: any) {
-          console.error("Razorpay return refund error:", refundError)
+          console.error(
+            `MANUAL REFUND REQUIRED: return ${ret.returnId} on order ${ret.orderId} — Razorpay refused the refund of ${requestedRefund}`,
+            refundError
+          )
+          updates.requiresManualRefund = true
           refundDetails = {
             refund_id: "manual_refund_required",
-            amount: ret.refundAmount,
+            amount: requestedRefund,
             status: "manual_processing_required",
             created_at: now,
           }
@@ -195,7 +200,7 @@ export async function PUT(
       } else {
         refundDetails = {
           refund_id: "no_payment_to_refund",
-          amount: ret.refundAmount,
+          amount: requestedRefund,
           status: "no_refund_required",
           created_at: now,
         }
@@ -203,6 +208,15 @@ export async function PUT(
 
       updates.refundDetails = refundDetails
       updates.refundedAt = now
+
+      // Returned goods come back into inventory once the refund is settled.
+      await releaseStock(
+        ret.items.map((item) => ({
+          id: item.productId,
+          name: item.name,
+          quantity: item.quantity,
+        }))
+      )
     }
 
     await collection.updateOne(

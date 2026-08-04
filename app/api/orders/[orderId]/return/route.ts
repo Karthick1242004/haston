@@ -5,6 +5,7 @@ import { getOrdersCollection, getReturnsCollection } from "@/lib/mongodb"
 import type { ServerOrder } from "@/types/order"
 import type { ServerReturn, ReturnItem } from "@/types/return"
 import { RETURN_WINDOW_DAYS } from "@/types/return"
+import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 interface IncomingReturnItem {
   productId: string
@@ -22,6 +23,9 @@ export async function POST(
     if (!session?.user?.email || !session.user.id) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
+
+    const limited = await enforceRateLimit(request, RATE_LIMITS.orderMutation, session.user.id)
+    if (limited) return limited
 
     const { orderId } = params
     const body = await request.json()
