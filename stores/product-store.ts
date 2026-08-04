@@ -5,6 +5,8 @@ import { cartLineKey, normalizeColor, normalizeSize } from "@/lib/cart"
 
 interface ProductState {
   cartItems: CartItem[]
+  /** Bumped on every local cart mutation so a slow server sync can tell it is stale. */
+  cartRevision: number
   isCartOpen: boolean
   isLoading: boolean
   error: string | null
@@ -15,13 +17,14 @@ interface ProductState {
   setCartOpen: (open: boolean) => void
   getCartTotal: () => number
   getCartItemsCount: () => number
-  syncCartFromDB: (dbCartItems: any[]) => void
+  syncCartFromDB: (dbCartItems: any[], expectedRevision?: number) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
 }
 
 export const useProductStore = create<ProductState>((set, get) => ({
   cartItems: [],
+  cartRevision: 0,
   isCartOpen: false,
   isLoading: false,
   error: null,
@@ -58,6 +61,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
 
       return {
         cartItems: newCartItems,
+        cartRevision: state.cartRevision + 1,
         isCartOpen: true
       }
     })
@@ -115,6 +119,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       cartItems: state.cartItems.filter(
         (item) => cartLineKey(item.id, item.selectedSize, item.selectedColor) !== lineKey
       ),
+      cartRevision: state.cartRevision + 1,
     }))
     
     // Update UI store cart count
@@ -174,6 +179,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
           ? { ...item, quantity }
           : item
       ),
+      cartRevision: state.cartRevision + 1,
     }))
     
     // Update UI store cart count
@@ -212,7 +218,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
   clearCart: async (syncToDb = true) => {
-    set({ cartItems: [] })
+    set((state) => ({ cartItems: [], cartRevision: state.cartRevision + 1 }))
     useUIStore.setState({ cartCount: 0 })
 
     // Sync to database if requested
@@ -236,7 +242,15 @@ export const useProductStore = create<ProductState>((set, get) => ({
     }
   },
 
-  syncCartFromDB: (dbCartItems) => {
+  syncCartFromDB: (dbCartItems, expectedRevision) => {
+    // Drop a response that was already in flight when the shopper changed the
+    // cart. Without this the initial load's fetch lands a second or two later
+    // and overwrites a just-added item, leaving the drawer showing an empty bag
+    // while the item sits in the database.
+    if (expectedRevision !== undefined && expectedRevision !== get().cartRevision) {
+      return
+    }
+
     // Normalise on the way in and fold duplicates together. Carts written
     // before colours were normalised can hold the same garment twice — once
     // with an object colour, once with the plain name — and those should

@@ -6,17 +6,28 @@ import { useProductStore } from '@/stores/product-store'
 
 export default function CartSyncProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()
-  const { syncCartFromDB, clearCart } = useProductStore()
+  // Depend on the email string rather than the session object: the object's
+  // identity changes on re-render, which re-ran this effect and refetched the
+  // cart repeatedly.
+  const userEmail = session?.user?.email ?? null
 
   useEffect(() => {
+    let cancelled = false
+
     const syncCart = async () => {
-      if (status === 'authenticated' && session?.user) {
+      if (status === 'authenticated' && userEmail) {
+        // Capture the cart's revision before the request goes out. If the
+        // shopper adds or removes something while it is in flight, the
+        // response is stale and applying it would wipe their change — which
+        // showed up as an empty bag while the item sat in the database.
+        const revisionAtFetch = useProductStore.getState().cartRevision
         try {
-          // Fetch cart from database
           const response = await fetch('/api/user/cart')
+          if (cancelled) return
           if (response.ok) {
             const data = await response.json()
-            syncCartFromDB(data.cartItems || [])
+            if (cancelled) return
+            useProductStore.getState().syncCartFromDB(data.cartItems || [], revisionAtFetch)
           } else {
             console.error('Failed to fetch cart from database')
           }
@@ -25,7 +36,7 @@ export default function CartSyncProvider({ children }: { children: React.ReactNo
         }
       } else if (status === 'unauthenticated') {
         // Clear cart when user logs out
-        await clearCart(false) // Don't sync to DB when clearing due to logout
+        await useProductStore.getState().clearCart(false) // Don't sync to DB when clearing due to logout
       }
     }
 
@@ -33,7 +44,11 @@ export default function CartSyncProvider({ children }: { children: React.ReactNo
     if (status !== 'loading') {
       syncCart()
     }
-  }, [session, status, syncCartFromDB, clearCart])
+
+    return () => {
+      cancelled = true
+    }
+  }, [status, userEmail])
 
   return <>{children}</>
-} 
+}
