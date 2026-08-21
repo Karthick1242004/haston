@@ -14,6 +14,7 @@ import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import type { Product } from "@/types/product"
 import { ProductCardSkeleton, SkeletonRegion } from "@/components/ui/skeletons"
+import { resolveProductColors, imageForColor } from "@/lib/product-colors"
 
 export default function WishlistPage() {
   const router = useRouter()
@@ -68,8 +69,14 @@ export default function WishlistPage() {
 
   const handleAddToCart = (product: Product) => {
     const defaultSize = product.sizes?.[0] || "M"
-    const defaultColor = product.colors?.[0] || "Default"
-    addProductToCart(product, defaultSize, defaultColor, 1)
+    const firstColor = resolveProductColors(product)[0]
+    const defaultColor = firstColor?.name || "Default"
+    addProductToCart(
+      { ...product, image: imageForColor(product, defaultColor) },
+      defaultSize,
+      defaultColor,
+      1
+    )
   }
 
   const handleProductClick = (productId: number) => {

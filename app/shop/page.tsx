@@ -25,6 +25,7 @@ import { CATEGORIES, getCategoryDisplayName } from "@/lib/categories"
 import { useEffect, useState } from "react"
 import { CardMain } from "@/components/ui/cardmain"
 import { ProductCardSkeleton, SkeletonRegion } from "@/components/ui/skeletons"
+import { resolveProductColors, imageForColor } from "@/lib/product-colors"
 
 interface FilterState {
   categories: string[]
@@ -681,8 +682,16 @@ export default function ShopPage() {
                                 e.preventDefault()
                                 e.stopPropagation()
                                 const defaultSize = product.sizes?.[0] || "M"
-                                const defaultColor = Array.isArray(product.colors) ? product.colors[0] : "Black"
-                                addProductToCart(product, defaultSize, defaultColor, 1)
+                                // Resolve to the colour name and its paired image so a
+                                // quick-add can never record a colour/photo mismatch.
+                                const firstColor = resolveProductColors(product)[0]
+                                const defaultColor = firstColor?.name || "Default"
+                                addProductToCart(
+                                  { ...product, image: imageForColor(product, defaultColor) },
+                                  defaultSize,
+                                  defaultColor,
+                                  1
+                                )
                               }}
                               disabled={(product.stock || 0) === 0}
                             >
@@ -779,8 +788,14 @@ export default function ShopPage() {
                                     e.preventDefault()
                                     e.stopPropagation()
                                     const defaultSize = product.sizes?.[0] || "M"
-                                    const defaultColor = Array.isArray(product.colors) ? product.colors[0] : "Black"
-                                    addProductToCart(product, defaultSize, defaultColor, 1)
+                                    const firstColor = resolveProductColors(product)[0]
+                                    const defaultColor = firstColor?.name || "Default"
+                                    addProductToCart(
+                                      { ...product, image: imageForColor(product, defaultColor) },
+                                      defaultSize,
+                                      defaultColor,
+                                      1
+                                    )
                                   }}
                                   disabled={(product.stock || 0) === 0}
                                 >

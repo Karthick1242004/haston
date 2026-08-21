@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { ChevronLeft, Star, Heart, ShoppingCart, Loader2 } from "lucide-react";
@@ -16,6 +16,8 @@ import Header from "@/components/header";
 import ReviewSection from "@/components/review-section";
 import type { Product } from "@/types/product";
 import Footer from "@/components/footer";
+import { resolveProductColors, imageForColor, colorForImageIndex } from "@/lib/product-colors";
+import type { ResolvedColor } from "@/lib/product-colors";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -47,12 +49,39 @@ export default function ProductDetailPage() {
     fetchProduct();
   }, [params.id]);
 
+  // The product's real colours, in the same order as its images (the admin
+  // form requires that pairing).
+  const productColors = useMemo(() => resolveProductColors(product), [product]);
+
   useEffect(() => {
     if (product) {
-      setSelectedColor(product.colors?.[0] || "");
+      // colors[0] used to be assigned raw, which handed the cart a
+      // { name, value } object instead of a colour name.
+      setSelectedColor(productColors[0]?.name || "");
       setSelectedSize(product.sizes?.[0] || "");
+      setSelectedImageIndex(0);
     }
-  }, [product]);
+  }, [product, productColors]);
+
+  // Picking a colour moves the gallery to that colour's photo.
+  const chooseColor = (name: string) => {
+    setSelectedColor(name);
+    const match = productColors.find((c: ResolvedColor) => c.name === name);
+    if (match && Array.isArray(product?.images) && product.images[match.imageIndex]) {
+      setSelectedImageIndex(match.imageIndex);
+    }
+  };
+
+  // ...and browsing the gallery selects the colour it belongs to, so adding
+  // straight from the green photo adds green rather than the first colour.
+  const chooseImage = (index: number) => {
+    setSelectedImageIndex(index);
+    const match = colorForImageIndex(product, index);
+    if (match) setSelectedColor(match.name);
+  };
+
+  // The photo for the chosen colour — this is what the cart line should show.
+  const cartImage = imageForColor(product, selectedColor);
 
   if (!product) {
     return (
@@ -64,7 +93,14 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (selectedSize && selectedColor) {
-      addProductToCart(product, selectedSize, selectedColor, quantity);
+      // Override `image` so the cart shows the colour the shopper picked. The
+      // store reads product.image, which is always the first photo.
+      addProductToCart(
+        { ...product, image: cartImage },
+        selectedSize,
+        selectedColor,
+        quantity
+      );
     }
   };
 
@@ -90,13 +126,6 @@ export default function ProductDetailPage() {
       });
     }
   };
-
-  const colorOptions = [
-    { name: "Portage", color: "bg-blue-400" },
-    { name: "Forest Green", color: "bg-green-600" },
-    { name: "Black", color: "bg-black" },
-    { name: "Pink", color: "bg-pink-400" },
-  ];
 
   return (
     <motion.div
@@ -126,7 +155,7 @@ export default function ProductDetailPage() {
                       : "border-transparent"
                   }`}
                   whileHover={{ scale: 1.05 }}
-                  onClick={() => setSelectedImageIndex(index)}
+                  onClick={() => chooseImage(index)}
                 >
                   <Image
                     src={image}
@@ -162,7 +191,7 @@ export default function ProductDetailPage() {
               <button
                 className="absolute left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors"
                 onClick={() =>
-                  setSelectedImageIndex(Math.max(0, selectedImageIndex - 1))
+                  chooseImage(Math.max(0, selectedImageIndex - 1))
                 }
                 disabled={selectedImageIndex === 0}
                 aria-label="Previous image"
@@ -196,7 +225,7 @@ export default function ProductDetailPage() {
                     className={`w-2 h-2 rounded-full transition-colors ${
                       selectedImageIndex === index ? "bg-white" : "bg-white/50"
                     }`}
-                    onClick={() => setSelectedImageIndex(index)}
+                    onClick={() => chooseImage(index)}
                     aria-label={`View image ${index + 1}`}
                   />
                 ))}
@@ -515,28 +544,34 @@ export default function ProductDetailPage() {
                 </div>
               )}
 
-              {/* Color Selection */}
-              {/* <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">Select Color</h3>
-                  <span className="text-gray-500 capitalize">{selectedColor}</span>
-                </div> */}
+              {/* Color Selection — real product colours, paired with the gallery */}
+              {productColors.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium">Select Color</h3>
+                    <span className="text-gray-500 capitalize">{selectedColor}</span>
+                  </div>
 
-              {/* <div className="flex gap-3">
-                  {colorOptions.map((option) => (
-                    <button
-                      key={option.name}
-                      onClick={() => setSelectedColor(option.name)}
-                      className={`w-12 h-12 rounded-full border-4 transition-all ${
-                        selectedColor === option.name
-                          ? "border-black scale-110"
-                          : "border-gray-200 hover:border-gray-400"
-                      } ${option.color}`}
-                      aria-label={`Select ${option.name} color`}
-                    />
-                  ))}
-                </div> */}
-              {/* </div> */}
+                  <div className="flex flex-wrap gap-3">
+                    {productColors.map((option: ResolvedColor) => (
+                      <button
+                        key={option.name}
+                        type="button"
+                        onClick={() => chooseColor(option.name)}
+                        aria-label={`Select ${option.name}`}
+                        aria-pressed={selectedColor === option.name}
+                        title={option.name}
+                        className={`w-10 h-10 rounded-full border-4 transition-all ${
+                          selectedColor === option.name
+                            ? "border-black scale-110"
+                            : "border-gray-200 hover:border-gray-400"
+                        }`}
+                        style={{ backgroundColor: option.value }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Size Selection */}
               <div className="space-y-2 !-mt-1">
@@ -625,7 +660,7 @@ export default function ProductDetailPage() {
                   onClick={() => {
                     if (selectedSize && selectedColor) {
                       buyProductNow(
-                        product,
+                        { ...product, image: cartImage },
                         selectedSize,
                         selectedColor,
                         quantity
@@ -696,7 +731,7 @@ export default function ProductDetailPage() {
                 className={`w-1.5 h-1.5 rounded-full transition-colors ${
                   selectedImageIndex === index ? "bg-white" : "bg-white/50"
                 }`}
-                onClick={() => setSelectedImageIndex(index)}
+                onClick={() => chooseImage(index)}
               />
             ))}
           </div>
@@ -707,7 +742,7 @@ export default function ProductDetailPage() {
           {product.images?.map((image, index) => (
             <button
               key={index}
-              onClick={() => setSelectedImageIndex(index)}
+              onClick={() => chooseImage(index)}
               className={`flex-shrink-0 w-16 h-20 rounded-lg overflow-hidden border-2 ${
                 selectedImageIndex === index
                   ? "border-black"
@@ -774,26 +809,33 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Color Selection */}
-          {/* <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="font-medium">Color</span>
-              <span className="text-gray-500 capitalize">{selectedColor}</span>
+          {/* Color Selection — real product colours, paired with the gallery */}
+          {productColors.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="font-medium">Color</span>
+                <span className="text-gray-500 capitalize">{selectedColor}</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {productColors.map((option: ResolvedColor) => (
+                  <button
+                    key={option.name}
+                    type="button"
+                    onClick={() => chooseColor(option.name)}
+                    aria-label={`Select ${option.name}`}
+                    aria-pressed={selectedColor === option.name}
+                    title={option.name}
+                    className={`w-10 h-10 rounded-full border-2 transition-all touch-manipulation ${
+                      selectedColor === option.name
+                        ? "border-black scale-110"
+                        : "border-gray-200"
+                    }`}
+                    style={{ backgroundColor: option.value }}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="flex gap-2">
-              {colorOptions.map((option) => (
-                <button
-                  key={option.name}
-                  onClick={() => setSelectedColor(option.name)}
-                  className={`w-10 h-10 rounded-full border-2 transition-all ${
-                    selectedColor === option.name
-                      ? "border-black scale-110"
-                      : "border-gray-200"
-                  } ${option.color}`}
-                />
-              ))}
-            </div>
-          </div> */}
+          )}
 
           {/* Size Selection */}
           <div className="space-y-3">
@@ -1101,7 +1143,12 @@ export default function ProductDetailPage() {
           disabled={!selectedSize || !selectedColor}
           onClick={() => {
             if (selectedSize && selectedColor) {
-              buyProductNow(product, selectedSize, selectedColor, quantity);
+              buyProductNow(
+                { ...product, image: cartImage },
+                selectedSize,
+                selectedColor,
+                quantity
+              );
             }
           }}
         >

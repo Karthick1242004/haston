@@ -27,6 +27,9 @@ export default function PopularProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  // Size chips were display-only, so the card always added sizes[0] no matter
+  // which chip the shopper clicked.
+  const [selectedSizes, setSelectedSizes] = useState<{ [key: string]: string }>({});
   const [selectedColors, setSelectedColors] = useState<{
     [key: string]: number;
   }>({});
@@ -158,11 +161,10 @@ export default function PopularProducts() {
       const selectedColorIndex = selectedColors[product.id.toString()] || 0;
       const selectedColor = productColors[selectedColorIndex];
 
-      // Get the first available size or default
+      // Honour the chip the shopper clicked, falling back to the first size.
       const selectedSize =
-        product.sizes && product.sizes.length > 0
-          ? product.sizes[0]
-          : "One Size";
+        selectedSizes[product.id.toString()] ||
+        (product.sizes && product.sizes.length > 0 ? product.sizes[0] : "One Size");
 
       // Match the cart image to the swatch the user picked. Falls back to the
       // product's main image if there is no per-color image at that index.
@@ -680,21 +682,45 @@ export default function PopularProducts() {
 
                   {/* Size Options Preview - Hidden on mobile */}
                   {product.sizes && product.sizes.length > 0 && (
-                    <div className="hidden sm:block space-y-1">
+                    <div className="hidden sm:block space-y-1 relative z-10">
                       <p className="text-xs text-gray-600 font-medium">
                         Available Sizes:
                       </p>
                       <div className="flex flex-wrap gap-1">
                         {product.sizes
                           .slice(0, 4)
-                          .map((size: string, sizeIndex: number) => (
-                            <span
-                              key={sizeIndex}
-                              className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded border hover:bg-gray-200 transition-colors"
-                            >
-                              {size}
-                            </span>
-                          ))}
+                          .map((size: string, sizeIndex: number) => {
+                            const activeSize =
+                              selectedSizes[product.id.toString()] || product.sizes?.[0];
+                            return (
+                              <button
+                                key={sizeIndex}
+                                type="button"
+                                aria-pressed={activeSize === size}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setSelectedSizes((prev) => ({
+                                    ...prev,
+                                    [product.id.toString()]: size,
+                                  }));
+                                }}
+                                // The card is covered by an absolute link
+                                // overlay; without lifting above it these clicks
+                                // land on the link and navigate instead of
+                                // selecting. Same treatment as the colour
+                                // swatches above.
+                                className={`relative z-10 pointer-events-auto touch-manipulation px-2 py-1 text-xs rounded border transition-colors ${
+                                  activeSize === size
+                                    ? "bg-blue-950 text-white border-blue-950"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                }`}
+                                style={{ touchAction: "manipulation" }}
+                              >
+                                {size}
+                              </button>
+                            );
+                          })}
                         {product.sizes.length > 4 && (
                           <span className="px-2 py-1 text-xs text-gray-500">
                             +{product.sizes.length - 4}

@@ -25,9 +25,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ 
+    // Never let a browser or shared cache hold on to a cart. A replayed
+    // response resurrected items the shopper had just deleted.
+    return NextResponse.json({
       cartItems: user.cartItems || [],
       cartCount: (user.cartItems || []).reduce((count: number, item: CartItem) => count + item.quantity, 0)
+    }, {
+      headers: {
+        'Cache-Control': 'private, no-store, max-age=0, must-revalidate',
+        'Vary': 'Cookie',
+      },
     })
   } catch (error) {
     console.error('Cart fetch error:', error)

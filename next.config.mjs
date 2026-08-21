@@ -41,9 +41,35 @@ const nextConfig = {
           },
         ],
       },
-      // The public /api/banner-messages route sets its own Cache-Control so the
-      // strip can be served from the shared cache; a blanket no-store rule here
-      // would override it. Admin endpoints below stay uncached.
+      // Per-user and privileged endpoints must never be cached. Next's default
+      // for these was `public, max-age=0, must-revalidate`, which let a browser
+      // replay a stale cart on history navigation — deleting an item and
+      // refreshing brought it back — and, worse, marked per-customer responses
+      // `public` with no Vary on the cookie, so any shared cache in front of the
+      // site could hand one customer's cart or orders to another.
+      // /api/products, /api/hero-slides and /api/banner-messages are genuinely
+      // public and keep their own caching rules below.
+      ...['/api/user/:path*', '/api/orders/:path*', '/api/returns/:path*',
+          '/api/coupons/:path*', '/api/admin/:path*', '/api/auth/:path*',
+          '/api/razorpay/:path*'].map((source) => ({
+        source,
+        headers: [
+          { key: 'Cache-Control', value: 'private, no-store, max-age=0, must-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
+          { key: 'Vary', value: 'Cookie' },
+        ],
+      })),
+      // `/api/orders` and `/api/returns` exactly, which the :path* patterns miss.
+      ...['/api/orders', '/api/returns'].map((source) => ({
+        source,
+        headers: [
+          { key: 'Cache-Control', value: 'private, no-store, max-age=0, must-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
+          { key: 'Vary', value: 'Cookie' },
+        ],
+      })),
       {
         source: '/api/admin/banner-messages',
         headers: [
