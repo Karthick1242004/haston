@@ -44,6 +44,16 @@ export function cartLineKey(
   ].join('|')
 }
 
+/**
+ * Link target for a cart line. Cart items carry the product's id, so they can
+ * link straight back to the product page. Returns "/shop" when the id is
+ * missing or malformed, so a legacy cart row can never render a dead link.
+ */
+export function productHref(productId: unknown): string {
+  const id = String(productId ?? '').trim()
+  return /^[a-f\d]{24}$/i.test(id) ? `/product/${id}` : '/shop'
+}
+
 export function isSameCartLine(
   a: { id?: unknown; productId?: unknown; selectedSize?: unknown; selectedColor?: unknown },
   productId: unknown,

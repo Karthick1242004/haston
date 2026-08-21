@@ -7,6 +7,12 @@ interface ProductState {
   cartItems: CartItem[]
   /** Bumped on every local cart mutation so a slow server sync can tell it is stale. */
   cartRevision: number
+  /**
+   * False until the cart has been reconciled with the server once. Pages must
+   * not treat an empty cart as meaningful before this flips, or they act on the
+   * store's initial empty state instead of the shopper's real cart.
+   */
+  cartHydrated: boolean
   isCartOpen: boolean
   isLoading: boolean
   error: string | null
@@ -18,6 +24,7 @@ interface ProductState {
   getCartTotal: () => number
   getCartItemsCount: () => number
   syncCartFromDB: (dbCartItems: any[], expectedRevision?: number) => void
+  markCartHydrated: () => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
 }
@@ -25,6 +32,7 @@ interface ProductState {
 export const useProductStore = create<ProductState>((set, get) => ({
   cartItems: [],
   cartRevision: 0,
+  cartHydrated: false,
   isCartOpen: false,
   isLoading: false,
   error: null,
@@ -248,6 +256,8 @@ export const useProductStore = create<ProductState>((set, get) => ({
     // and overwrites a just-added item, leaving the drawer showing an empty bag
     // while the item sits in the database.
     if (expectedRevision !== undefined && expectedRevision !== get().cartRevision) {
+      // Still hydrated: local state is simply newer than this response.
+      set({ cartHydrated: true })
       return
     }
 
@@ -288,9 +298,11 @@ export const useProductStore = create<ProductState>((set, get) => ({
     }
 
     const localCartItems = Array.from(byLine.values())
-    set({ cartItems: localCartItems })
+    set({ cartItems: localCartItems, cartHydrated: true })
     useUIStore.setState({ cartCount: localCartItems.reduce((count, item) => count + item.quantity, 0) })
   },
+
+  markCartHydrated: () => set({ cartHydrated: true }),
 
   setCartOpen: (open) => {
     set({ isCartOpen: open })

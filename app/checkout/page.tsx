@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
+import Link from "next/link"
 import Script from "next/script"
 import { ChevronLeft, Minus, Plus, Trash2, CreditCard, ShoppingBag, User, Loader2, Tag } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -22,6 +23,7 @@ import { useProductStore } from "@/stores/product-store"
 import { ExtendedUser } from "@/types/database"
 import { useToast } from "@/hooks/use-toast"
 import { computeTotals } from "@/lib/pricing"
+import { productHref } from "@/lib/cart"
 
 interface UserDetails {
   email: string
@@ -44,7 +46,7 @@ interface LocationState {
 export default function CheckoutPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const { cartItems, updateQuantity, removeFromCart, getCartTotal, getCartItemsCount, clearCart } = useProductStore()
+  const { cartItems, cartHydrated, updateQuantity, removeFromCart, getCartTotal, getCartItemsCount, clearCart } = useProductStore()
   const { toast } = useToast()
   
   // Helper function to safely get color name
@@ -91,11 +93,14 @@ export default function CheckoutPage() {
   const subtotal = getCartTotal()
   const { discount, shipping, taxes, total } = computeTotals(subtotal, appliedDiscount)
 
+  // Wait until the cart has been reconciled with the server. Redirecting on the
+  // store's initial empty state bounced anyone who refreshed or opened
+  // /checkout directly straight back to the homepage, cart intact but unseen.
   useEffect(() => {
-    if (cartItems.length === 0) {
+    if (cartHydrated && cartItems.length === 0) {
       router.push('/')
     }
-  }, [cartItems, router])
+  }, [cartHydrated, cartItems, router])
 
   // Fetch user profile if authenticated
   useEffect(() => {
@@ -783,8 +788,12 @@ export default function CheckoutPage() {
                             transition={{ delay: index * 0.1 }}
                             className="flex gap-3 sm:gap-4 p-3 sm:p-4 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow"
                           >
-                            {/* Product Image */}
-                            <div className="flex-shrink-0">
+                            {/* Product Image — links through to the product page */}
+                            <Link
+                              href={productHref(item.id)}
+                              aria-label={`View ${item.name}`}
+                              className="flex-shrink-0 touch-manipulation active:opacity-70 transition-opacity"
+                            >
                               <div className="relative w-20 h-24 sm:w-24 sm:h-32 rounded-lg overflow-hidden bg-gray-100">
                                 <Image
                                   src={item.image || 'https://via.placeholder.com/150'}
@@ -795,13 +804,19 @@ export default function CheckoutPage() {
                                   quality={75}
                                 />
                               </div>
-                            </div>
+                            </Link>
 
                             {/* Product Details */}
                             <div className="flex-1 space-y-2 min-w-0">
                               <div className="flex justify-between items-start gap-2">
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base break-words line-clamp-2">{item.name}</h3>
+                                  {/* Only the image and title navigate, so tapping
+                                      the quantity controls never leaves checkout. */}
+                                  <Link href={productHref(item.id)} className="touch-manipulation">
+                                    <h3 className="font-semibold text-gray-900 text-sm sm:text-base break-words line-clamp-2 hover:text-blue-950 hover:underline underline-offset-2 active:opacity-70 transition-colors">
+                                      {item.name}
+                                    </h3>
+                                  </Link>
                                   <p className="text-xs sm:text-sm text-gray-600 break-words">
                                     Color: {getColorName(item.selectedColor)} • Size: {item.selectedSize}
                                   </p>

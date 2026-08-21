@@ -33,10 +33,15 @@ export default function CartSyncProvider({ children }: { children: React.ReactNo
           }
         } catch (error) {
           console.error('Error syncing cart:', error)
+        } finally {
+          // Mark hydrated even when the fetch fails, so pages waiting on the
+          // cart resolve to a definite state instead of hanging.
+          if (!cancelled) useProductStore.getState().markCartHydrated()
         }
       } else if (status === 'unauthenticated') {
         // Clear cart when user logs out
         await useProductStore.getState().clearCart(false) // Don't sync to DB when clearing due to logout
+        useProductStore.getState().markCartHydrated()
       }
     }
 

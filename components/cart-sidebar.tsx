@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { X, Minus, Plus, Trash2 } from "lucide-react"
 import {
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { useProductStore } from "@/stores/product-store"
+import { productHref } from "@/lib/cart"
 
 export default function CartSidebar() {
   const router = useRouter()
@@ -99,8 +101,13 @@ export default function CartSidebar() {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                       className="flex gap-4 bg-white"
                     >
-                      {/* Product Image */}
-                      <div className="flex-shrink-0">
+                      {/* Product Image — links through to the product page */}
+                      <Link
+                        href={productHref(item.id)}
+                        onClick={() => setCartOpen(false)}
+                        aria-label={`View ${item.name}`}
+                        className="flex-shrink-0 touch-manipulation active:opacity-70 transition-opacity"
+                      >
                         <div className="relative w-24 h-32 rounded-lg overflow-hidden bg-gray-100">
                           <Image
                             src={item.image || '/placeholder.jpg'}
@@ -111,19 +118,30 @@ export default function CartSidebar() {
                             quality={75}
                           />
                         </div>
-                      </div>
+                      </Link>
 
                       {/* Product Details */}
                       <div className="flex-1 space-y-2">
-                        <div className="flex justify-between items-start">
-                          <h3 className="font-semibold text-gray-900 text-sm leading-tight">
-                            {item.name}
-                          </h3>
+                        <div className="flex justify-between items-start gap-2">
+                          {/* Only the image and title navigate. Wrapping the whole
+                              row would nest the remove and quantity buttons inside
+                              an anchor, which is invalid and makes tapping "+" on a
+                              phone jump to the product page. */}
+                          <Link
+                            href={productHref(item.id)}
+                            onClick={() => setCartOpen(false)}
+                            className="flex-1 min-w-0 touch-manipulation"
+                          >
+                            <h3 className="font-semibold text-gray-900 text-sm leading-tight hover:text-blue-950 hover:underline underline-offset-2 active:opacity-70 transition-colors">
+                              {item.name}
+                            </h3>
+                          </Link>
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={async () => await removeFromCart(item.id, item.selectedSize, item.selectedColor)}
-                            className="h-8 w-8 rounded-full hover:bg-red-50 hover:text-red-600 transition-colors"
+                            aria-label={`Remove ${item.name} from bag`}
+                            className="h-8 w-8 shrink-0 rounded-full hover:bg-red-50 hover:text-red-600 transition-colors"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
