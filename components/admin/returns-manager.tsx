@@ -35,6 +35,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import type { Return, ReturnStatus } from "@/types/return"
+import { OrderCardSkeleton, SkeletonRegion } from "@/components/ui/skeletons"
 
 interface AdminReturnsStats {
   total: number
@@ -259,11 +260,11 @@ export default function ReturnsManager() {
 
       {/* List */}
       {isLoading ? (
-        <Card>
-          <CardContent className="p-12 text-center text-gray-500">
-            Loading returns…
-          </CardContent>
-        </Card>
+        <SkeletonRegion label="Loading returns" className="space-y-3">
+          <OrderCardSkeleton />
+          <OrderCardSkeleton />
+          <OrderCardSkeleton />
+        </SkeletonRegion>
       ) : returns.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Edit } from "lucide-react";
+import { SkeletonBox, SkeletonRegion } from "@/components/ui/skeletons";
 
 interface Coupon {
   _id: string;
@@ -208,7 +209,22 @@ export default function CouponManager() {
         </div>
         
         {isLoading ? (
-          <div className="p-8 text-center text-gray-500">Loading coupons...</div>
+          // Mirrors the 5-column table below so the panel does not resize
+          // when the real rows arrive.
+          <SkeletonRegion label="Loading coupons" className="divide-y divide-gray-100">
+            {Array.from({ length: 4 }, (_, i) => (
+              <div key={i} className="grid grid-cols-5 gap-4 items-center px-4 py-4">
+                <SkeletonBox className="h-4 w-24" />
+                <SkeletonBox className="h-6 w-20 rounded-full" />
+                <SkeletonBox className="h-6 w-16 rounded-full" />
+                <SkeletonBox className="h-3 w-24" />
+                <div className="flex justify-end gap-2">
+                  <SkeletonBox className="h-8 w-8 rounded-md" />
+                  <SkeletonBox className="h-8 w-8 rounded-md" />
+                </div>
+              </div>
+            ))}
+          </SkeletonRegion>
         ) : coupons.length === 0 ? (
           <div className="p-8 text-center text-gray-500">No coupons found. Create one above!</div>
         ) : (

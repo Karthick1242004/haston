@@ -16,6 +16,7 @@ import { useProductStore } from "@/stores/product-store";
 import { useSession } from "next-auth/react";
 import type { Product, ProductColor, ProductCategory } from "@/types/product";
 import { CATEGORIES, getCategoryDisplayName } from "@/lib/categories";
+import { ProductCardSkeleton, SkeletonRegion } from "@/components/ui/skeletons";
 
 // Default color fallback for products without colors
 const getDefaultColors = (): ProductColor[] => [
@@ -24,6 +25,7 @@ const getDefaultColors = (): ProductColor[] => [
 
 export default function PopularProducts() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [selectedColors, setSelectedColors] = useState<{
     [key: string]: number;
@@ -52,6 +54,8 @@ export default function PopularProducts() {
         setProducts(allProductsData.slice(0, 8)); // Show first 8 initially
       } catch (err) {
         console.error(err);
+      } finally {
+        setProductsLoading(false);
       }
     }
     fetchProducts();
@@ -452,14 +456,28 @@ export default function PopularProducts() {
                 <Badge variant="outline" className="text-sm">
                   {getCategoryDisplayName(selectedCategory, selectedSubcategory !== "all" ? selectedSubcategory : undefined)}
                 </Badge>
-                <span className="text-sm text-gray-600">
-                  ({products.length} products)
-                </span>
+                {!productsLoading && (
+                  <span className="text-sm text-gray-600">
+                    ({products.length} products)
+                  </span>
+                )}
               </div>
             )}
           </div>
         </motion.div>
 
+        {productsLoading ? (
+          // The grid has no height until products arrive, so the homepage
+          // visibly jumped when they did. Reserve the space.
+          <SkeletonRegion
+            label="Loading products"
+            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-3 auto-rows-fr"
+          >
+            {Array.from({ length: 8 }, (_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </SkeletonRegion>
+        ) : (
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-3 auto-rows-fr">
           {products.map((product, index) => {
             const productColors = getProductColors(product);
@@ -729,6 +747,7 @@ export default function PopularProducts() {
             );
           })}
         </div>
+        )}
       </div>
     </section>
   );

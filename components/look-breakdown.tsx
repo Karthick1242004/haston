@@ -55,15 +55,18 @@ export default function LookBreakdown() {
           sizes: p.sizes || ["S", "M", "L", "XL"]
         }))
 
+        setCarouselItems(items)
         if (items.length > 0) {
-          setCarouselItems(items)
-          setIsDataLoaded(true)
           // Enable auto-play only after data is loaded
           setTimeout(() => setIsAutoPlaying(true), 1000)
         }
       } catch (err) {
         console.error('Error fetching look items:', err)
-        setIsDataLoaded(false)
+      } finally {
+        // Always mark the fetch as settled. Flagging it only when items came
+        // back left the spinner running forever whenever the look list was
+        // empty or the request failed.
+        setIsDataLoaded(true)
       }
     }
     fetchLooks()

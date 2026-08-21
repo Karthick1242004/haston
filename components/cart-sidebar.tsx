@@ -14,11 +14,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { useProductStore } from "@/stores/product-store"
 import { productHref } from "@/lib/cart"
+import { CartItemSkeleton, SkeletonRegion } from "@/components/ui/skeletons"
 
 export default function CartSidebar() {
   const router = useRouter()
   const { 
     cartItems, 
+    cartHydrated,
     isCartOpen, 
     setCartOpen, 
     updateQuantity, 
@@ -51,7 +53,9 @@ export default function CartSidebar() {
           <SheetHeader className="p-6 border-b border-gray-100 bg-white">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-xl font-bold text-gray-900">
-                Your Bag ({itemCount})
+                {/* Hold the count back until the cart is known — "(0)" during
+                    loading reads as "your bag is empty". */}
+                Your Bag{cartHydrated ? ` (${itemCount})` : ""}
               </SheetTitle>
               <Button
                 variant="ghost"
@@ -81,7 +85,15 @@ export default function CartSidebar() {
           {/* Cart Items */}
           <div className="flex-1 overflow-y-auto p-6">
             <AnimatePresence mode="popLayout">
-              {cartItems.length === 0 ? (
+              {!cartHydrated ? (
+                // The cart is fetched after mount, so until it lands an empty
+                // bag is not a fact — showing "Your bag is empty" here told
+                // shoppers their cart was gone a moment before it appeared.
+                <SkeletonRegion label="Loading your bag" className="space-y-6">
+                  <CartItemSkeleton />
+                  <CartItemSkeleton />
+                </SkeletonRegion>
+              ) : cartItems.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}

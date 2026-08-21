@@ -24,6 +24,7 @@ import { ExtendedUser } from "@/types/database"
 import { useToast } from "@/hooks/use-toast"
 import { computeTotals } from "@/lib/pricing"
 import { productHref } from "@/lib/cart"
+import { CartItemSkeleton, SkeletonBox, SkeletonRegion } from "@/components/ui/skeletons"
 
 interface UserDetails {
   email: string
@@ -83,6 +84,7 @@ export default function CheckoutPage() {
   const [discountCode, setDiscountCode] = useState("")
   const [appliedDiscount, setAppliedDiscount] = useState(0)
   const [availableCoupons, setAvailableCoupons] = useState<{code: string, discountPercentage: number}[]>([])
+  const [couponsLoading, setCouponsLoading] = useState(true)
   const [isFormValid, setIsFormValid] = useState(false)
   const [isLoadingProfile, setIsLoadingProfile] = useState(false)
   const [isProcessingPayment, setIsProcessingPayment] = useState(false)
@@ -120,11 +122,17 @@ export default function CheckoutPage() {
           }
         } catch (error) {
           console.error('Failed to fetch coupons:', error)
+        } finally {
+          setCouponsLoading(false)
         }
       }
       fetchAvailableCoupons()
+    } else if (status !== 'loading') {
+      // No session means no coupons to load; without this the skeleton would
+      // never resolve for a signed-out shopper.
+      setCouponsLoading(false)
     }
-  }, [session])
+  }, [session, status])
 
   // Pre-fill form with session data
   useEffect(() => {
@@ -461,6 +469,31 @@ export default function CheckoutPage() {
     }
   }
 
+  // Same trap as the redirect above: until the cart has been reconciled with
+  // the server, "empty" is not a fact. Showing this during the fetch told a
+  // shopper their cart was gone moments before their items appeared.
+  if (!cartHydrated) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen bg-[#F1EFEE] px-4 py-10">
+          <SkeletonRegion label="Loading checkout" className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <SkeletonBox className="h-8 w-56" />
+              <SkeletonBox className="h-64 w-full rounded-lg" />
+              <SkeletonBox className="h-48 w-full rounded-lg" />
+            </div>
+            <div className="space-y-4">
+              <SkeletonBox className="h-8 w-40" />
+              <CartItemSkeleton />
+              <CartItemSkeleton />
+              <SkeletonBox className="h-40 w-full rounded-lg" />
+            </div>
+          </SkeletonRegion>
+        </div>
+      </PageTransition>
+    )
+  }
+
   if (cartItems.length === 0) {
     return (
       <PageTransition>
@@ -605,7 +638,14 @@ export default function CheckoutPage() {
                     </CardHeader>
                     <CardContent className="space-y-6 px-4 sm:px-6">
                       {/* Saved Addresses Section for Authenticated Users */}
-                      {session?.user && userProfile?.addresses && userProfile.addresses.length > 0 && (
+                      {session?.user && isLoadingProfile && (
+                        <SkeletonRegion label="Loading saved addresses" className="space-y-3 mb-4">
+                          <SkeletonBox className="h-4 w-36" />
+                          <SkeletonBox className="h-20 w-full rounded-lg" />
+                        </SkeletonRegion>
+                      )}
+
+                      {session?.user && !isLoadingProfile && userProfile?.addresses && userProfile.addresses.length > 0 && (
                         <div className="space-y-4">
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <h3 className="text-lg font-semibold text-blue-950">Saved Addresses</h3>
@@ -940,7 +980,14 @@ export default function CheckoutPage() {
                       </div>
 
                       {/* Available Coupons */}
-                      {!appliedDiscount && availableCoupons.length > 0 && (
+                      {!appliedDiscount && couponsLoading && (
+                        <SkeletonRegion label="Loading available coupons" className="space-y-3 mt-4">
+                          <SkeletonBox className="h-4 w-32" />
+                          <SkeletonBox className="h-16 w-full rounded-lg" />
+                        </SkeletonRegion>
+                      )}
+
+                      {!appliedDiscount && !couponsLoading && availableCoupons.length > 0 && (
                         <div className="space-y-3 mt-4">
                           <p className="text-sm font-medium text-gray-700">Available Coupons</p>
                           {availableCoupons.map((coupon) => (

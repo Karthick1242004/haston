@@ -24,6 +24,7 @@ import { CATEGORIES, getCategoryDisplayName } from "@/lib/categories"
 // Products will be fetched from backend
 import { useEffect, useState } from "react"
 import { CardMain } from "@/components/ui/cardmain"
+import { ProductCardSkeleton, SkeletonRegion } from "@/components/ui/skeletons"
 
 interface FilterState {
   categories: string[]
@@ -114,8 +115,10 @@ export default function ShopPage() {
   const { toggleWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist()
 
   const [products, setProducts] = useState<Product[]>([])
+  const [productsLoading, setProductsLoading] = useState(true)
 
   useEffect(()=>{
+    setProductsLoading(true)
     fetch('/api/products')
       .then(r=>r.json())
       .then(d=>{
@@ -125,6 +128,7 @@ export default function ShopPage() {
       .catch(err => {
         console.error('API Error:', err)
       })
+      .finally(() => setProductsLoading(false))
   },[])
   
   const [filters, setFilters] = useState<FilterState>({
@@ -567,7 +571,22 @@ export default function ShopPage() {
             </div>
 
             {/* Products Grid/List */}
-            {filteredAndSortedProducts.length === 0 ? (
+            {productsLoading ? (
+              // Without this the first paint claimed "No products found matching
+              // your filters", blaming the shopper's filters for an unfinished fetch.
+              <SkeletonRegion
+                label="Loading products"
+                className={`grid gap-2 ${
+                  viewMode === "grid"
+                    ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+                    : "grid-cols-1"
+                }`}
+              >
+                {Array.from({ length: 10 }, (_, i) => (
+                  <ProductCardSkeleton key={i} />
+                ))}
+              </SkeletonRegion>
+            ) : filteredAndSortedProducts.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-500 text-lg">No products found matching your filters.</p>
                 <Button onClick={clearAllFilters} className="mt-4">

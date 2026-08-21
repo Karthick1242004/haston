@@ -35,11 +35,15 @@ import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import { ExtendedUser, Address } from "@/types/database"
 import Loader from "@/components/loader"
+import { SkeletonBox, SkeletonRegion } from "@/components/ui/skeletons"
 
 export default function ProfilePage() {
   const { data: session, status, update } = useSession()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  // Separate from isLoading, which belongs to the Save button. Without this the
+  // address list fell through to its empty state while userProfile was null.
+  const [profileLoading, setProfileLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [userProfile, setUserProfile] = useState<ExtendedUser | null>(null)
   const [orderCount, setOrderCount] = useState(0)
@@ -79,6 +83,7 @@ export default function ProfilePage() {
   }, [session, status, router])
 
   const fetchUserProfile = async () => {
+    setProfileLoading(true)
     try {
       const [profileResponse, ordersResponse] = await Promise.all([
         fetch('/api/user/profile'),
@@ -103,6 +108,8 @@ export default function ProfilePage() {
       }
     } catch (error) {
       console.error('Failed to fetch profile:', error)
+    } finally {
+      setProfileLoading(false)
     }
   }
 
@@ -679,7 +686,18 @@ export default function ProfilePage() {
                       </div>
                     </CardHeader>
                     <CardContent className="p-6">
-                      {userProfile?.addresses && userProfile.addresses.length > 0 ? (
+                      {profileLoading ? (
+                        <SkeletonRegion label="Loading addresses" className="space-y-4">
+                          {Array.from({ length: 2 }, (_, i) => (
+                            <div key={i} className="p-4 border border-gray-200 rounded-lg bg-white space-y-2">
+                              <SkeletonBox className="h-5 w-20 rounded-full" />
+                              <SkeletonBox className="h-4 w-40" />
+                              <SkeletonBox className="h-3 w-56" />
+                              <SkeletonBox className="h-3 w-32" />
+                            </div>
+                          ))}
+                        </SkeletonRegion>
+                      ) : userProfile?.addresses && userProfile.addresses.length > 0 ? (
                         <div className="space-y-4">
                           {userProfile.addresses.map((address, index) => (
                             <div

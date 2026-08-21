@@ -13,13 +13,23 @@ import { useAuthCart } from "@/hooks/use-auth-cart"
 import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import type { Product } from "@/types/product"
+import { ProductCardSkeleton, SkeletonRegion } from "@/components/ui/skeletons"
 
 export default function WishlistPage() {
   const router = useRouter()
-  const { wishlist, removeFromWishlist, isLoading } = useWishlist()
+  const { wishlist, removeFromWishlist, isLoading, isHydrated } = useWishlist()
   const { addProductToCart } = useAuthCart()
   const [wishlistProducts, setWishlistProducts] = useState<Product[]>([])
   const [isLoadingProducts, setIsLoadingProducts] = useState(false)
+
+  // One source of truth for "still resolving". Beyond the two fetch flags it
+  // covers the gap between the wishlist ids arriving and the product fetch
+  // starting — a render where nothing is flagged as loading but the products
+  // are not there yet, which flashed the empty state.
+  const isResolvingWishlist =
+    !isHydrated ||
+    isLoadingProducts ||
+    (wishlist.length > 0 && wishlistProducts.length === 0)
 
   // Fetch full product details for wishlist items
   useEffect(() => {
@@ -105,7 +115,9 @@ export default function WishlistPage() {
                 </h1>
               </div>
               <p className="text-gray-600">
-                {wishlistProducts.length > 0 
+                {isResolvingWishlist
+                  ? "Loading your saved items…"
+                  : wishlistProducts.length > 0
                   ? `${wishlistProducts.length} item${wishlistProducts.length !== 1 ? 's' : ''} in your wishlist`
                   : "Your wishlist is empty"
                 }
@@ -113,14 +125,19 @@ export default function WishlistPage() {
             </motion.div>
 
             {/* Loading State */}
-            {(isLoading || isLoadingProducts) && (
-              <div className="flex justify-center items-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-950"></div>
-              </div>
+            {isResolvingWishlist && (
+              <SkeletonRegion
+                label="Loading your wishlist"
+                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+              >
+                {Array.from({ length: 4 }, (_, i) => (
+                  <ProductCardSkeleton key={i} />
+                ))}
+              </SkeletonRegion>
             )}
 
             {/* Empty State */}
-            {!isLoading && !isLoadingProducts && wishlistProducts.length === 0 && (
+            {!isResolvingWishlist && wishlistProducts.length === 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -140,7 +157,7 @@ export default function WishlistPage() {
             )}
 
             {/* Wishlist Products Grid */}
-            {!isLoading && !isLoadingProducts && wishlistProducts.length > 0 && (
+            {!isResolvingWishlist && wishlistProducts.length > 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

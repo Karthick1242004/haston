@@ -79,6 +79,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { GenerateInvoiceButton } from "@/components/generate-invoice-button";
+import { ProductCardSkeleton, OrderCardSkeleton, StatCardSkeleton, ListRowSkeleton, SkeletonRegion } from "@/components/ui/skeletons";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -162,6 +163,8 @@ export default function AdminPage() {
   >("products");
   const [orders, setOrders] = useState<Order[]>([]);
   const [orderStats, setOrderStats] = useState<any>({});
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(true);
   const [orderFilters, setOrderFilters] = useState({
     status: "all",
     search: "",
@@ -188,16 +191,20 @@ export default function AdminPage() {
   const [productToDelete, setProductToDelete] = useState<any>(null);
 
   const fetchProducts = async () => {
+    setProductsLoading(true);
     try {
       const res = await fetch("/api/products");
       const json = await res.json();
       setProducts(json.products || []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setProductsLoading(false);
     }
   };
 
   const fetchOrders = async () => {
+    setOrdersLoading(true);
     try {
       const queryParams = new URLSearchParams({
         status: orderFilters.status,
@@ -224,6 +231,8 @@ export default function AdminPage() {
       }
     } catch (err) {
       console.error("Error fetching orders:", err);
+    } finally {
+      setOrdersLoading(false);
     }
   };
 
@@ -871,7 +880,18 @@ export default function AdminPage() {
                     </Button>
                   </div>
 
-                  {products.length === 0 ? (
+                  {productsLoading ? (
+                    // "No Products Yet" during a fetch reads as an empty
+                    // catalogue, which is alarming for an admin.
+                    <SkeletonRegion
+                      label="Loading products"
+                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    >
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <ProductCardSkeleton key={i} />
+                      ))}
+                    </SkeletonRegion>
+                  ) : products.length === 0 ? (
                     <Card className="p-12 text-center">
                       <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-xl font-semibold text-gray-600 mb-2">
@@ -2193,6 +2213,18 @@ export default function AdminPage() {
 
             <TabsContent value="orders" className="space-y-6">
               {/* Order Statistics Cards */}
+              {ordersLoading ? (
+                // Real zeros and loading zeros look identical, so hold the
+                // tiles back rather than reporting ₹0 revenue mid-fetch.
+                <SkeletonRegion
+                  label="Loading order statistics"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                >
+                  {Array.from({ length: 4 }, (_, i) => (
+                    <StatCardSkeleton key={i} />
+                  ))}
+                </SkeletonRegion>
+              ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -2247,6 +2279,7 @@ export default function AdminPage() {
                   </CardContent>
                 </Card>
               </div>
+              )}
 
               {/* Order Filters */}
               <Card>
@@ -2469,7 +2502,15 @@ export default function AdminPage() {
                 ))}
               </div>
 
-              {orders.length === 0 && (
+              {ordersLoading && (
+                <SkeletonRegion label="Loading orders" className="space-y-6">
+                  <OrderCardSkeleton />
+                  <OrderCardSkeleton />
+                  <OrderCardSkeleton />
+                </SkeletonRegion>
+              )}
+
+              {!ordersLoading && orders.length === 0 && (
                 <Card>
                   <CardContent className="p-12 text-center">
                     <ShoppingBag className="w-16 h-16 text-gray-400 mx-auto mb-4" />

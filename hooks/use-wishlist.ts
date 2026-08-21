@@ -3,14 +3,24 @@ import { useSession } from 'next-auth/react'
 import { toast } from '@/hooks/use-toast'
 
 export const useWishlist = () => {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [wishlist, setWishlist] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  // isLoading only covers add/remove mutations, so it is false during the very
+  // first fetch. Pages relying on it rendered "Your wishlist is empty" before
+  // the ids had arrived. This flips once the first fetch settles, either way.
+  const [isHydrated, setIsHydrated] = useState(false)
 
   // Fetch wishlist when user is authenticated
   const fetchWishlist = useCallback(async () => {
+    // While NextAuth is still resolving, `session` is undefined — which is not
+    // the same as "signed out". Marking hydrated here would skip the loading
+    // state entirely and flash the empty wishlist.
+    if (status === 'loading') return
+
     if (!session?.user) {
       setWishlist([])
+      setIsHydrated(true)
       return
     }
 
@@ -22,8 +32,10 @@ export const useWishlist = () => {
       }
     } catch (error) {
       console.error('Failed to fetch wishlist:', error)
+    } finally {
+      setIsHydrated(true)
     }
-  }, [session])
+  }, [session, status])
 
   // Load wishlist on mount and when session changes
   useEffect(() => {
@@ -186,6 +198,7 @@ export const useWishlist = () => {
   return {
     wishlist,
     isLoading,
+    isHydrated,
     addToWishlist,
     removeFromWishlist,
     toggleWishlist,
