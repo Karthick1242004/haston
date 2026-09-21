@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
-import crypto from 'crypto'
-import Razorpay from 'razorpay'
 import {
   getOrdersCollection,
   getUsersCollection,
@@ -11,11 +9,7 @@ import {
 import { Order, ServerOrder, ShippingAddress } from '@/types/order'
 import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { reserveStock, releaseStock } from '@/lib/stock'
-
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-})
+import { razorpay, checkoutSignatureMatches } from '@/lib/razorpay'
 
 const SHIPPING_FIELDS: (keyof ShippingAddress)[] = [
   'firstName', 'lastName', 'email', 'phone',
@@ -32,15 +26,6 @@ function sanitizeShippingAddress(input: any): ShippingAddress | null {
     address[field] = value.trim()
   }
   return address
-}
-
-// Constant-time comparison so signature verification cannot be probed by timing.
-function signatureMatches(expected: string, provided: unknown): boolean {
-  if (typeof provided !== 'string') return false
-  const a = Buffer.from(expected, 'utf8')
-  const b = Buffer.from(provided, 'utf8')
-  if (a.length !== b.length) return false
-  return crypto.timingSafeEqual(a, b)
 }
 
 export async function POST(request: NextRequest) {
@@ -75,12 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. The signature proves Razorpay produced this payment for this order.
-    const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest('hex')
-
-    if (!signatureMatches(expectedSignature, razorpay_signature)) {
+    if (!checkoutSignatureMatches(razorpay_order_id, razorpay_payment_id, razorpay_signature)) {
       return NextResponse.json({ error: 'Invalid payment signature' }, { status: 400 })
     }
 
@@ -120,6 +100,48 @@ export async function POST(request: NextRequest) {
         `Payment amount mismatch for ${razorpay_payment_id}: charged ${payment.amount}, expected ${intent.amountPaise}`
       )
       return NextResponse.json({ error: 'Payment amount mismatch' }, { status: 400 })
+    }
+
+    // 3b. An authorized payment is only a hold on the customer's funds. Razorpay
+    //     releases it back to them after five days if nobody captures it, and an
+    //     uncaptured payment never enters the settlement balance. Confirming an
+    //     order on `authorized` therefore ships goods against money that later
+    //     disappears and never reaches the merchant's bank, so capture it here
+    //     and refuse the order if the capture does not stick. Whether checkout
+    //     auto-captures is a dashboard setting we do not control from code; this
+    //     makes the outcome the same either way.
+    if (payment.status === 'authorized') {
+      try {
+        payment = await razorpay.payments.capture(
+          razorpay_payment_id,
+          Number(payment.amount),
+          String(payment.currency)
+        )
+      } catch (captureError) {
+        // A concurrent retry may have captured it moments ago, and Razorpay
+        // rejects the second capture outright. Re-read before giving up.
+        const recheck = await razorpay.payments.fetch(razorpay_payment_id).catch(() => null)
+        if (recheck?.status !== 'captured') {
+          console.error(`Could not capture payment ${razorpay_payment_id}:`, captureError)
+          return NextResponse.json(
+            {
+              error:
+                'Your payment could not be completed. Any amount held will be released by your bank. Please contact support before paying again.',
+            },
+            { status: 402 }
+          )
+        }
+        payment = recheck
+      }
+    }
+
+    // Everything past this point — the order, the stock reservation, the refund
+    // on the out-of-stock path — assumes real money has changed hands.
+    if (payment.status !== 'captured') {
+      console.error(
+        `Payment ${razorpay_payment_id} is '${payment.status}' after capture; refusing to confirm the order`
+      )
+      return NextResponse.json({ error: 'Payment was not completed' }, { status: 400 })
     }
 
     // 4. Claim the intent. Whichever concurrent request wins this transition is

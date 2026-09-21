@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import crypto from 'crypto'
+import { checkoutSignatureMatches } from '@/lib/razorpay'
 
 // Advisory check only — it lets the browser show a success state early. The
 // authoritative verification (signature + Razorpay payment lookup + amount
@@ -21,18 +21,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const expected = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest('hex')
-
-    const expectedBuf = Buffer.from(expected, 'utf8')
-    const providedBuf = Buffer.from(razorpay_signature, 'utf8')
-    const isAuthentic =
-      expectedBuf.length === providedBuf.length &&
-      crypto.timingSafeEqual(expectedBuf, providedBuf)
-
-    if (!isAuthentic) {
+    if (!checkoutSignatureMatches(razorpay_order_id, razorpay_payment_id, razorpay_signature)) {
       return NextResponse.json({ error: 'Invalid payment signature' }, { status: 400 })
     }
 

@@ -61,6 +61,26 @@ async function main() {
   )
   console.log('rateLimits: ttl_rate_limits created')
 
+  // One document per Razorpay webhook. The unique index is what makes the
+  // handler idempotent under Razorpay's retries, so it is load-bearing.
+  await db.collection('paymentEvents').createIndex(
+    { eventId: 1 },
+    { unique: true, name: 'uniq_payment_event_id' }
+  )
+  // The queue a human works from: events the handler could not resolve itself.
+  await db.collection('paymentEvents').createIndex(
+    { receivedAt: -1 },
+    {
+      name: 'idx_payment_events_needing_reconciliation',
+      partialFilterExpression: { needsReconciliation: true },
+    }
+  )
+  await db.collection('paymentEvents').createIndex(
+    { paymentId: 1, receivedAt: -1 },
+    { name: 'idx_payment_events_by_payment' }
+  )
+  console.log('paymentEvents: indexes created')
+
   // Supports the owner-scoped order lookups used across the order routes.
   await db.collection('orders').createIndex({ orderId: 1 }, { name: 'idx_orderId' })
   await db.collection('orders').createIndex({ userEmail: 1, createdAt: -1 }, { name: 'idx_userEmail_createdAt' })

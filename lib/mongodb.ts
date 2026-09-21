@@ -94,6 +94,14 @@ export async function getCheckoutIntentsCollection(): Promise<Collection> {
   return db.collection("checkoutIntents")
 }
 
+// Every Razorpay webhook we accept, one document per event id. This is the only
+// server-side record of what happened to a payment after the browser walked
+// away: captures with no order behind them, failures, and refunds.
+export async function getPaymentEventsCollection(): Promise<Collection> {
+  const db = await getDatabase()
+  return db.collection("paymentEvents")
+}
+
 // Re-export types from database types file for server-side usage
 // This ensures API routes can still use these types while keeping client bundle clean
 export type { ExtendedUser, Address, CartItem } from '@/types/database'

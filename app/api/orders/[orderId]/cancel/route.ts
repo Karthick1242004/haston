@@ -5,12 +5,7 @@ import { getOrdersCollection } from '@/lib/mongodb'
 import { Order, ServerOrder } from '@/types/order'
 import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { releaseStock } from '@/lib/stock'
-import Razorpay from 'razorpay'
-
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-})
+import { razorpay } from '@/lib/razorpay'
 
 export async function POST(
   request: NextRequest,

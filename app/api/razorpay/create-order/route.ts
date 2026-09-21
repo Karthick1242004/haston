@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Razorpay from 'razorpay'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { getCheckoutIntentsCollection } from '@/lib/mongodb'
 import { priceUserCart, PricingError } from '@/lib/pricing-server'
 import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
-
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-})
+import { razorpay } from '@/lib/razorpay'
 
 export const dynamic = 'force-dynamic'
 

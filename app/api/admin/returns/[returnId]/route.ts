@@ -6,12 +6,7 @@ import { releaseStock } from "@/lib/stock"
 import { getOrdersCollection, getReturnsCollection } from "@/lib/mongodb"
 import type { ServerOrder, RefundDetails } from "@/types/order"
 import type { ServerReturn, ReturnStatus } from "@/types/return"
-import Razorpay from "razorpay"
-
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-})
+import { razorpay } from "@/lib/razorpay"
 
 const VALID_TRANSITIONS: Record<ReturnStatus, ReturnStatus[]> = {
   requested: ["approved", "rejected"],
