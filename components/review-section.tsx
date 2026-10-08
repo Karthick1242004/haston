@@ -80,8 +80,8 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
       return
     }
 
-    if (characterCount < 150) {
-      toast.error(`Review must be at least 150 characters. Current: ${characterCount} characters`)
+    if (characterCount === 0) {
+      toast.error('Please write your review')
       return
     }
 
@@ -244,32 +244,19 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Your Review
-                  <span className="text-sm text-gray-500 ml-2">
-                    ({characterCount}/150 characters minimum)
-                  </span>
                 </label>
                 <Textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Share your experience with this product..."
                   className="min-h-[120px] resize-none"
-                  maxLength={1000}
+                  maxLength={5000}
                 />
-                <div className="mt-1 text-sm text-gray-500">
-                  {characterCount < 150 && (
-                    <span className="text-orange-600">
-                      {150 - characterCount} more characters needed
-                    </span>
-                  )}
-                  {characterCount >= 150 && (
-                    <span className="text-green-600">✓ Minimum character count met</span>
-                  )}
-                </div>
               </div>
               <div className="flex gap-2">
                 <Button
                   onClick={handleSubmitReview}
-                  disabled={rating === 0 || characterCount < 150 || isSubmitting}
+                  disabled={rating === 0 || characterCount === 0 || isSubmitting}
                   className="bg-black text-white hover:bg-gray-800"
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Review'}

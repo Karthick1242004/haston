@@ -100,18 +100,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // There is no minimum length — a one-word review is a valid review. The
+    // upper bound stays because reviews are embedded in the product document,
+    // which Mongo caps at 16MB for the whole array.
+    if (comment.trim().length === 0) {
+      return NextResponse.json({ error: 'Review cannot be empty' }, { status: 400 })
+    }
+
     if (comment.length > 5000) {
       return NextResponse.json(
         { error: 'Review must be 5000 characters or fewer' },
-        { status: 400 }
-      )
-    }
-
-    // Check minimum character count (150 characters)
-    const characterCount = comment.trim().length
-    if (characterCount < 150) {
-      return NextResponse.json(
-        { error: `Review must be at least 150 characters. Current character count: ${characterCount}` },
         { status: 400 }
       )
     }
@@ -130,19 +128,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Reviews are verified-purchase only: the reviewer must own a delivered
-    // order containing this product. Without this, any signed-in account could
-    // rate any product, which is the cheapest possible review-spam vector.
+    // Reviews are verified-purchase only: the reviewer must own an order
+    // containing this product. Order status is not checked — placing the order
+    // is enough. Dropping the ownership check entirely would let any signed-in
+    // account rate any product, which is the cheapest review-spam vector there
+    // is, so that part stays.
     const orders = await getOrdersCollection()
     const purchased = await orders.findOne({
       userEmail: session.user.email,
-      status: 'delivered',
       'items.id': productId.toString(),
     })
 
     if (!purchased) {
       return NextResponse.json(
-        { error: 'You can only review products from an order that has been delivered' },
+        { error: 'You can only review products you have ordered' },
         { status: 403 }
       )
     }
@@ -167,8 +166,8 @@ export async function POST(request: NextRequest) {
       userImage: session.user.image || '',
       rating: parsedRating,
       comment: comment.trim(),
-      // Always true now that a delivered order is required to reach this point;
-      // stored so the UI can show a "Verified purchase" badge.
+      // Always true: an order containing this product is required to get here.
+      // Stored so the UI can show a "Verified purchase" badge.
       verifiedPurchase: true,
       createdAt: new Date(),
       updatedAt: new Date()
