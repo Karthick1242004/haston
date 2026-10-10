@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import { useProductStore } from "@/stores/product-store"
-import { ExtendedUser } from "@/types/database"
+import { ExtendedUser, Address } from "@/types/database"
 import { useToast } from "@/hooks/use-toast"
 import { computeTotals } from "@/lib/pricing"
 import { COUNTRIES, statesFor } from "@/lib/locations"
@@ -35,6 +35,28 @@ interface UserDetails {
   state: string
   zipCode: string
   country: string
+}
+
+/**
+ * A saved address carries the whole shipping identity, not just the lines —
+ * the recipient's name and phone belong to it too. Every field falls back to
+ * whatever is already in the form, so an address missing a value cannot blank
+ * something the customer has typed. Nothing here is locked: the inputs stay
+ * editable after an address is applied.
+ */
+function fieldsFromAddress(address: Address, prev: UserDetails): UserDetails {
+  return {
+    ...prev,
+    firstName: address.firstName || prev.firstName,
+    lastName: address.lastName || prev.lastName,
+    phone: address.phone || prev.phone,
+    // address2 was being dropped on the floor; flat numbers live there.
+    address: [address.address1, address.address2].filter(Boolean).join(', '),
+    city: address.city,
+    state: address.state,
+    zipCode: address.zipCode,
+    country: address.country,
+  }
 }
 
 export default function CheckoutPage() {
@@ -157,15 +179,7 @@ export default function CheckoutPage() {
         const defaultAddress = data.user.addresses?.find((addr: any) => addr.isDefault)
         if (defaultAddress) {
           setSelectedAddressId(defaultAddress.id)
-          setUserDetails(prev => ({
-            ...prev,
-            address: defaultAddress.address1,
-            city: defaultAddress.city,
-            state: defaultAddress.state,
-            zipCode: defaultAddress.zipCode,
-            country: defaultAddress.country,
-            phone: defaultAddress.phone || prev.phone,
-          }))
+          setUserDetails(prev => fieldsFromAddress(defaultAddress, prev))
         }
       }
     } catch (error) {
@@ -232,15 +246,7 @@ export default function CheckoutPage() {
     setSelectedAddressId(addressId)
     const selectedAddress = userProfile?.addresses?.find(addr => addr.id === addressId)
     if (selectedAddress) {
-      setUserDetails(prev => ({
-        ...prev,
-        address: selectedAddress.address1,
-        city: selectedAddress.city,
-        state: selectedAddress.state,
-        zipCode: selectedAddress.zipCode,
-        country: selectedAddress.country,
-        phone: selectedAddress.phone || prev.phone,
-      }))
+      setUserDetails(prev => fieldsFromAddress(selectedAddress, prev))
     }
   }
 
