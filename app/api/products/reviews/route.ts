@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: 'Please sign in to write a review.' },
         { status: 401 }
       )
     }
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     // Validation
     if (!productId || !rating || !comment) {
       return NextResponse.json(
-        { error: 'Product ID, rating, and comment are required' },
+        { error: 'Please choose a rating and write your review.' },
         { status: 400 }
       )
     }
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     const parsedRating = typeof rating === 'number' ? rating : NaN
     if (!Number.isInteger(parsedRating) || parsedRating < 1 || parsedRating > 5) {
       return NextResponse.json(
-        { error: 'Rating must be a whole number between 1 and 5' },
+        { error: 'Please select a rating between 1 and 5 stars.' },
         { status: 400 }
       )
     }
@@ -104,12 +104,15 @@ export async function POST(request: NextRequest) {
     // upper bound stays because reviews are embedded in the product document,
     // which Mongo caps at 16MB for the whole array.
     if (comment.trim().length === 0) {
-      return NextResponse.json({ error: 'Review cannot be empty' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Please write a few words about the product.' },
+        { status: 400 }
+      )
     }
 
     if (comment.length > 5000) {
       return NextResponse.json(
-        { error: 'Review must be 5000 characters or fewer' },
+        { error: 'Your review is too long. Please keep it under 5,000 characters.' },
         { status: 400 }
       )
     }
@@ -141,7 +144,7 @@ export async function POST(request: NextRequest) {
 
     if (!purchased) {
       return NextResponse.json(
-        { error: 'You can only review products you have ordered' },
+        { error: 'You can review this product once you have ordered it.' },
         { status: 403 }
       )
     }
@@ -152,7 +155,7 @@ export async function POST(request: NextRequest) {
 
     if (userReview) {
       return NextResponse.json(
-        { error: 'You have already reviewed this product' },
+        { error: 'You have already reviewed this product.' },
         { status: 400 }
       )
     }
@@ -186,7 +189,7 @@ export async function POST(request: NextRequest) {
 
     if (write.matchedCount === 0) {
       return NextResponse.json(
-        { error: 'You have already reviewed this product' },
+        { error: 'You have already reviewed this product.' },
         { status: 400 }
       )
     }

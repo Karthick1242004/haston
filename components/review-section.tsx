@@ -49,7 +49,7 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
         setReviewCount(data.reviewCount)
       } catch (error) {
         console.error('Error fetching reviews:', error)
-        toast.error('Failed to load reviews')
+        toast.error('Could not load reviews. Please refresh the page.')
       } finally {
         setIsLoading(false)
       }
@@ -70,18 +70,18 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
 
   const handleSubmitReview = async () => {
     if (!session) {
-      toast.error('Please sign in to add a review')
+      toast.error('Please sign in to write a review.')
       router.push('/auth/signin')
       return
     }
 
     if (rating === 0) {
-      toast.error('Please select a rating')
+      toast.error('Please select a star rating.')
       return
     }
 
     if (characterCount === 0) {
-      toast.error('Please write your review')
+      toast.error('Please write a few words about the product.')
       return
     }
 
@@ -116,9 +116,9 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
       setComment("")
       setShowAddReview(false)
       
-      toast.success('Review added successfully!')
+      toast.success('Thank you — your review has been published.')
     } catch (error: any) {
-      toast.error(error.message || 'Failed to add review')
+      toast.error(error.message || 'Could not publish your review. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -277,7 +277,7 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
       {/* User Already Reviewed Message */}
       {session && userHasReviewed && (
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-blue-800">Thank you for your review! You have already reviewed this product.</p>
+          <p className="text-blue-800">Thank you — you have already reviewed this product.</p>
         </div>
       )}
 
@@ -298,7 +298,7 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
       <div className="space-y-4">
         {reviews.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            <p>No reviews yet. Be the first to review this product!</p>
+            <p>No reviews yet — be the first to review this product.</p>
           </div>
         ) : (
           <>
