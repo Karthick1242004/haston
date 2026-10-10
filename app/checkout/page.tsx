@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
@@ -15,14 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city"
-import "react-country-state-city/dist/react-country-state-city.css"
 import Header from "@/components/header"
 import PageTransition from "@/components/page-transition"
 import { useProductStore } from "@/stores/product-store"
 import { ExtendedUser } from "@/types/database"
 import { useToast } from "@/hooks/use-toast"
 import { computeTotals } from "@/lib/pricing"
+import { COUNTRIES, statesFor } from "@/lib/locations"
 import { productHref } from "@/lib/cart"
 import { CartItemSkeleton, SkeletonBox, SkeletonRegion } from "@/components/ui/skeletons"
 
@@ -36,12 +35,6 @@ interface UserDetails {
   state: string
   zipCode: string
   country: string
-}
-
-interface LocationState {
-  countryId: number
-  stateId: number
-  cityId: number
 }
 
 export default function CheckoutPage() {
@@ -72,12 +65,6 @@ export default function CheckoutPage() {
     state: "",
     zipCode: "",
     country: ""
-  })
-  
-  const [locationState, setLocationState] = useState<LocationState>({
-    countryId: 0,
-    stateId: 0,
-    cityId: 0
   })
   
   const [selectedAddressId, setSelectedAddressId] = useState<string>("")
@@ -205,6 +192,25 @@ export default function CheckoutPage() {
     setIsFormValid(isValid)
   }, [userDetails])
 
+  // A stored address can carry a country or state we do not list. Surfacing it
+  // as an extra option keeps the saved value visible and selected instead of
+  // the field falling back to its placeholder.
+  const countryOptions = useMemo(
+    () =>
+      userDetails.country && !COUNTRIES.includes(userDetails.country)
+        ? [userDetails.country, ...COUNTRIES]
+        : COUNTRIES,
+    [userDetails.country]
+  )
+
+  const stateOptions = useMemo(() => {
+    const known = statesFor(userDetails.country)
+    if (known.length === 0) return known
+    return userDetails.state && !known.includes(userDetails.state)
+      ? [userDetails.state, ...known]
+      : known
+  }, [userDetails.country, userDetails.state])
+
   const handleInputChange = (field: keyof UserDetails, value: string) => {
     setUserDetails(prev => ({
       ...prev,
@@ -212,42 +218,13 @@ export default function CheckoutPage() {
     }))
   }
 
-  const handleCountryChange = (e: any) => {
-    setLocationState(prev => ({
-      ...prev,
-      countryId: e.id,
-      stateId: 0,
-      cityId: 0
-    }))
+  const handleCountryChange = (country: string) => {
     setUserDetails(prev => ({
       ...prev,
-      country: e.name,
-      state: "",
-      city: ""
-    }))
-  }
-
-  const handleStateChange = (e: any) => {
-    setLocationState(prev => ({
-      ...prev,
-      stateId: e.id,
-      cityId: 0
-    }))
-    setUserDetails(prev => ({
-      ...prev,
-      state: e.name,
-      city: ""
-    }))
-  }
-
-  const handleCityChange = (e: any) => {
-    setLocationState(prev => ({
-      ...prev,
-      cityId: e.id
-    }))
-    setUserDetails(prev => ({
-      ...prev,
-      city: e.name
+      country,
+      // The old state belongs to the old country, so it cannot stand. City is
+      // typed by hand and is just as likely to still be right, so it stays.
+      state: statesFor(country).includes(prev.state) ? prev.state : "",
     }))
   }
 
@@ -264,10 +241,6 @@ export default function CheckoutPage() {
         country: selectedAddress.country,
         phone: selectedAddress.phone || prev.phone,
       }))
-      
-      // Note: For saved addresses, we don't set locationState IDs as they require lookup
-      // The form will show the text values but won't populate the select components
-      // This is a limitation when working with saved addresses vs dynamic selection
     }
   }
 
@@ -752,16 +725,22 @@ export default function CheckoutPage() {
                         />
                       </div>
 
-                      {/* Country, State, City Selection - Dynamic */}
+                      {/* A saved address may hold a country or state spelled
+                          differently from our list; keep its value selectable
+                          so loading an address never silently blanks a field. */}
                       <div>
                         <Label htmlFor="country">Country *</Label>
                         <div className="mt-1">
-                          <CountrySelect
-                            onChange={handleCountryChange}
-                            placeHolder="Select Country"
-                            containerClassName="!border !border-gray-200 !rounded-md"
-                            inputClassName="!border-0 !outline-none !ring-0 !bg-transparent"
-                          />
+                          <Select value={userDetails.country} onValueChange={handleCountryChange}>
+                            <SelectTrigger id="country">
+                              <SelectValue placeholder="Select Country" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {countryOptions.map((name) => (
+                                <SelectItem key={name} value={name}>{name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
 
@@ -769,25 +748,40 @@ export default function CheckoutPage() {
                         <div>
                           <Label htmlFor="state">State/Province *</Label>
                           <div className="mt-1">
-                            <StateSelect
-                              countryid={locationState.countryId}
-                              onChange={handleStateChange}
-                              placeHolder="Select State/Province"
-                              containerClassName="!border !border-gray-200 !rounded-md"
-                              inputClassName="!border-0 !outline-none !ring-0 !bg-transparent"
-                            />
+                            {stateOptions.length > 0 ? (
+                              <Select
+                                value={userDetails.state}
+                                onValueChange={(state) => handleInputChange("state", state)}
+                              >
+                                <SelectTrigger id="state">
+                                  <SelectValue placeholder="Select State/Province" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {stateOptions.map((name) => (
+                                    <SelectItem key={name} value={name}>{name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              // No country chosen yet, or one we hold no states
+                              // for. Typing it is better than a dead dropdown.
+                              <Input
+                                id="state"
+                                value={userDetails.state}
+                                onChange={(e) => handleInputChange("state", e.target.value)}
+                                placeholder="Enter state/province"
+                              />
+                            )}
                           </div>
                         </div>
                         <div>
                           <Label htmlFor="city">City/District *</Label>
                           <div className="mt-1">
-                            <CitySelect
-                              countryid={locationState.countryId}
-                              stateid={locationState.stateId}
-                              onChange={handleCityChange}
-                              placeHolder="Select City/District"
-                              containerClassName="!border !border-gray-200 !rounded-md"
-                              inputClassName="!border-0 !outline-none !ring-0 !bg-transparent"
+                            <Input
+                              id="city"
+                              value={userDetails.city}
+                              onChange={(e) => handleInputChange("city", e.target.value)}
+                              placeholder="Enter city/district"
                             />
                           </div>
                         </div>
