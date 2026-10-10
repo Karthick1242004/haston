@@ -11,7 +11,7 @@ import { ChevronLeft, Minus, Plus, Trash2, CreditCard, ShoppingBag, User, Loader
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
@@ -737,16 +737,15 @@ export default function CheckoutPage() {
                       <div>
                         <Label htmlFor="country">Country *</Label>
                         <div className="mt-1">
-                          <Select value={userDetails.country} onValueChange={handleCountryChange}>
-                            <SelectTrigger id="country">
-                              <SelectValue placeholder="Select Country" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {countryOptions.map((name) => (
-                                <SelectItem key={name} value={name}>{name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <SearchableSelect
+                            id="country"
+                            value={userDetails.country}
+                            onValueChange={handleCountryChange}
+                            options={countryOptions}
+                            placeholder="Select Country"
+                            searchPlaceholder="Search country..."
+                            emptyText="No country found."
+                          />
                         </div>
                       </div>
 
@@ -755,19 +754,15 @@ export default function CheckoutPage() {
                           <Label htmlFor="state">State/Province *</Label>
                           <div className="mt-1">
                             {stateOptions.length > 0 ? (
-                              <Select
+                              <SearchableSelect
+                                id="state"
                                 value={userDetails.state}
                                 onValueChange={(state) => handleInputChange("state", state)}
-                              >
-                                <SelectTrigger id="state">
-                                  <SelectValue placeholder="Select State/Province" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {stateOptions.map((name) => (
-                                    <SelectItem key={name} value={name}>{name}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                                options={stateOptions}
+                                placeholder="Select State/Province"
+                                searchPlaceholder="Search state..."
+                                emptyText="No state found."
+                              />
                             ) : (
                               // No country chosen yet, or one we hold no states
                               // for. Typing it is better than a dead dropdown.
