@@ -92,9 +92,9 @@ export default function SizeGuidePage() {
                 <CardContent className="p-6">
                   <div className="relative w-full">
                     <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                      {/* Matches the artwork's own 1179x846 so object-contain
+                      {/* Matches the artwork's own 1068x779 so object-contain
                           has nothing to letterbox. */}
-                      <div className="relative w-full aspect-[1179/846] overflow-hidden rounded-lg">
+                      <div className="relative w-full aspect-[1068/779] overflow-hidden rounded-lg">
                         <Image
                           src="/hexhue-size-chart.jpg"
                           alt="Hex & Hue size chart: regular fit, chest, length and shoulder measurements in inches for sizes S to XXL"
