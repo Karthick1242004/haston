@@ -89,23 +89,23 @@ export default function SizeGuidePage() {
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="relative w-full">
-                    <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                      {/* Matches the artwork's own 1068x779 so object-contain
-                          has nothing to letterbox. */}
-                      <div className="relative w-full aspect-[1068/779] overflow-hidden rounded-lg">
-                        <Image
-                          src="/hexhue-size-chart.jpg"
-                          alt="Hex & Hue size chart: regular fit, chest, length and shoulder measurements in inches for sizes S to XXL"
-                          fill
-                          className="object-contain"
-                          priority
-                          sizes="(max-width: 768px) 100vw, 80vw"
-                          quality={90}
-                        />
-                      </div>
-                    </div>
+                {/* The chart runs edge to edge on purpose. Padding or a tinted
+                    backdrop here reads as a grey border drawn around the
+                    artwork rather than as part of the card. The frame carries
+                    the artwork's own 1068x779 so object-contain has nothing to
+                    letterbox, and the card's overflow-hidden rounds the bottom
+                    corners. */}
+                <CardContent className="p-0">
+                  <div className="relative w-full aspect-[1068/779]">
+                    <Image
+                      src="/hexhue-size-chart.jpg"
+                      alt="Hex & Hue size chart: regular fit, chest, length and shoulder measurements in inches for sizes S to XXL"
+                      fill
+                      className="object-contain"
+                      priority
+                      sizes="(max-width: 768px) 100vw, 80vw"
+                      quality={90}
+                    />
                   </div>
                 </CardContent>
               </Card>
