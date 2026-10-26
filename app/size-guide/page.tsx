@@ -15,8 +15,8 @@ export default function SizeGuidePage() {
 
   const handleDownload = () => {
     const link = document.createElement('a')
-    link.href = '/oversizefit.png'
-    link.download = 'oversizefit.png'
+    link.href = '/hexhue-size-chart.jpg'
+    link.download = 'hexhue-size-chart.jpg'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -62,7 +62,7 @@ export default function SizeGuidePage() {
                 </h1>
               </div>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Find your perfect fit with our comprehensive size chart. All measurements are in centimeters.
+                Find your perfect fit with our size chart. All measurements are in inches.
               </p>
             </motion.div>
 
@@ -92,10 +92,12 @@ export default function SizeGuidePage() {
                 <CardContent className="p-6">
                   <div className="relative w-full">
                     <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                      <div className="relative w-full aspect-[16/10] overflow-hidden rounded-lg">
+                      {/* Matches the artwork's own 1179x846 so object-contain
+                          has nothing to letterbox. */}
+                      <div className="relative w-full aspect-[1179/846] overflow-hidden rounded-lg">
                         <Image
-                          src="/oversizefit.png"
-                          alt="Size Guide Chart"
+                          src="/hexhue-size-chart.jpg"
+                          alt="Hex & Hue size chart: regular fit, chest, length and shoulder measurements in inches for sizes S to XXL"
                           fill
                           className="object-contain"
                           priority
